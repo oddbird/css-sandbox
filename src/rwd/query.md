@@ -1,8 +1,8 @@
 ---
-title: Container Blocks
+title: Container Queries
 eleventyNavigation:
-  key: container-blocks
-  title: Container Blocks
+  key: container-queries
+  title: Container Queries
   parent: rwd
 ---
 

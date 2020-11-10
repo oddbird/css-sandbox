@@ -117,3 +117,27 @@ Many languages provide both inline & block conditionals,
 for good reason --
 there are cases for each --
 and I think that might also be the way to go in CSS.
+
+## Questions
+
+### Can we improve the balance of readability/efficiency?
+
+==TODO: The syntax could use some bike-shedding...==
+
+### What observations can we support, on what properties?
+
+The primary focus is on `available-inline-size`
+used in grid-templates,
+with mention of future ideas like `inherited-font-style`.
+I'd love to flesh out that thinking a bit more.
+
+Even if `available-inline-size` is enough for Level 1,
+we need to define where and how it can be used.
+
+### Can a single switch contain multiple observations?
+
+The existing proposals & demos show
+`available-inline-size` as the only value being observed.
+If more observations are allowed,
+will the syntax support combining/mixing observations
+within a single switch function?

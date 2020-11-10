@@ -23,14 +23,16 @@ so in addition to "container query" solutions,
 I also want to think about if/where they can also be improved
 for responsive design.
 
-## In Progress
-
-- [`@switch()` Function](switch/)
-- [`@container` Rule](query/)
-- [Grids](grids/)
-
 ## Resources
 
 - WICG: [Use Cases and Requirements](https://wicg.github.io/cq-usecases/)
 - CSS Tricks: [Container Query Discussion](https://css-tricks.com/container-query-discussion/)
 - Zach Leatherman: [The Origin Story of Container Queries](https://www.zachleat.com/web/origin-container-queries/)
+
+## In Progress
+
+These different directions are not exclusive --
+a full solution for styling responsive components
+will likely require multiple approaches.
+
+{{ collections.all | eleventyNavigation('rwd') | eleventyNavigationToHtml | safe }}
