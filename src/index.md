@@ -22,6 +22,4 @@ and not a replacement for CSSWG issue threads**.
 
 ## What I'm Working On…
 
-1. [Container Queries](/rwd/)
-2. CSS Scoping & Encapsulation
-3. CSS Layers
+{{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | safe }}

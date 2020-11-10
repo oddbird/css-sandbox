@@ -62,9 +62,18 @@ aside {
 
 ## Is single-axis containment even possible?
 
-@@@ ToDo
+CSSWG [1D containment issue](https://github.com/w3c/csswg-drafts/issues/1031)
 
-...See the [CSSWG 1d containment issue](https://github.com/w3c/csswg-drafts/issues/1031)
+Single-axis containment only works
+if we can ensure that changes in the cross-axis
+have no impact on the contained axis.
+There are several places where CSS makes that difficult:
+
+- Extra cross-axis size
+  can trigger scrollbars on the contained-axis.
+- Block-axis percentage-padding
+  is relative to the inline axis.
+- _are there other?_
 
 ### Should we build this into `@media`? [❌]
 
