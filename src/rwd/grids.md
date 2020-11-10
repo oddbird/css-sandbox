@@ -2,7 +2,7 @@
 title: Grid Improvements
 eleventyNavigation:
   key: grids
-  title: grid improvements
+  title: Grid Improvements
   parent: rwd
 ---
 

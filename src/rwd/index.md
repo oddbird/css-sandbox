@@ -2,7 +2,7 @@
 title: Responsive Components
 eleventyNavigation:
   key: rwd
-  title: responsive components
+  title: Responsive Components
   parent: home
 ---
 

@@ -1,8 +1,8 @@
 ---
-title: Container Rule
+title: Container Blocks
 eleventyNavigation:
-  key: container-rule
-  title: container rule
+  key: container-blocks
+  title: Container Blocks
   parent: rwd
 ---
 

@@ -2,7 +2,7 @@
 title: Switch Function
 eleventyNavigation:
   key: switch-function
-  title: switch function
+  title: Switch Function
   parent: rwd
 ---
 
