@@ -11,7 +11,7 @@ a {
   }
 
   &[href*='://']::after {
-    content: ' ↗ ';
+    content: ' ↗';
   }
 }
 

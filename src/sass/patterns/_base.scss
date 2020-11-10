@@ -8,16 +8,31 @@ html {
 }
 
 body {
+  display: grid;
+  grid-gap: 1em;
+  grid-template: auto 1fr auto / auto;
   margin: 0 auto;
   max-width: 55ch;
+  min-height: 100vh;
 }
 
 nav {
   font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
 
-  + h1 {
-    margin-top: 0.5rem;
+footer {
+  border-top: medium solid var(--neutral);
+  font-size: 0.75rem;
+  padding: 1em 0;
+
+  p {
+    margin: 0.25rem;
   }
+}
+
+h1 {
+  margin: 0;
 }
 
 h2, h3, h4, h5, h6 {
