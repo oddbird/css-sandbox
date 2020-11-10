@@ -1,8 +1,8 @@
 ---
-title: Container Queries
+title: Responsive Components
 eleventyNavigation:
   key: rwd
-  title: container queries
+  title: responsive components
   parent: home
 ---
 
@@ -17,10 +17,17 @@ based on more immediate context --
 like the width of a parent container --
 which might not match cleanly to viewport media.
 
+Grid and flexbox both provide some tools
+for managing available space,
+so in addition to "container query" solutions,
+I also want to think about if/where they can also be improved
+for responsive design.
+
 ## In Progress
 
 - [`@switch()` Function](switch/)
 - [`@container` Rule](query/)
+- [Grids](grids/)
 
 ## Resources
 
