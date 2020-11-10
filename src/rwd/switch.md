@@ -6,8 +6,6 @@ eleventyNavigation:
   parent: rwd
 ---
 
-## Summary
-
 The `switch()` function would provide conditional logic in CSS values,
 similar to the Sass `if()` function,
 but with access to some essential client-side values for comparison:

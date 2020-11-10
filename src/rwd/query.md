@@ -6,8 +6,6 @@ eleventyNavigation:
   parent: rwd
 ---
 
-## Summary
-
 Since container-queries are often seen as
 an extension of media-queries,
 the most common proposal is to add an `@`-rule

@@ -6,8 +6,6 @@ eleventyNavigation:
   parent: home
 ---
 
-## Summary
-
 Currently `@media` queries give us a way to adjust a design
 based on device features, user-preferences, and viewport size.
 But modern web development relies heavily on modular
