@@ -1,0 +1,39 @@
+figure {
+  margin: 1.5em 0;
+}
+
+img {
+  width: 100%;
+}
+
+[style*="--ratio"],
+[data-ratio] {
+  > :first-child {
+    width: 100%;
+  }
+
+  > img {
+    height: auto;
+  }
+
+  @supports (--custom:property) {
+    display: grid;
+    grid-template: 'media' auto / 100%;
+
+    &::before {
+      content: "";
+      display: block;
+      grid-area: media;
+      padding-bottom: calc(100% / (var(--ratio)));
+    }
+
+    > :first-child {
+      grid-area: media;
+      height: 100%;
+    }
+  }
+}
+
+[data-ratio] {
+  --ratio: 16/9;
+}

@@ -1,0 +1,31 @@
+@use 'sass:color';
+
+html {
+  // palette
+  --contrast-light: snow;
+  --contrast-dark: #{color.mix(darkslategray, black, 25%)};
+  --neutral-light: lightslategray;
+  --neutral-dark: slategray;
+  --prime-light: powderblue;
+  --prime-dark: teal;
+  --accent-light: hotpink;
+  --accent-dark: mediumvioletred;
+
+  // theme
+  --bg: var(--contrast-light);
+  --text: var(--contrast-dark);
+  --neutral: var(--neutral-dark);
+  --action: var(--prime-dark);
+  --focus: var(--accent-dark);
+
+  @media (prefers-color-scheme: dark) {
+    --bg: var(--contrast-dark);
+    --text: var(--contrast-light);
+    --neutral: var(--neutral-light);
+    --action: var(--prime-light);
+    --focus: var(--accent-light);
+  }
+
+  background: var(--bg);
+  color: var(--text);
+}

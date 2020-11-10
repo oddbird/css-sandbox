@@ -1,4 +1,4 @@
-body {
-  font-family: sans-serif;
-  background-color: #f9f9f9;
-}
+@use '../../node_modules/cssremedy/css/remedy.css';
+@use '../../node_modules/prism-themes/themes/prism-a11y-dark.css';
+
+@use 'patterns';

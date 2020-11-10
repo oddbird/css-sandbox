@@ -1,0 +1,35 @@
+a {
+  &:link,
+  &:visited {
+    color: var(--link, var(--action));
+  }
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: var(--focus);
+  }
+
+  &[href*='://']::after {
+    content: ' ↗ ';
+  }
+}
+
+.header-anchor {
+  &:link,
+  &:visited {
+    --link: var(--neutral);
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: normal;
+    margin: 0 0.5em;
+    text-decoration: none;
+  }
+
+  @media (width > 48em) {
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}

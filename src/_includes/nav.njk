@@ -1,0 +1,10 @@
+{% if eleventyNavigation and eleventyNavigation.parent %}
+  <nav>
+    {% set key = eleventyNavigation.key %}
+    {% set navPages = collections.all | eleventyNavigationBreadcrumb(key) %}
+    {% for item in navPages %}
+      / <a href="{{ item.url }}">{{ (item.title or item.key) | mdInline | safe }}</a>
+    {% endfor %}
+    /
+  </nav>
+{% endif %}

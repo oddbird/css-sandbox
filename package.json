@@ -20,12 +20,22 @@
   "license": "ISC",
   "dependencies": {
     "@11ty/eleventy": "^0.11.0",
+    "@11ty/eleventy-navigation": "^0.1.6",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.4",
     "autoprefixer": "^9.8.6",
     "cross-env": "^7.0.2",
     "cssnano": "^4.1.10",
+    "cssremedy": "0.1.0-beta.2",
+    "js-yaml": "^3.14.0",
+    "markdown-it": "^12.0.2",
+    "markdown-it-anchor": "^6.0.0",
+    "markdown-it-footnote": "^3.0.2",
+    "markdown-it-mark": "^3.0.0",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^8.1.0",
-    "sass": "^1.26.10"
+    "prism-themes": "^1.5.0",
+    "sass": "^1.26.10",
+    "typogr": "^0.6.8"
   },
   "browserslist": [
     "last 2 versions"

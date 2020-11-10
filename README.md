@@ -1,14 +1,29 @@
-![logo](https://repository-images.githubusercontent.com/302921248/58478900-0adf-11eb-8f0b-74be58a898ef)
+# Miriam's CSS Sandbox
 
-# 11ty Sass Skeleton
+This is a scratch site for
+[Miriam Suzanne](https://oddbird.net/authors/miriam/)
+to take notes & document ideas
+related to the
+[CSS Working Group](https://github.com/w3c/csswg-drafts/)
+and CSS Specifications.
 
-Featuring absolutely nothing beyond a base HTML5 template and the essential setup to watch and compile your Sass alongside 11ty.
-
-Includes minifiying and autoprefixing of styles `postbuild`.
-
-<small>Created by [@5t3ph](https://twitter.com/5t3ph)</small>
+I like to work in the open,
+and make my notes available --
+you are welcome to explore,
+and even [open issues or pull-requests][gh] --
+but **this is my own personal notebook,
+and not a replacement for CSSWG issue threads**.
 
 ## Development Scripts
+
+This static site is built using
+[Eleventy](11ty.dev/),
+based on a [skeleton template](https://11ty.rocks/)
+developed by [@5t3ph](https://twitter.com/5t3ph).
+
+**`npm install`**
+
+> Install everything needed to build/start the static site
 
 **`npm start`**
 
@@ -17,15 +32,3 @@ Includes minifiying and autoprefixing of styles `postbuild`.
 **`npm run build`**
 
 > Production build includes minified, autoprefixed CSS
-
-Use this as the "Publish command" if needed by hosting such as Netlify.
-
-## Resources to extend this and learn 11ty
-
-**Learn to build an 11ty site in 20 mins** with my [egghead video course](https://5t3ph.dev/learn-11ty) and see how to add a blog and custom data.
-
-**Add auto-generated social media images** by following [my tutorial](https://dev.to/5t3ph/automated-social-sharing-images-with-puppeteer-11ty-and-netlify-22ln)
-
-**Explore advanced setup of custom data** through my [tutorial on building a community site](https://css-tricks.com/a-community-driven-site-with-eleventy-building-the-site/)
-
-**For a more full-featured starter** check out my [11ty Netlify Jumpstart](https://11ty-netlify-jumpstart.netlify.app/) (also works for hosts other than Netlify).
