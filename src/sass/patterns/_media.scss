@@ -24,7 +24,7 @@ img {
       content: "";
       display: block;
       grid-area: media;
-      padding-bottom: calc(100% / (var(--ratio)));
+      padding-bottom: calc(100% / var(--ratio));
     }
 
     > :first-child {
@@ -35,5 +35,5 @@ img {
 }
 
 [data-ratio] {
-  --ratio: 16/9;
+  --ratio: #{16/9};
 }
