@@ -60,7 +60,7 @@ aside {
 
 ## Questions
 
-## Is single-axis containment even possible?
+### Is single-axis containment even possible?
 
 CSSWG [1D containment issue](https://github.com/w3c/csswg-drafts/issues/1031)
 
