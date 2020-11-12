@@ -1,6 +1,10 @@
 html {
+  --system-fonts: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  --body-fonts: Palatino,Palatino Linotype,Palatino LT STD,Book Antiqua,Georgia,serif;
+  --code-fonts: monaco,Consolas,'Lucida Console',monospace;
+
   background-color: #f9f9f9;
-  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-family: var(--body-fonts);
   font-size: 1.15em;
   font-size: calc(1em + 0.5vw);
   line-height: 1.4;
@@ -11,7 +15,7 @@ body {
   grid-gap: 1em;
   grid-template: auto 1fr auto / auto;
   margin: 0 auto;
-  max-width: 60ch;
+  max-width: 70ch;
   min-height: 100vh;
   padding: 1em;
 }
@@ -35,9 +39,10 @@ h1 {
   margin: 0;
 }
 
-h2, h3, h4, h5, h6 {
-  position: relative;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--system-fonts);
   line-height: 1.2;
+  position: relative;
 }
 
 h2 {
@@ -46,6 +51,21 @@ h2 {
   padding-top: 0.25rem;
 }
 
+code,
+mark {
+  background: var(--mark);
+  color: inherit;
+  display: inline-block;
+  padding: 0 0.25em;
+}
+
+code {
+  font-family: var(--code-fonts);
+  font-size: 0.8em;
+}
+
 pre code {
-  font-size: 0.75rem;
+  background: unset;
+  display: unset;
+  padding: unset;
 }

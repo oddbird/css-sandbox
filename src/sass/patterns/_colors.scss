@@ -17,6 +17,7 @@ html {
   --neutral: var(--neutral-dark);
   --action: var(--prime-dark);
   --focus: var(--accent-dark);
+  --mark: var(--accent-light);
 
   @media (prefers-color-scheme: dark) {
     --bg: var(--contrast-dark);
@@ -24,6 +25,7 @@ html {
     --neutral: var(--neutral-light);
     --action: var(--prime-light);
     --focus: var(--accent-light);
+    --mark: var(--accent-dark);
   }
 
   background: var(--bg);

@@ -11,6 +11,7 @@ a {
   }
 
   &[href*='://']::after {
+    font-family: var(--system-fonts);
     content: ' ↗';
   }
 }
