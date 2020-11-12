@@ -54,7 +54,8 @@ When combined with layout containment, it allows:
 
 ## Is single-axis containment even possible?
 
-CSSWG [1D containment issue](https://github.com/w3c/csswg-drafts/issues/1031)
+- CSSWG [1D containment issue](https://github.com/w3c/csswg-drafts/issues/1031),
+- Brian Kardell's [css-observers issue](https://github.com/bkardell/css-observers/issues/11)
 
 2-axis size containment might work for some app-style layouts,
 where layout areas are sized to the viewport,

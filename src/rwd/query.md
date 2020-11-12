@@ -11,13 +11,13 @@ an extension of media-queries,
 the most common proposal is to add an @-rule
 block syntax that works similar to existing `@media`.
 
-
 ## Resources
 
 - David Baron:
   [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
 - W3C: [CSS Containment Module](https://drafts.csswg.org/css-contain/)
 - Chrome: [Container Queries Project](https://docs.google.com/document/d/1ekz9JNJVQnvt_Xxd1BmanJpamGApyp5vRW_hpuh24h8/edit?usp=sharing)
+- My [notes on containment](contain/)
 
 ## Syntax Proposal
 
