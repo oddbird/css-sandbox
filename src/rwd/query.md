@@ -17,7 +17,7 @@ block syntax that works similar to existing `@media`.
   [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
 - W3C: [CSS Containment Module](https://drafts.csswg.org/css-contain/)
 - Chrome: [Container Queries Project](https://docs.google.com/document/d/1ekz9JNJVQnvt_Xxd1BmanJpamGApyp5vRW_hpuh24h8/edit?usp=sharing)
-- My [notes on containment](contain/)
+- My [notes on containment](./contain/)
 
 ## Syntax Proposal
 
@@ -82,7 +82,7 @@ and [size](#size-containment) containment
 to avoid infinite style loops.
 
 But authors would likely need
-[single-axis containment](contain/).
+[single-axis containment](./contain/).
 Is that even possible?
 
 ### Interleaving Layout & Style
