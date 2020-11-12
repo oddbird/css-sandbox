@@ -4,7 +4,6 @@ html {
   font-size: 1.15em;
   font-size: calc(1em + 0.5vw);
   line-height: 1.4;
-  padding: 1em;
 }
 
 body {
@@ -12,8 +11,9 @@ body {
   grid-gap: 1em;
   grid-template: auto 1fr auto / auto;
   margin: 0 auto;
-  max-width: 55ch;
+  max-width: 60ch;
   min-height: 100vh;
+  padding: 1em;
 }
 
 nav {

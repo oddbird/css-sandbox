@@ -111,3 +111,11 @@ Option 3: Make Proximity Meaningful
 There is a CSS-issue that current scope solutions solve around proximity – concepts of “inner” and “outer” - which might belong in the cascade: https://twitter.com/keithjgrant/status/1123676335484952576
 
 
+## Notes From Han
+
+- consider scoping attributes
+- styling shadow DOM from the outer page
+- donut scope
+- avoid previous pitfalls
+- consider specificity / media queries
+- consider re-calc

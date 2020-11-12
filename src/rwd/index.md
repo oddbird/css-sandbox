@@ -26,7 +26,8 @@ for responsive design.
 ## Resources
 
 - WICG: [Use Cases and Requirements](https://wicg.github.io/cq-usecases/)
-- CSS Tricks: [Container Query Discussion](https://css-tricks.com/container-query-discussion/)
+- Chris Coyier: [Let's Not Forget About Container Queries](https://css-tricks.com/lets-not-forget-about-container-queries/)
+- Chris Coyier: [Container Query Discussion](https://css-tricks.com/container-query-discussion/)
 - Zach Leatherman: [The Origin Story of Container Queries](https://www.zachleat.com/web/origin-container-queries/)
 
 ## In Progress
@@ -36,3 +37,12 @@ a full solution for styling responsive components
 will likely require multiple approaches.
 
 {{ collections.all | eleventyNavigation('rwd') | eleventyNavigationToHtml | safe }}
+
+## Hacks & Workarounds
+
+These all work one-property-at-a-time,
+much like the [`switch()` proposal](switch/)…
+
+- Heydon Pickering: [Flexbox Holy Albatros](https://heydonworks.com/article/the-flexbox-holy-albatross/)
+- Xiao Zhuo Jia: [Unholy Albatross](http://www.miragecraft.com/articles/unholy_albatross.html)
+- Mathias Hülsbusch: [The Raven Technique](https://css-tricks.com/the-raven-technique-one-step-closer-to-container-queries/)
