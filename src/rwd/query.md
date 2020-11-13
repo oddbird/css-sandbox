@@ -175,7 +175,7 @@ makes it impossible to have fully-modular components
 that respond to _any context_.
 I'd want a syntax that allows for
 _implicit_ containers (much like positioning context)
-created whenever the required _containment_ is applid to an element:
+created whenever the required _containment_ is applied to an element:
 
 ```css
 /* both aside & main become "implicit containers" */
@@ -197,7 +197,7 @@ aside {
 David's syntax proposal raises two big questions:
 
 - Can selectors inside the query reference the queried element itself?
-- If so, what proerties can be adjusted without infinite looping?
+- If so, what properties can be adjusted without infinite looping?
 
 If the query can apply adjustments to the container,
 we have infinite-loop problems --
