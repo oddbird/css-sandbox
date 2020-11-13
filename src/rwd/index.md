@@ -43,6 +43,8 @@ will likely require multiple approaches.
 I think **both of these are worth pusuing**,
 because they come with a number of important trade-offs:
 
+==TODO: Sort use-cases from WICG based on these two approaches==
+
 ### Ability to Implement
 
 The `@container` syntax is surrently blocked
