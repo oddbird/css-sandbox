@@ -17,16 +17,20 @@ block syntax that works similar to existing `@media`.
   [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
 - W3C: [CSS Containment Module](https://drafts.csswg.org/css-contain/)
 - Chrome: [Container Queries Project](https://docs.google.com/document/d/1ekz9JNJVQnvt_Xxd1BmanJpamGApyp5vRW_hpuh24h8/edit?usp=sharing)
+- Chrome: [Intent to Prototype](https://groups.google.com/a/chromium.org/g/blink-dev/c/u1AKdrXhPGI/m/wrJb-unhAgAJ?pli=1)
 - My [notes on containment](../contain/)
 
 ## Syntax Proposal
 
-The Chrome [Intent to Prototype](https://groups.google.com/a/chromium.org/g/blink-dev/c/u1AKdrXhPGI/m/wrJb-unhAgAJ?pli=1)
-links to a [gist](https://gist.github.com/mirisuzanne/748169312f110d6246e092945673b16e)
-of my early thinking.
-I threw that gist together in a hurry,
-to explain my thinking on using selectors
-as part of the query.
+The Chrome I2P contains a link to
+my initial [gist](https://gist.github.com/mirisuzanne/748169312f110d6246e092945673b16e).
+I threw that together in a hurry,
+simply trying to describe the problem with mixing
+scope & containment.
+
+Both that Gist and this document
+lean heavily on David Baron's
+initial proposal.
 
 Here is my current thinking...
 

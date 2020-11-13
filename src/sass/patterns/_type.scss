@@ -1,0 +1,47 @@
+// headings
+
+h1 {
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--system-fonts);
+  line-height: 1.2;
+  position: relative;
+}
+
+h2 {
+  border-top: medium dotted var(--neutral);
+  margin-top: 1.5em;
+  padding-top: 0.25rem;
+}
+
+// markers & code
+
+code,
+mark {
+  background: var(--mark);
+  color: var(--text);
+  display: inline-block;
+  padding: 0 0.25em;
+}
+
+code {
+  font-family: var(--code-fonts);
+  font-size: 0.8em;
+}
+
+pre code {
+  background: unset;
+  color: unset;
+  display: unset;
+  padding: unset;
+}
+
+// amp
+
+.amp {
+  font-family: Garamond,Baskerville,Baskerville Old Face,Hoefler Text,Times New Roman,serif;
+  font-style: italic;
+  font-weight: normal;
+}

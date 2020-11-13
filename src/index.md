@@ -19,6 +19,6 @@ a personal sandbox for me to play in.
 [gh]: https://github.com/oddbird/css-sandbox
 [drafts]: https://github.com/w3c/csswg-drafts/issues
 
-## What I'm Working On…
+## My Notes (So Far) On…
 
-{{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | safe }}
+{{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | typogr | safe }}
