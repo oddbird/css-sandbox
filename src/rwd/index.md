@@ -23,10 +23,6 @@ so in addition to "container query" solutions,
 I also want to think about if/where they can also be improved
 for responsive design.
 
-**Contents:**
-
-[[toc]]
-
 ## Resources
 
 - WICG: [Use Cases and Requirements](https://wicg.github.io/cq-usecases/)

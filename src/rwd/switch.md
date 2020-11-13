@@ -11,10 +11,6 @@ similar to the Sass `if()` function,
 but with access to some essential client-side values for comparison:
 primarily `available-inline-size`.
 
-**Contents:**
-
-[[toc]]
-
 ## Resources
 
 _From [Brian Kardell](https://bkardell.com/) & [Igalia](https://www.igalia.com/)_

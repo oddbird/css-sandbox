@@ -10,9 +10,6 @@ const mdown = require('markdown-it')({
   .disable('code')
   .use(require('markdown-it-mark'))
   .use(require('markdown-it-footnote'))
-  .use(require("markdown-it-table-of-contents"), {
-    includeLevel: [1, 2, 3],
-  })
   .use(require('markdown-it-anchor'), {
     permalink: true,
   });
@@ -28,10 +25,13 @@ const render = (content, type = true) =>
 const inline = (content, type = true) =>
   type ? set(mdown.renderInline(content)) : mdown.renderInline(content);
 
+const cleanToc = (content) => set(content.replace(/\s¶/g,''));
+
 module.exports = {
   mdown,
   amp,
   set,
   render,
   inline,
+  cleanToc,
 };

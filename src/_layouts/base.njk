@@ -13,26 +13,16 @@
     <h1>{{ title }}</h1>
   </header>
 
+  {% if eleventyNavigation and eleventyNavigation.parent %}
+    {{ content | toc | cleanToc | safe }}
+  {% endif %}
+
   <main>
     {{ content | safe }}
   </main>
 
   <footer>
-    <p>
-      Maintained by
-      <a href="https://oddbird.net/authors/miriam/">Miriam Suzanne</a>
-      & <a href="https://oddbird.net/">OddBird</a>
-    </p>
-    <p>
-      <a href="https://github.com/oddbird/css-sandbox/blob/main/{{ page.inputPath }}">
-        Edit this page
-      </a>
-      or
-      <a href="https://github.com/oddbird/css-sandbox/issues">
-        file an issue
-      </a>
-      on GitHub
-    </p>
+    {% include "footer.njk" %}
   </footer>
 </body>
 </html>
