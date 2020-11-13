@@ -23,6 +23,10 @@ so in addition to "container query" solutions,
 I also want to think about if/where they can also be improved
 for responsive design.
 
+**Contents:**
+
+[[toc]]
+
 ## Resources
 
 - WICG: [Use Cases and Requirements](https://wicg.github.io/cq-usecases/)
@@ -30,7 +34,7 @@ for responsive design.
 - Chris Coyier: [Container Query Discussion](https://css-tricks.com/container-query-discussion/)
 - Zach Leatherman: [The Origin Story of Container Queries](https://www.zachleat.com/web/origin-container-queries/)
 
-## In Progress
+## Proposals
 
 These different directions are not exclusive --
 a full solution for styling responsive components

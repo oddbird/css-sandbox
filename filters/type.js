@@ -10,6 +10,9 @@ const mdown = require('markdown-it')({
   .disable('code')
   .use(require('markdown-it-mark'))
   .use(require('markdown-it-footnote'))
+  .use(require("markdown-it-table-of-contents"), {
+    includeLevel: [1, 2, 3],
+  })
   .use(require('markdown-it-anchor'), {
     permalink: true,
   });
