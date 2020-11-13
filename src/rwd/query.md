@@ -234,6 +234,15 @@ of the `contain` property?
 What comes to mind is a `display-outside` value
 of `container`.
 
+### What Do We Query?
+
+- Are queries limited to container dimensions?
+- Are relative units like `em`/`rem` resolved to the container value?
+- Can we query other values on the container,
+  like custom properties?
+
+==TODO: Needs more thought & input==
+
 ### Should we build this into `@media`? [❌]
 
 My immediate instinct was that container-queries
