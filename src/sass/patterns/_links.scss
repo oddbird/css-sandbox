@@ -20,17 +20,25 @@ a {
   &:link,
   &:visited {
     --link: var(--neutral);
+    --scale: 0.75;
+    --x: 0;
     display: inline-block;
-    font-size: 1rem;
     font-weight: normal;
-    margin: 0 0.5em;
     text-decoration: none;
+    transition: transform 300ms ease-out;
+    transform: scale(var(--scale)) translateX(var(--x));
+
+    @media (min-width: 48em) {
+      --scale: 0.6;
+      --x: -25%;
+      position: absolute;
+      right: 100%;
+    }
   }
 
-  @media (width > 48em) {
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    transform: translateY(-50%);
+  &:hover,
+  &:focus,
+  &:active {
+    --scale: 0.8;
   }
 }
