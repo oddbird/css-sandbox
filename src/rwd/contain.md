@@ -66,6 +66,10 @@ on the block-axis (often vertical).
 
 We need container queries to support that more common use-case.
 
+Conceptually, single-axis containment should not be hard to implement
+_if we can describe how it works_.
+But that may still be challenging...
+
 Single-axis containment only works
 if we can ensure that changes in the cross-axis
 have no impact on the contained axis.
@@ -98,5 +102,3 @@ to the inline axis (the more common use-case),
 since this issue only flows from inline-to-block.
 That would require some consideration
 for nested writing mode changes...
-
-
