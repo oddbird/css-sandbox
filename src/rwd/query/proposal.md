@@ -1,28 +1,13 @@
 ---
-title: Container Queries
+title: Work-in-Progress Proposal
 eleventyNavigation:
-  key: container-queries
-  title: Container Queries
-  parent: rwd
+  key: query-proposal
+  title: Work-in-Progress Proposal
+  parent: container-queries
 ---
 
-Since container-queries are often seen as
-an extension of media-queries,
-the most common proposal is to add an @-rule
-block syntax that works similar to existing `@media`.
-
-## Resources
-
-- David Baron:
-  [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
-- W3C: [CSS Containment Module](https://drafts.csswg.org/css-contain/)
-- Chrome: [Container Queries Project](https://docs.google.com/document/d/1ekz9JNJVQnvt_Xxd1BmanJpamGApyp5vRW_hpuh24h8/edit?usp=sharing)
-- Chrome: [Intent to Prototype](https://groups.google.com/a/chromium.org/g/blink-dev/c/u1AKdrXhPGI/m/wrJb-unhAgAJ?pli=1)
-- My [notes on containment](../contain/)
-
-## Syntax Proposal
-
-The Chrome I2P contains a link to
+The [Chrome I2P](https://groups.google.com/a/chromium.org/g/blink-dev/c/u1AKdrXhPGI/m/wrJb-unhAgAJ?pli=1)
+contains a link to
 my initial [gist](https://gist.github.com/mirisuzanne/748169312f110d6246e092945673b16e).
 I threw that together in a hurry,
 simply trying to describe the problem with mixing
@@ -30,18 +15,22 @@ scope & containment.
 
 Both that Gist and this document
 lean heavily on David Baron's
-initial proposal.
+[initial proposal](https://github.com/dbaron/container-queries-implementability),
+and have a lot in common with
+Viktor Hubert's
+[Container Query Plugin](https://github.com/ZeeCoder/container-query/blob/master/docs/syntax.md#Queries).
 
 Here is my current thinking...
 
-### Creating Container Context
+## Creating Containers
 
 What's required for a containment context is:
 
 ```css
 .sidebar,
 .main {
-  contain: layout inline-size;
+  /* working on `inline-size` & `block-size` options... */
+  contain: layout size;
 }
 ```
 
@@ -51,14 +40,14 @@ Would there be a way to clean it up?
 ```css
 .sidebar,
 .main {
-  contain: queries; /* extending contain */
-  display: container; /* extending display */
+  /* extending contain? */
+  contain: queries;
 }
 ```
 
 ==TODO: this needs a bit more thought...==
 
-### Querying Context
+## Querying Context
 
 ```css
 /* @container <query> [, <query>]* */
@@ -77,56 +66,6 @@ _containment context_
 is greater-than `45em`.
 
 ## Questions
-
-### Size & Layout Containment
-
-Since the contents of a block can impact it's size,
-this would require both [layout](#layuot-containment)
-and [size](#size-containment) containment
-to avoid infinite style loops.
-
-But authors would likely need
-[single-axis containment](../contain/).
-Is that even possible?
-
-### Interleaving Layout & Style
-
-Browser engine rendering relies on discreet stages:
-
-1. **Style Calculation** matches selectors to elements,
-   and applies cascading/inheritance logic
-   to determine a value for every property
-   on every element
-2. **Layout** applies all sizing-related properties
-   to determine the size & position of each element on the page
-3. **Paint** determines the color to paint each individual pixel
-   in isolated "layers"
-4. **Composite** maps the overlap of layers,
-   to determine final pixel values
-
-For elements relying on a container query,
-internal style calculation would need to happen
-_after_ external layout has concluded.
-
-### @-Rule or Selector? [👍 @-rule]
-
-There are two general approaches to a syntax:
-
-```css
-/* @-rule block */
-@container <query> {
-  .selector { /* ... */ }
-}
-
-/* pseudo-class */
-.selector:media(<query>) { /* ... */ }
-```
-
-I don't think the selector approach makes sense here,
-since it's likely that a responsive component
-will have multiple moving parts,
-and each might require a unique selector
-at the same breakpoint.
 
 ### Required Scope?
 
@@ -242,24 +181,3 @@ of `container`.
   like custom properties?
 
 ==TODO: Needs more thought & input==
-
-### Should we build this into `@media`? [❌]
-
-My immediate instinct was that container-queries
-really are the same as media-queries,
-and we could handle both in the existing @-rule --
-something like:
-
-```css
-@media screen and container(width > 45em) { /* ... */ }
-```
-
-The immediate issue is that font-relative sizes in `@media`
-resolve based on the inherited viewport font size,
-before any document styles are applied.
-But container queries refer to a specific element in the DOM,
-and should ideally resolve based on that element's styles.
-
-I think that reflects a broader issue:
-"media" may be a part of "context" --
-but they are fairly different concepts in practice.

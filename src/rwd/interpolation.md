@@ -9,7 +9,8 @@ eleventyNavigation:
 Breakpoints only get you so far.
 In many cases it would be better to have units
 and values that can respond more fluidly to context.
-We can do some of that with [viewport-units](),
+We can do some of that with relative units
+(several JS plugins provide container-relative units),
 but that approach comes with a number of limitations.
 
 [Scott Kellum](https://twitter.com/ScottKellum)

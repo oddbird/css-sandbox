@@ -21,7 +21,7 @@ _From [Brian Kardell](https://bkardell.com/) & [Igalia](https://www.igalia.com/)
 
 ## Background
 
-The [query-block](query/) approach
+The [query-block](../query/) approach
 relies on [CSS Containment](https://drafts.csswg.org/css-contain/)
 to avoid infinite loops -
 and specifically [single-axis size containment](https://github.com/w3c/csswg-drafts/issues/1031)
