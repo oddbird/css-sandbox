@@ -21,8 +21,10 @@ Viktor Hubert's
 [Container Query Plugin](https://github.com/ZeeCoder/container-query/blob/master/docs/syntax.md#Queries).
 
 Here is my current thinking...
+Though I'm not sold on it.
+See my questions below.
 
-## Creating Containers
+## Creating containers
 
 What's required for a containment context is:
 
@@ -47,7 +49,7 @@ Would there be a way to clean it up?
 
 ==TODO: this needs a bit more thought...==
 
-## Querying Context
+## Querying context
 
 ```css
 /* @container <query> [, <query>]* */
@@ -67,7 +69,7 @@ is greater-than `45em`.
 
 ## Questions
 
-### Required Scope?
+### Required scope?
 
 David Baron's proposal requires
 an explicit selector for defining the container,
@@ -103,7 +105,7 @@ and the usefulness of mixing scope with queries in the first place.
 
 I think both features will be better-served by having their own syntax.
 
-#### Implicit Containers
+#### Implicit containers
 
 The explicit selector
 makes it impossible to have fully-modular components
@@ -127,7 +129,7 @@ aside {
 }
 ```
 
-#### The Container Itself
+#### The container itself
 
 David's syntax proposal raises two big questions:
 
@@ -147,7 +149,7 @@ an extrnal container.
 There is no way to select the container
 being queried.
 
-#### Are Implicit Containers Dangerous?
+#### Are implicit containers dangerous?
 
 Implicit _positioning context_ sometimes creates a problem,
 if you want an absolutely-positioned child
@@ -173,11 +175,107 @@ of the `contain` property?
 What comes to mind is a `display-outside` value
 of `container`.
 
-### What Do We Query?
+### What about a selector-level syntax?
+
+Other proposals rely on a `:container(<query>)` pseudo-selector,
+rather than a new @-rule.
+I moved away from that for a few reasons:
+
+#### Selector scoping
+
+I don't think this feature should require
+scoping to explicit container selectors,
+the way it is in David Baron's proposal --
+so I avoided any selector-like syntax.
+
+But in reality,
+a pseudo-class doesn't need to be attached
+to any more specific context.
+This could work the same as my @-rule example:
+
+```css
+:container(width < 40em) .media-object { /* ... */ }
+```
+
+#### Internal vs external context
+
+But in my proposal,
+the container is _always external_.
+You can't style a container based on it's own self-created context:
+
+```css
+.sidebar { contain: size; }
+
+@container (width < 40em) {
+  /* this would respond to the context that .sidebar is IN, */
+  /* not the context that .sidebar CREATES */
+  .sidebar { flex-direction: column; }
+}
+```
+
+That relationship is made more clear
+by nesting one inside the other.
+It might be confusing
+with a pseudo-class selector?
+
+```css
+.sidebar { contain: size; }
+
+.sidebar:container(width < 40em) {
+  flex-direction: column;
+}
+```
+
+Or maybe there are still ways to make that clear
+with a different word, like "context"?
+Sidebar might be a "container",
+but this would more clearly query the "context"
+that it is in?
+
+```css
+.sidebar { contain: size; }
+
+.sidebar:context(width < 40em) {
+  flex-direction: column;
+}
+```
+
+But this distinction maybe get's weird.
+What do these different selectors mean?
+
+```css
+:context(width < 40em) { font-size: small; }
+.media-object:context(width < 40em) { font-size: small; }
+:context(width < 40em) .media-object { font-size: small; }
+```
+
+#### Multiple selectors in a query
+
+It could be handy to nest multiple selectors
+inside a single query.
+I don't think this is a blocker --
+since it can be pre-processed easily,
+and there are already proposals for CSS nesting:
+
+```css
+:context(width < 40em) {
+  .media-object { /* ... */ }
+  .gallery { /* ... */ }
+}
+```
+
+#### Do we need nested `@keyframes`/`@property` rules?
+
+On the other hand,
+media-queries allow other @-rules to be nested,
+and I'm not sure we need that here?
+Is there a reason to allow keyframe & property descriptions
+inside the container query?
+If not, is it confusing to restrict them?
+
+### What can we query?
 
 - Are queries limited to container dimensions?
 - Are relative units like `em`/`rem` resolved to the container value?
 - Can we query other values on the container,
   like custom properties?
-
-==TODO: Needs more thought & input==

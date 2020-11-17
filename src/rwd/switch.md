@@ -11,6 +11,19 @@ similar to the Sass `if()` function,
 but with access to some essential client-side values for comparison:
 primarily `available-inline-size`.
 
+If you think of it as a full solution,
+it can look bulky --
+because it works one-property-at-a-time.
+But if you think about use-cases where
+_you only need to adjust one property_,
+this becomes much more attractive
+than adding fully distinct blocks
+for each breakpoint.
+
+## Status
+
+- Igalia: [Prototype in Chromium](https://www.youtube.com/embed/8QFST9MvjyA)
+
 ## Resources
 
 _From [Brian Kardell](https://bkardell.com/) & [Igalia](https://www.igalia.com/)_
@@ -78,7 +91,7 @@ but seems like a temporary way to fit existing CSS syntax:
 
 There is also a comment from
 [Fantasai](https://gist.github.com/bkardell/e5d702b15c7bcf2de2d60b80b916e53c#gistcomment-3295085)
-with a proposal to make the syntax more efficient:
+with a proposal to make the syntax more efficient.
 
 ```css
 .foo {
