@@ -1,3 +1,7 @@
+---
+date: Last Modified
+---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +15,12 @@
   <header>
     {% include "nav.njk" %}
     <h1>{{ title }}</h1>
+
+    {% if page.url != '/' %}
+      <time datetime="{{ page.date.toISOString() }}">
+        Updated {{ page.date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
+      </time>
+    {% endif %}
   </header>
 
   {% if eleventyNavigation and eleventyNavigation.parent %}

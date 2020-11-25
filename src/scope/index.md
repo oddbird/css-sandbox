@@ -6,7 +6,7 @@ eleventyNavigation:
   parent: home
 ---
 
-Authors often complain that CSS is "globrally scoped" --
+Authors often complain that CSS is "globally scoped" --
 so that every selector is compared against every DOM element.
 While selectors allow you to filter the DOM tree to an extent,
 the idea of "scope" would take that a bit farther.
@@ -19,7 +19,7 @@ Some common expectations:
 
 - Scopes can have a lower boundary ("donut" shape)
   to avoid bleeding into nested components
-- Scopes are able to overlap/nest or "extend" each other
+- Scopes are not exclusive, so multiple scopes can include the same elements
 - Scope conflicts are resolved by _proximity_ rather than _source-order_ --
   with inner scope taking precedence when all else is equal
 
@@ -37,9 +37,9 @@ some of the most strongly-isolated use-cases
 (no bleed from the outer page),
 leaving scope to focus on less-isolated components?
 
-## Existing Specs
+## Existing specs that mention scope
 
-### [CSS Selectors - Level 4](https://www.w3.org/TR/selectors-4/) (Working Draft)
+### [CSS Selectors - Level 4](https://www.w3.org/TR/selectors-4/)
 
 - [Scoped Selectors](https://www.w3.org/TR/selectors-4/#scoping)
   that only refer to a subtree or fragment of the document
@@ -57,7 +57,7 @@ In CSS, this is the same as `:root`, since there is no way to scope elements. Ho
 
 > “Specifications intending for this pseudo-class to match specific elements     rather than the document’s root element must define either a scoping root (if using scoped selectors) or an explicit set of :scope elements.”
 
-### [CSS Scoping - Level 1](https://drafts.csswg.org/css-scoping/) (Editor’s Draft)
+### [CSS Scoping - Level 1](https://drafts.csswg.org/css-scoping/)
 
 The latest draft is primarily concerned
 with Custom Elements & Shadow DOM.
@@ -84,7 +84,7 @@ Scoping has two primary effects:
   - This results in proximity-weighting across scopes
   - But also means scope overrides everything
 
-### [CSS Cascade - Level 4](https://www.w3.org/TR/css-cascade-4/) (Working Draft)
+### [CSS Cascade - Level 4](https://www.w3.org/TR/css-cascade-4/)
 
 - [Removes](https://www.w3.org/TR/css-cascade-4/#change-2018-drop-scoped)
   “scoping” from the cascade sort criteria,
@@ -94,7 +94,7 @@ Scoping has two primary effects:
   - Outer context wins for *normal* layer conflicts
   - Inner context wins for `!important` layer conflicts
 
-## Pior Art
+## Pior art
 
 ### Naming conventions (BEM)
 
