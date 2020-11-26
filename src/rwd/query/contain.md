@@ -84,21 +84,90 @@ This is only an issue when all three are true:
 
 - Scrollbars are part of the layout flow (they are not overlayed)
 - Overflow on the cross-axis is set to `auto` on _any ancestor_
-- The container size is impacted by the size of that ancestor
+- The contained size is impacted by the size of that ancestor
 
-This could be solved by forcing `auto` scrollbars in that instance
-to be always-visible on the cross-axis,
-when any contents have 1D size containment.
+This could be solved by
+forcing in-flow `auto` scrollbars to be always-visible
+when there are nested single-axis containers.
 
-### Percentage Margins & Padding
+### Percentage Padding
 
 Block-axis percentage padding & margins
 are resolved relative to the inline available size.
+That would cause issues when:
 
-https://codepen.io/anon/pen/aYQLvV?editors=1100
+- Containment is on the block-axis
+- Any ancestor has inline-size determined by contents
+  (float+auto, min-content, max-content, etc)
+- Any intermediate ancestor has:
+  - box-sizing of border-box
+  - height determined by the outer ancestor
+  - % padding on the block-axis
+    (so inner-height decreases as outer-width increases)
+- The container block-size is impacted
+  by the inner-size of that ancestor
 
-One proposed resolution is to limit single-axis containment
-to the inline axis (the more common use-case),
-since this issue only flows from inline-to-block.
-That would require some consideration
-for nested writing mode changes...
+See
+[contain-y comment](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-379463428))
+and related
+[codepen demo](https://codepen.io/anon/pen/aYQLvV?editors=1100).
+
+That issue is most likely to occur
+when containing the block-axis,
+but nested writing modes
+can flip the impacted axis
+([contain-x with writing modes](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-722980450)).
+
+It's interesting that browsers
+are already inconsistent about rendering that last demo.
+They also disagree on simpler
+[percentage calculations](https://codepen.io/mirisuzanne/pen/9f46dc0b9e57f0f2e0cd46b6b5898d67?editors=1100)
+when "in a particular axis,
+the containing block’s size depends on the box’s size"
+[[Box Sizing 3](https://www.w3.org/TR/css-sizing-3/#sizing-values)].
+
+The sizing/layout specs all have
+module-specific caveats for handling those cases.
+This seems to me like it could be solved
+with one more caveat?
+Not solved as in _perfect layout_,
+but at least _consistent & implementable_,
+without infitine loops.
+
+I have trouble imagining actual use-cases
+that would require this to behave well.
+
+
+### Notes towards a resolution
+
+I'm not an expert on rendering engines,
+but I imagine something like this:
+
+When determining the size-contribution
+of a single-axis container:
+
+1. For the sake of determining auto scrollbars,
+   the container contributes an infinite cross-axis size
+   (always trigger the scrollbar)
+2. For the sake of resolving percentages on the contained axis...
+
+   a. the contribution is determined without any input
+      from the contents on either axis
+      (as though contained on both dimensions)
+   a. alternately, these percentages could always resolve to `auto`
+
+The main difference from most existing caveats
+is that no second-pass re-calculation would be allowed.
+
+I think #1 might be a fairly common issue --
+and a somewhat surprising result.
+Auto overflow exists _because_
+no one wants a useless scrollbar
+just sitting around.
+
+I have trouble imagining real use-cases
+that would be impacted by #2.
+This sort of cross-axis % padding
+is often used to manage aspect-ratios,
+but I don't think that case would be affected
+(and also relies on a 0 intrinsic-size contribution).
