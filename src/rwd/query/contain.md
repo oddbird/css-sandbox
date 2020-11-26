@@ -150,11 +150,10 @@ of a single-axis container:
    the container contributes an infinite cross-axis size
    (always trigger the scrollbar)
 2. For the sake of resolving percentages on the contained axis...
-
-   a. the contribution is determined without any input
+   1. the contribution is determined without any input
       from the contents on either axis
       (as though contained on both dimensions)
-   a. alternately, these percentages could always resolve to `auto`
+   2. alternately, these percentages could always resolve to `auto`
 
 The main difference from most existing caveats
 is that no second-pass re-calculation would be allowed.
