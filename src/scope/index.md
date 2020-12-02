@@ -8,34 +8,33 @@ eleventyNavigation:
 
 Authors often complain that CSS is "globally scoped" --
 so that every selector is compared against every DOM element.
-While selectors allow you to filter the DOM tree to an extent,
-the idea of "scope" would take that a bit farther.
 
-But the idea is not well defined --
-and different authors have very different ideas
-of how this should work.
+There are several overlapping concerns here,
+based on a wide range of use-cases --
+and they can quickly become confused.
+That has lead to a wide array of proposals
+that are sometimes working towards different goals.
 
-Some common expectations:
+In the meantime,
+the CSSWG conversation has been stalled --
+in part to see how Shadow-DOM changes things.
 
-- Scopes can have a lower boundary ("donut" shape)
-  to avoid bleeding into nested components
-- Scopes are not exclusive, so multiple scopes can include the same elements
-- Scope conflicts are resolved by _proximity_ rather than _source-order_ --
-  with inner scope taking precedence when all else is equal
+Looking at the state of things now,
+my sense is that
+both shadow-DOM
+and the abandoned "scope" specification
+were focused around strong isolation use-cases --
+which Shdaow-DOM has now partly addressed:
 
-But scoping models disagree on:
+- Declarative Shadow-DOM would help make that more widely usable
+- People want better ways to style across the shadow-boundary
+- There may also be use-cases for similar "isolated scope" in light DOM
 
-- Can global selectors style inside an HTML-marked scope?
-  (this concept requires an HTML attribute)
-- If so, how much weight does scope add in the cascade?
-- Should inheritance be blocked at the scope boundary?
-
-The entire conversation has been delayed,
-in part to see how Shadow-DOM changes the discussion.
-I _think_ a declarative Shadow-DOM would help solve
-some of the most strongly-isolated use-cases
-(no bleed from the outer page),
-leaving scope to focus on less-isolated components?
+Meanwhile,
+there are many use-cases for "scope"
+that would require a much lighter touch.
+I've been mainly interested in those low-isolation problems,
+but this document contains notes on both.
 
 ## Existing specs that mention scope
 
@@ -94,6 +93,138 @@ Scoping has two primary effects:
   - Outer context wins for *normal* layer conflicts
   - Inner context wins for `!important` layer conflicts
 
+## The scope of scoped CSS
+
+### The "namespace" problem
+
+All CSS Selectors are global,
+matching against the entire DOM.
+As projects grow,
+or adqapt a more modular "component-composition" approach,
+it can be hard to track what names have been used,
+and avoid conflicts.
+
+To solve this,
+authors rely on
+convoluted naming conventions (BEM)
+and JS tooling (CSS Modules & Scoped Styles)
+to "isolate" selector names inside a single component.
+
+That may partly be solved by ancestor selectors,
+but that raises additional issues…
+
+### The nearest-ancestor "proximity" problem
+
+Ancestor selectors already allow us to
+filter the "scope" of nested selectors
+to a sub-tree in the DOM:
+
+```css
+/* link colors for light and dark backgrounds */
+.light a { color: purple; }
+.dark a { color: plum; }
+```
+
+But problems show up quickly
+when you start thinking of these as modular styles
+that should nest in any arrangement.
+
+```html
+<div class="dark">
+  <a href="#">plum</a>
+
+  <div class="light">
+    <a href="#">also plum???</a>
+  </div>
+</div>
+```
+
+Our selectors appropriately have the same specificity,
+but they are not weighted by
+"proximity" to the element being styled.
+Instead we fallback to source order,
+and `.dark` will always take precedence.
+
+There is no selector/specificity solution
+that accurately reflects what we want here --
+with the "nearest ancestor" taking precedence.
+
+This was one of the
+[original issues highlighted by OOCSS][oocss-proximity]
+
+[oocss-proximity]: https://www.slideshare.net/stubbornella/object-oriented-css/62-CSS_WISH_LIST
+
+### The lower-boundary, or "ownership" problem ("donut scope")
+
+While "proximity" is loosely concerned with nesting styles,
+the problem comes into more focus
+with the concept of modular components --
+which can be more complex.
+
+To use BEM terminology,
+Components are generally comprised of:
+
+- An outer "block" component wrapper
+- Inner "elements" that belong to that block explicitly
+
+In html templating languages,
+and JS frameworks,
+this can be represented by an "include"
+or "single file component".
+
+BEM is useful in establishing ownership in CSS:
+
+```css
+/* any title inside the component tree */
+.component .title { /* too broad */ }
+
+/* any title inside the component tree */
+.component > .title { /* too limiting of DOM structures */ }
+
+/* just the title of the component */
+.component__title { /* just right! */ }
+```
+
+JS frameworks automate this process
+with single file components --
+but it would be useful to express "ownership" more clearly
+in native HTML/CSS.
+
+Nicole Sullivan coined the term
+["donut" scope][donut] for this issue in 2011.
+
+[donut]: http://www.stubbornella.org/content/2011/10/08/scope-donuts/
+
+### Fully isolated styles
+
+There is a more extreme use-case,
+often used for widgets that should appear unchanged
+across multiple projects --
+but sometimes used for component libraries
+on larger projects.
+
+Full isolation blocks off a section of the DOM,
+so that it _only_ accepts styles that are
+explicitly scoped.
+General page styles do not apply.
+
+I don't think this is the most common concern,
+but it has recieved the most attention.
+Shadow DOM is entirely constructed around this behavior,
+and the initial unimplemented scope spec
+built on a similar premise (with some hybrid flexibility).
+
+[Yu Han](#yu-han’s-notes-%26-proposal) has
+an interesting proposal
+for improving on the Shadow DOM approach,
+and making it available in the light DOM.
+That requires a new `scoped` HTML attribute,
+because that sort of isolation has to be defined on the element itself.
+
+I have not attempted to address this type of scope in my proposal,
+because it feels like a significantly different issue
+that already has work underway.
+
 ## Pior art
 
 ### Naming conventions (BEM)
@@ -146,42 +277,11 @@ CSS Modules, Vue, Styled-JSX, and other tools often use a similar pattern
 - [CSS Scoping Requirements](https://docs.google.com/document/d/1OdrepVuj5EIccnd5sSkUSiwPOL0fBEly6KVRxobcJko/edit)
 - [CSS Scoping Solutions Brainstorming](https://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit)
 
-Need to follow-up on these passing mentions
-from an early meeting with Han:
+This proposal has two parts,
+designed to build on top of existing shadow DOM logic.
 
-- consider scoping attributes
-- styling shadow DOM from the outer page
-- donut scope
-- avoid previous pitfalls
-- consider specificity / media queries
-- consider re-calc
-
-### Reference selectors ([csswg issue](https://github.com/w3c/csswg-drafts/issues/3714))
-
-These are free-floating declaration blocks
-that can be applied to elements via JS API.
-
-- ✅ The core idea is conceptually similar to Sass
-  `%placeholder`/`@extends` and `mixins`
-  that have no impact until they are explicitly applied
-- ❌ Lexical scoping makes sense when I think about it from the JS end,
-  but I think this is a really confusing idea
-  when you think of it from the CSS side.
-  Then again the entire proposal assumes…
-- ❌ “Once a reference is defined in a CSS file
-  it must be imported into another context (eg HTML/JS) to be usable.”
-  I think this needs to be useful in CSS, or we’re missing out.
-- ⁉️ HTML `css-refs="$foo"` I think is only attempting to apply scope?
-  Otherwise this is just a new selector...
-
-According to [Giuseppe](https://github.com/w3c/csswg-drafts/issues/3714#issuecomment-474248269),
-one of the goals here is “Deterministic” resolution,
-based on the order references are applied,
-rather than relying on the cascade to resolve conflicts.
-Eg `ref=”red blue”` would return a different result than `ref=”blue red”`.
-
-Another goal seems to be overriding specificity & source order -
-with a cascade weight similar to (Above? Below? Not clear…) inline-styles.
+1. Allow shadow-DOM elements to opt-in to global styles
+2. Allow light-DOM elements to opt-in to style isolation
 
 ## Possible syntax
 
@@ -235,7 +335,9 @@ when you consider lower boundaries:
 .block .element { /* ... */ }
 ```
 
-Is that the distinction we care about?
+I assume that's the distinction we care about?
+I do think that would be enough to limit naming conflicts
+to the component root (scoping) selectors.
 
 ### How does scope relate to nesting?
 
@@ -257,6 +359,12 @@ they clearly have some overlap.
 
 ### Are scope attributes useful in html?
 
+Yu Han's proposal requires a scope attribute in HTML
+because the full-isolation use-case
+would require elements to opt-in or out of global page styles.
+But is it required or useful for less isolated use-cases?
+It does come up regularly,
+as a form of syntax sugar.
 From [Sebastian](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-693022720):
 
 ```css
@@ -284,7 +392,8 @@ p { color: blue; }
 ```
 
 I think you could achieve the same goal manually,
-with only minor syntax changes:
+with only minor syntax changes --
+so at this point I'm not convinced we need it:
 
 ```css
 p { color: blue; }
@@ -386,7 +495,7 @@ but above source-order.
 That would allow scopes to be re-arranged safely,
 without any impact on existing specificity rules.
 
-(Thisw could be combined with either of the above options)
+(This could be combined with either of the above options)
 
 #### Option 4: Importance-relative layering
 

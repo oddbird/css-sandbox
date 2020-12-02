@@ -137,36 +137,153 @@ without infitine loops.
 I have trouble imagining actual use-cases
 that would require this to behave well.
 
+### Option: Containment with edge-cases
 
-### Notes towards a resolution
+If 1D containment is needed,
+we would need to make some hard decisions
+about how the cases above _fail consistently_
+while maintaining containment.
+This isn't ideal,
+but may also be a worthwhile tradeoff for authors.
+It would take some more discussion, but something like:
 
-I'm not an expert on rendering engines,
-but I imagine something like this:
+1. For the sake of determining auto scrollbars on ancestors,
+  the container contributes an infinite cross-axis size
+  (always trigger the scrollbar).
+  This is probably the more common edge-case,
+  but I also think auto-scrollbars _might often_ imply
+  an element has containable size on the cross-axis --
+  so authors could avoid this by using 2D size containment in those cases?
+2. For the sake of resolving percentage-padding on the contained axis,
+  always resolve to `auto`.
+  Maybe there's a better solution here,
+  but I think this is the existing first-pass behavior
+  in many cases where an element has unknown size --
+  so it's a starting-point.
 
-When determining the size-contribution
-of a single-axis container:
+This may not be a complete list of issues/solutions,
+but the point is that it shouldn't _block_
+an attempt at moving forward.
+A prototype would help us expose/address additional issues.
 
-1. For the sake of determining auto scrollbars,
-   the container contributes an infinite cross-axis size
-   (always trigger the scrollbar)
-2. For the sake of resolving percentages on the contained axis...
-   1. the contribution is determined without any input
-      from the contents on either axis
-      (as though contained on both dimensions)
-   2. alternately, these percentages could always resolve to `auto`
+### Option: No containment ("pinky promise")
 
-The main difference from most existing caveats
-is that no second-pass re-calculation would be allowed.
+Anders proposed this as a solution.
+I don't know how feasable it is to implement,
+but I like it in theory. What if:
 
-I think #1 might be a fairly common issue --
-and a somewhat surprising result.
-Auto overflow exists _because_
-no one wants a useless scrollbar
-just sitting around.
+- We evaluate the CQ against the size the container _would have_
+  if `contain:size` was specified.
+  - A CQ then implies a _promise_ of containment from the author,
+    at least for the axes present in the CQ expression.
+  - Layout proceeds without size containment.
+    The actual result of the layout has no effect on CQ evaluation.
+  - In other words, if the author breaks their promise,
+    the CQ will still evaluate as if they hadn't.
+    (The CQs won't be evaluated again).
+- For the problematic "ancestral scrollbar" case,
+  we'll automatically evaluate the CQ twice
+  (since we're doing layout twice),
+  so the second pass would have the CQ evaluate
+  against the scrollbar-aware size.
+  - However, if that second pass changes CQ evaluation
+    such that the scrollbar wouldn’t be needed after all
+    (e.g. by setting things to `display:none`
+    when the container is below a certain width),
+    then the scrollbar remains.
 
-I have trouble imagining real use-cases
-that would be impacted by #2.
-This sort of cross-axis % padding
-is often used to manage aspect-ratios,
-but I don't think that case would be affected
-(and also relies on a 0 intrinsic-size contribution).
+There is some danger that this makes it too easy
+for authors to stumble into "promise-breaking" behavior,
+where the container query reports a size
+significantly different from the final layout dimensions.
+But the advantages might be enough to offset that concern.
+It might be worth testing in a prototype.
+
+#### Would it make layout "stateful"?
+
+See [Florian's comment on the CSSWG thread][state]
+
+[state]: https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-737054969
+
+#### How would this interact with floats?
+
+Eric Portis asked:
+
+> Are queries in the block direction,
+> or on floated elements,
+> all going to evaluate against 0, then?
+> I do worry this’ll be confusing…
+
+I think the answer is _yes_,
+but I'm not sure containment improves this.
+None of the options fully support a query against
+elements that take their size from children.
+The question is how we respond to that case:
+
+- Size containment would enforce
+  that authors _always add an explicit size_,
+  or the element cannot be queried.
+- Pinky promise approach would allow the query
+  but only return a size when it is explcitly set.
+
+In either case,
+we'll need to teach the concept
+that queries rely on external sizing to be accurate.
+
+Rune Lillesveen pushed that a bit further,
+asking about containers _inside_ floats:
+
+> I was thinking about the case
+> where you have an auto-width block
+> inside a float
+> and other content that contributes to min/max widths.
+> What's the width that a CQ on `#auto` evaluates against
+> and when does that happen?
+> Will that width possibly change multiple times during layout?:
+
+```html
+<!doctype html>
+<style>
+  #float { float: left }
+  #auto { height: 200px; background: blue }
+</style>
+<div id="float">
+  <div>YYYYYYYYYYYYY</div>
+  <div id="auto"></div>
+  XXXXXXXXXXXXXXXXXXXXX
+</div>
+```
+
+To me this looks like the same basic problem,
+unless there is something special about the timing issues?
+
+#### How does it scale when nested?
+
+From Eric again:
+
+> How does “pretend it didn’t happen” scale
+> when you have nested containers & queries?
+> Do you pretend for each nested container in turn,
+> (so you have to run layout the-max-nested-depth times, I think?),
+> or do you pretend every queried container has contain set,
+> all the way up the chain,
+> once (so you’re “only” running layout twice,
+> once for real and once for query resolving purposes?)
+
+This is a question for someone
+with more knowledge of browser rendering & layout internals.
+
+Acording to Rune:
+
+> This sounds like what would have happened
+> if we fully finished layout for each container,
+> re-evaluated container queries,
+> then went back to style recalc,
+> then layout for a container at the next level, etc.
+> instead of calling style recalc from layout
+> and continue in the same layout pass.
+
+I think this reflects
+some of their thinking about how to
+"interleave style and layout" --
+needs follow-up...

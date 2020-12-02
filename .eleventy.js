@@ -12,6 +12,7 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addWatchTarget("./src/sass/");
   eleventyConfig.addPassthroughCopy("./src/css");
+  eleventyConfig.addPassthroughCopy("./src/favicon.svg");
 
   // filters
   eleventyConfig.addFilter('amp', type.amp);
