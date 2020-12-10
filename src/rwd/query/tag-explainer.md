@@ -30,6 +30,20 @@ CSSWG Issues:
 - [Introduction](#introduction)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
+- [Single-Axis Containment](#single-axis-containment)
+  - [Known Issues](#known-issues)
+- [Container Queries (`@container`)](#container-queries-container)
+- [Key scenarios](#key-scenarios)
+  - [Scenario 1](#scenario-1)
+  - [Scenario 2](#scenario-2)
+- [Detailed design discussion](#detailed-design-discussion)
+  - [[Tricky design choice #1]](#tricky-design-choice-1)
+  - [[Tricky design choice 2]](#tricky-design-choice-2)
+- [Considered alternatives](#considered-alternatives)
+  - [[Alternative 1]](#alternative-1)
+  - [[Alternative 2]](#alternative-2)
+- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [References & acknowledgements](#references--acknowledgements)
 
 ## Introduction
 
@@ -47,11 +61,13 @@ for conditional styling of descendants.
 
 This solution works by applying size & layout containment
 to the queried elements.
-In order to make that less restrictive for authors,
-we are proposing an option for single-axis size containment.
-Any element with both size & layout contained
+Any element with both size & layout containment
 can be queried using a new `@continer` rule,
 with similar syntax to existing media-queries.
+Currently, size containment is all-or-nothing.
+In order to make that less restrictive for authors,
+we are also proposing `inline-size` & `block-size` values
+for the `contain` property.
 
 ## Goals
 
@@ -93,8 +109,10 @@ that rely on context-relative styling:
   in consistent relationships --
   based on the available space.
 
-See [Phil Walton's Responsive Components][demo],
-and [Typetura](https://typetura.com/)
+For example use-cases, see:
+
+- [Phil Walton's Responsive Components][demo],
+- [Typetura](https://typetura.com/) fluid typography
 for examples.
 
 [demo]: https://philipwalton.github.io/responsive-components/#overview
@@ -130,28 +148,125 @@ and solve different but overlapping use-cases:
 
 [switch]: https://bkardell.com/blog/AllThemSwitches.html
 
-<!-- ## [API 1]
+## Single-Axis Containment
 
-[For each related element of the proposed solution - be it an additional JS method, a new object, a new element, a new concept etc., create a section which briefly describes it.]
+_This is a proposed change to the
+[CSS Containment Module](https://drafts.csswg.org/css-contain/),
+specifically
+[size containment](https://drafts.csswg.org/css-contain/#containment-size)._
 
-```js
-// Provide example code - not IDL - demonstrating the design of the feature.
+In order for container-queries to work in a performant way,
+authors will need to apply both `size` and `layout` containment
+to any element being queried.
+In particular,
+container elements will need size containment
+_on the axis being queried_.
 
-// If this API can be used on its own to address a user need,
-// link it back to one of the scenarios in the goals section.
+The majority of web layout
+is managed through constraints
+on a single (often inline) axis,
+with intrinsic sizing on the cross (often block) axis.
+That flexibility on the cross-axis is required
+to allow for changes in content, font size, etc.
+While there are some situations where
+sizes are extrinsic (and containable) on both axis,
+making 2D containment a pre-requisite for container-queries
+would eliminate the vast majority of use-cases.
 
-// If you need to show how to get the feature set up
-// (initialized, or using permissions, etc.), include that too.
+We're proposing two new single-axis values:
+
+```css
+.inline-container {
+  contain: inline-size;
+}
+
+.block-container {
+  contain: block-size;
+}
 ```
 
-[Where necessary, provide links to longer explanations of the relevant pre-existing concepts and API.
-If there is no suitable external documentation, you might like to provide supplementary information as an appendix in this document, and provide an internal link where appropriate.]
+Elements with `<axis>-size` containment
+should have their intrinsic and final layout
+on the specified axis
+determined without any contributions from their children.
+In most cases,
+that should be the same as current `contain: size` behavior,
+only applied to a single axis.
 
-[If this is already specced, link to the relevant section of the spec.]
+### Known Issues
 
-[If spec work is in progress, link to the PR or draft of the spec.]
+There are two known situations in CSS
+where changes on the block-axis
+can have an impact on the inline-axis layout:
 
-## [API 2]
+1. When an ancestor of the contained element has `auto` scrolling,
+   extra cross-axis size can cause scrollbars
+   to appear on the contained-axis.
+   This is only an issue when all three are true:
+
+   - Scrollbars are part of the layout flow (they are not overlaid)
+   - Overflow on the cross-axis is set to `auto` on _any ancestor_
+   - The contained size is impacted by the size of that ancestor
+
+2. Block-axis percentage padding & margins
+   are resolved relative to the inline available size.
+   That would cause issues when:
+
+   - Containment is on the block-axis
+   - Any ancestor has inline-size determined by contents
+     (float+auto, min-content, max-content, etc)
+   - Any intermediate ancestor has:
+     - box-sizing of border-box
+     - height determined by the outer ancestor
+     - % padding on the block-axis
+       (so inner-height decreases as outer-width increases)
+   - The container block-size is impacted
+     by the inner-size of that ancestor
+
+   See
+   [contain-y comment](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-379463428))
+   and related
+   [codepen demo](https://codepen.io/anon/pen/aYQLvV?editors=1100).
+
+   That issue is most likely to occur
+   when containing the block-axis,
+   but nested writing modes
+   can flip the impacted axis
+   ([contain-x with writing modes](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-722980450)).
+
+There are likely more issues
+that would be revealed during implementation --
+but we expect the number to remain low.
+
+These are not entirely new issues.
+The sizing/layout specs all have
+module-specific caveats for handling
+percentages based on available size.
+Our proposal is to begin prototyping this feature,
+and attempt to address each issue as they arise --
+using similar workarounds.
+For example:
+
+- For the sake of determining auto scrollbars on ancestors,
+  the container contributes an infinite cross-axis size
+  (always trigger the scrollbar).
+  This is probably the more common edge-case,
+  but in many cases auto-scrollbars imply an element
+  has containable size on the cross-axis --
+  so authors could avoid this by using 2D size containment in those cases?
+- For the sake of resolving percentage-padding on the contained axis,
+  always resolve to auto.
+  This seems to be the existing first-pass behavior
+  in many cases where an element has unknown size.
+  Since the percentage issue
+  only flows one direction --
+  from inline-to-block sizing --
+  this may only be an issue for `block-size` containment.
+
+Those are not final solutions,
+but examples for how we might be able to solve each case individually.
+
+## Container Queries (`@container`)
 
 [etc.]
 
@@ -222,4 +337,4 @@ Many thanks for valuable feedback and advice from:
 
 - [Person 1]
 - [Person 2]
-- [etc.] -->
+- [etc.]

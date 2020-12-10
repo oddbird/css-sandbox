@@ -47,7 +47,7 @@ Isolates the size-impact of contents:
 This feature primarily exists to make container queries possible.
 When combined with layout containment, it allows:
 
-- Rendering engines to optomize performance
+- Rendering engines to optimize performance
   by ensuring that internal changes
   will never require external layout adjustments
 - Off-screen rendering can be delayed
@@ -82,7 +82,7 @@ extra cross-axis size can cause scrollbars
 to appear on the contained-axis.
 This is only an issue when all three are true:
 
-- Scrollbars are part of the layout flow (they are not overlayed)
+- Scrollbars are part of the layout flow (they are not overlaid)
 - Overflow on the cross-axis is set to `auto` on _any ancestor_
 - The contained size is impacted by the size of that ancestor
 
@@ -132,7 +132,7 @@ This seems to me like it could be solved
 with one more caveat?
 Not solved as in _perfect layout_,
 but at least _consistent & implementable_,
-without infitine loops.
+without infinite loops.
 
 I have trouble imagining actual use-cases
 that would require this to behave well.
@@ -171,7 +171,7 @@ A prototype would help us expose/address additional issues.
 _According to browser engineers, this approach won't be possible._
 
 Anders proposed this as a solution.
-I don't know how feasable it is to implement,
+I don't know how feasible it is to implement,
 but I like it in theory. What if:
 
 - We evaluate the CQ against the size the container _would have_
@@ -226,7 +226,7 @@ The question is how we respond to that case:
   that authors _always add an explicit size_,
   or the element cannot be queried.
 - Pinky promise approach would allow the query
-  but only return a size when it is explcitly set.
+  but only return a size when it is explicitly set.
 
 In either case,
 we'll need to teach the concept
@@ -275,7 +275,7 @@ From Eric again:
 This is a question for someone
 with more knowledge of browser rendering & layout internals.
 
-Acording to Rune:
+According to Rune:
 
 > This sounds like what would have happened
 > if we fully finished layout for each container,
