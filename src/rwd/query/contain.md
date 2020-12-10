@@ -137,7 +137,7 @@ without infitine loops.
 I have trouble imagining actual use-cases
 that would require this to behave well.
 
-### Option: Containment with edge-cases
+### ✅ Option: Containment with edge-cases
 
 If 1D containment is needed,
 we would need to make some hard decisions
@@ -166,7 +166,9 @@ but the point is that it shouldn't _block_
 an attempt at moving forward.
 A prototype would help us expose/address additional issues.
 
-### Option: No containment ("pinky promise")
+### ❌ Option: No containment ("pinky promise")
+
+_According to browser engineers, this approach won't be possible._
 
 Anders proposed this as a solution.
 I don't know how feasable it is to implement,

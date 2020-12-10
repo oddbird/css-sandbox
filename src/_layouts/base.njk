@@ -24,7 +24,7 @@ date: Last Modified
     {% endif %}
   </header>
 
-  {% if eleventyNavigation and eleventyNavigation.parent %}
+  {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
     {{ content | toc | cleanToc | safe }}
   {% endif %}
 
