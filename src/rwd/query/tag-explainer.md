@@ -13,7 +13,6 @@ _Based on the
 ## Authors
 
 - Miriam Suzanne
-- ???
 
 ## Participate
 
@@ -30,15 +29,16 @@ CSSWG Issues:
 - [Introduction](#introduction)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
-- [Proposed Features & Syntax](#proposed-features--syntax)
+- [Proposed Solutions](#proposed-solutions)
   - [Single-axis containment (`inline-size` & `block-size` values)](#single-axis-containment-inline-size--block-size-values)
   - [Containment context](#containment-context)
   - [Container queries (`@container`)](#container-queries-container)
     - [Container features](#container-features)
     - [Container query list](#container-query-list)
-- [@@@ Key scenarios](#-key-scenarios)
-  - [@@@ Scenario 1](#-scenario-1)
-  - [@@@ Scenario 2](#-scenario-2)
+- [Key scenarios](#key-scenarios)
+  - [Modular components in any container](#modular-components-in-any-container)
+  - [Components with internal containers](#components-with-internal-containers)
+  - [Component in a responsive grid track](#component-in-a-responsive-grid-track)
 - [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
   - [Single-axis containment issues](#single-axis-containment-issues)
   - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
@@ -74,84 +74,61 @@ for the `contain` property.
 
 ## Goals
 
-Discussion of Container/Element Queries
-go back at least a decade,
-and have remained one of the more heavily
-requested and discussed CSS features
-over that period.
+Often the layout of a page
+involves different "container" areas --
+such as sidebars and main content areas --
+and then component parts that
+can be placed in any area.
+Those components can be complex (a full calendar widget)
+or fairly simple (heading typography),
+but should respond in some way to the size of the container.
 
-There are two common cases
-where media queries become particularly problematic:
-
-- Authors want to describe components
-  that can exist in different contexts --
-  like a sidebar, or the main content area --
-  and respond to the size of each context
-  without needing to explicitly plan
-  for eery possible combination
-  of containers and viewport sizes
-- When using flexbox and grid layouts,
-  available grid-track size can change in ways
-  that are difficult to describe based on viewport sizes --
-  such as shrinking & growing in regular intervals
-  as new columns are added or removed from the grid.
-
-And several common example use-cases
-that rely on context-relative styling:
-
-- "Card" layouts often shift their orientation
-  based on available space --
-  with an image at the top in narrow context,
-  moving to the side when there is available space.
-- Calendar layouts often shift from list to grid view
-  based on available space --
-  with nested "events" that need to respond
-  to the available space within a single day.
-- When setting type,
-  authors want to control font-size, line-length, and line-height
-  in consistent relationships --
-  based on the available space.
-
-For example use-cases, see:
-
-- [Phil Walton's Responsive Components][demo],
-- [Typetura](https://typetura.com/) fluid typography
-for examples.
-
-[demo]: https://philipwalton.github.io/responsive-components/#overview
+This can happen at multiple levels of layout --
+even inside nested components.
+The important distinction is that
+the "container" is distinct from the "component" being styled.
+We can query one to style the other.
 
 ## Non-goals
 
-This is not an exclusive solution
-to all "responsive component" issues.
-There are several other interesting discussions
-that would complement this approach --
-and solve different but overlapping use-cases:
+Modern layouts provide a related problem
+with slightly different constraints.
+When using grid layout, for example,
+available grid-track size can change in ways
+that are difficult to describe based on viewport sizes --
+such as shrinking & growing in regular intervals
+as new columns are added or removed
+from a repeating `auto-fit`/`auto-fill` grid.
 
-- Brian Kardell's [`switch()` proposal][switch]
-  would provide a value-level condition statement
-  based on parent element context,
-  without requiring any containment from authors.
-  There are some simpler use-cases
-  (like changing a single grid-template),
-  where that might be a more compact and flexible option for authors.
-- At-rule query blocks require an author to define
-  external "breakpoints" for change,
-  while flexbox & grid provide more intrinsic
-  tools that adapt a layout based on both context & content.
-  There might be ways to expand on those existing specifications
-  to help make components even more intrinsically responsive.
-- With both media- and container-queries,
-  authors often want the ability to interpolate a value
-  from one breakpoint to the next.
-  That is especially useful for describing
-  changes in typography --
-  with fluid text-sizing, line-heights, and line-lengths
-  based on available viewport or container dimensions.
+In this case there is no external "container" element to query
+for an accurate sense of available space.
+
+We have a [reasonable workaround](#component-in-a-responsive-grid-track),
+but an ideal solution might look more like
+Brian Kardell's [`switch()` proposal][switch] --
+which allows a limited set of properties
+to query the space available,
+rather than any explicit container.
+It would be good to consider these approaches in tandem.
 
 [switch]: https://bkardell.com/blog/AllThemSwitches.html
 
-## Proposed Features & Syntax
+Improvements to flexbox & grid --
+such as
+[indefinite grid spans](https://github.com/w3c/csswg-drafts/issues/388)
+or [first / last keywords](https://github.com/w3c/csswg-drafts/issues/2402) --
+could also improve on the existing flexibility
+of those tools.
+
+And finally,
+authors often want to _smoothly interpolate values_
+as the context changes,
+rather than toggling them at breakpoints.
+That would require a way
+to describe context-based animations,
+with breakpoint-like keyframes.
+
+## Proposed Solutions
 
 ### Single-axis containment (`inline-size` & `block-size` values)
 
@@ -338,21 +315,182 @@ and following the same logic as media-query-lists:
 >
 > --[Media Queries 4](https://www.w3.org/TR/mediaqueries-4/#mq-list)
 
-## @@@ Key scenarios
+## Key scenarios
 
-[If there are a suite of interacting APIs, show how they work together to solve the key scenarios described.]
+### Modular components in any container
 
-### @@@ Scenario 1
+Page layouts often provide different layout "areas"
+that can act as containers for their descendant elements.
+These can be nested in more complex ways,
+but let's start with a sidebar and main content:
 
-[Description of the end-user scenario]
-
-```js
-// Sample code demonstrating how to use these APIs to address that scenario.
+```html
+<body>
+  <main>...</main>
+  <aside>...</aside>
+</body>
 ```
 
-### @@@ Scenario 2
+We can establish a responsive layout,
+and declare each of these areas as
+a _containment context_ for responsive components:
 
-[etc.]
+```css
+body {
+  display: grid;
+  grid-template: 'main' auto 'aside' auto / 100%;
+}
+
+@media (width > 40em) {
+  body {
+    grid-template: 'aside main' auto / 1fr 3fr;
+  }
+}
+
+main, aside {
+  contain: layout inline-size;
+}
+```
+
+Now components can move cleanly
+between the two areas --
+responding to container dimensions
+without concern for the overall layout.
+For example, some responsive defaults
+on typographic elements:
+
+```css
+h2 {
+  font-size: 120%;
+}
+
+@container (width > 40em) {
+  h2 {
+    font-size: calc(130% + 0.5vw);
+  }
+}
+```
+
+Or "media objects" that respond to available space:
+
+```css
+.media-object {
+  grid-template: 'img' auto 'content' auto / 100%;
+}
+
+@container (width > 45em) {
+  .media-object {
+    grid-template: 'img content' auto / auto 1fr;
+  }
+}
+```
+
+### Components with internal containers
+
+A more complex component,
+like a calendar,
+might reference external context
+while also defining nested containers:
+
+```html
+<section class="calendar">
+  <div class="day">
+    <article class="event">...</article>
+    <article class="event">...</article>
+  </div>
+  <div class="day">...</div>
+  <div class="day">...</div>
+</section>
+```
+
+```css
+.day {
+  contain: layout inline-size;
+}
+
+/* despite having different containers, these could share a query */
+@container (width > 40em) {
+  /* queried against external page context */
+  .calendar {
+    grid-template: repeat(7, 1fr);
+  }
+
+  .day {
+    border: thin solid silver;
+    padding: 1em;
+  }
+
+  /* queried against the day */
+  .event {
+    grid-template: 'img content' auto / auto 1fr;
+  }
+}
+```
+
+### Component in a responsive grid track
+
+In some situations,
+there is no clear "container" element
+defining the available space.
+Consider the following HTML & CSS:
+
+```html
+<section class="card-grid">
+  <div class="card">...</div>
+  <div class="card">...</div>
+  <div class="card">...</div>
+  <div class="card">...</div>
+</section>
+```
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
+}
+
+.card {
+  display: grid;
+  /* we want to change this value based on the track size */
+  grid-template: 'image' auto 'content' 1fr 'footer' auto / 100%;
+}
+```
+
+The size of `.card-grid` does not
+accurately reflect the available space for a given card,
+but there is no other external "container"
+that `.card` can use to adjust the `grid-template`.
+
+Authors using our proposal
+would need to add an extra wrapping element --
+so that the card component has an external track-sized container to query:
+
+```html
+<section class="card-grid">
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+</section>
+```
+
+```css
+/* the outer element can get containment… */
+.card-container {
+  contain: layout inline-size;
+}
+
+/* which gives .card something to query against */
+@contain (width > 30em) {
+  .card {
+    grid-template: 'image content' 1fr 'image footer' auto / 1fr 3fr;
+  }
+}
+```
+
+There are already many similar situations in CSS layout --
+so this might be a viable solution for most use-cases --
+but the extra markup is not ideal.
 
 ## Detailed design discussion & alternatives
 
