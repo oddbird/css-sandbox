@@ -145,7 +145,7 @@ imposed by `switch()`.
 
 Implicit containers avoid those issues
 by ensuring that every container-query is matching
-an extrnal container.
+an external container.
 There is no way to select the container
 being queried.
 

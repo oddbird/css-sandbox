@@ -30,18 +30,21 @@ CSSWG Issues:
 - [Introduction](#introduction)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
-- [Single-Axis Containment](#single-axis-containment)
-  - [Known Issues](#known-issues)
-- [Container Queries (`@container`)](#container-queries-container)
-- [Key scenarios](#key-scenarios)
-  - [Scenario 1](#scenario-1)
-  - [Scenario 2](#scenario-2)
-- [Detailed design discussion](#detailed-design-discussion)
-  - [[Tricky design choice #1]](#tricky-design-choice-1)
-  - [[Tricky design choice 2]](#tricky-design-choice-2)
-- [Considered alternatives](#considered-alternatives)
-  - [[Alternative 1]](#alternative-1)
-  - [[Alternative 2]](#alternative-2)
+- [Proposed Features & Syntax](#proposed-features--syntax)
+  - [Single-axis containment (`inline-size` & `block-size` values)](#single-axis-containment-inline-size--block-size-values)
+  - [Containment context](#containment-context)
+  - [Container queries (`@container`)](#container-queries-container)
+    - [Container features](#container-features)
+    - [Container query list](#container-query-list)
+- [@@@ Key scenarios](#-key-scenarios)
+  - [@@@ Scenario 1](#-scenario-1)
+  - [@@@ Scenario 2](#-scenario-2)
+- [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
+  - [Single-axis containment issues](#single-axis-containment-issues)
+  - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
+  - [Combining scope with container queries](#combining-scope-with-container-queries)
+  - [(???) Interleaving layout & style](#-interleaving-layout--style)
+  - [@-Rule or pseudo-class?](#-rule-or-pseudo-class)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 
@@ -148,7 +151,9 @@ and solve different but overlapping use-cases:
 
 [switch]: https://bkardell.com/blog/AllThemSwitches.html
 
-## Single-Axis Containment
+## Proposed Features & Syntax
+
+### Single-axis containment (`inline-size` & `block-size` values)
 
 _This is a proposed change to the
 [CSS Containment Module](https://drafts.csswg.org/css-contain/),
@@ -193,7 +198,165 @@ In most cases,
 that should be the same as current `contain: size` behavior,
 only applied to a single axis.
 
-### Known Issues
+### Containment context
+
+Ideally, container queries could be resolved
+against the _available space_ for any given element.
+Since size and layout containment are required,
+we instead need to define the _containment context_
+for each element.
+
+We propose that any element with
+layout and size containment on a given axis
+generates a new _containment context_ in that axis,
+which descendants can query against:
+
+```css
+.two-axis-container {
+  /* establishes a new containment context on both axis */
+  contain: layout size;
+}
+
+.inline-container {
+  /* establishes a new containment context on the inline axis */
+  contain: layout inline-size;
+}
+
+.block-container {
+  /* establishes a new containment context on the block axis */
+  contain: layout block-size;
+}
+```
+
+### Container queries (`@container`)
+
+This could be added to a future level
+of the [CSS Conditional Rules Module](https://drafts.csswg.org/css-conditional-3/).
+Unless otherwise noted,
+`@container` should follow the established specifications
+for _conditional group rules_.
+
+The `@container` rule can be used
+to style elements based on their immediate _containment context_,
+and uses a similar syntax to existing media queries:
+
+```css
+/* @container <container-query-list> { <stylesheet> } */
+@container (width > 45em) {
+  .media-object {
+    grid-template: 'img content' auto / auto 1fr;
+  }
+}
+```
+
+This would target
+any `.media-object` who's
+_containment context_
+(nearest ancestor with containment applied)
+is greater-than `45em`.
+When no containment context is established,
+the _Initial Containing Block_ can be used
+to resolve the query.
+
+Unlike media-queries,
+each element that is targeted by a conditional group rule
+will need to resolve the query
+against it's own containment context.
+Multiple elements targeted by the same selector
+within the same group
+may still resolve differently
+based on context.
+Consider the following CSS & HTML together:
+
+```css
+/* css */
+section { contain: layout inline-size; }
+
+div { background: red; }
+
+@container (width > 500px) {
+  div { background: yellow; }
+}
+
+@container (width > 1000px) {
+  div { background: green; }
+}
+```
+
+```html
+<!-- html -->
+<section style="width: 1500px"> <!-- container 1 -->
+  <div>green background</div>
+
+  <section style="width: 50%"> <!-- container 2 (nested) -->
+    <div>yellow background (resolves against container 2)</div>
+  </section>
+</section>
+<section style="width: 400px"> <!-- container 3 -->
+  <div>red background</div>
+</section>
+```
+
+#### Container features
+
+Like media-queries,
+`@container` needs a well defined list of "features"
+that can be queried.
+The most essential container features
+are the contained dimensions:
+
+- physical dimensions: `width` / `height`
+- logical dimensions: `inline-size` / `block-size`
+
+When containment is available on both axis,
+we might also be able to query
+dimensional relationships such as:
+
+- `aspect-ratio`
+- `orientation`
+
+Since container queries resolve against
+styled elements in the DOM,
+it may also be possible to query other
+aspects of the container's computed style?
+
+- `inline-content-box`
+- `font-size`
+- etc.
+
+This needs more discussion and fleshing-out.
+
+#### Container query list
+
+Like media-queries,
+container-queries can be combined in a list,
+using the same syntax
+and following the same logic as media-query-lists:
+
+> A media query list is true if any of its component media queries are true,
+> and false only if all of its component media queries are false."
+>
+> --[Media Queries 4](https://www.w3.org/TR/mediaqueries-4/#mq-list)
+
+## @@@ Key scenarios
+
+[If there are a suite of interacting APIs, show how they work together to solve the key scenarios described.]
+
+### @@@ Scenario 1
+
+[Description of the end-user scenario]
+
+```js
+// Sample code demonstrating how to use these APIs to address that scenario.
+```
+
+### @@@ Scenario 2
+
+[etc.]
+
+## Detailed design discussion & alternatives
+
+### Single-axis containment issues
 
 There are two known situations in CSS
 where changes on the block-axis
@@ -258,83 +421,168 @@ For example:
   always resolve to auto.
   This seems to be the existing first-pass behavior
   in many cases where an element has unknown size.
-  Since the percentage issue
-  only flows one direction --
-  from inline-to-block sizing --
-  this may only be an issue for `block-size` containment.
+  Another option would be to drop
+  `block-size` from the proposal.
 
 Those are not final solutions,
-but examples for how we might be able to solve each case individually.
+but examples for how we might be able to
+solve each case as it arises.
 
-## Container Queries (`@container`)
+### Implicit vs explicit containers
 
-[etc.]
+In conversations leading to this proposal,
+there has been some concern about the dangers
+of establishing context _implicitly_
+based on the value of `contain`.
+Similar behavior for positioning & stacking
+has sometimes been confusing for authors.
 
-## Key scenarios
+[David Baron's proposal](https://github.com/dbaron/container-queries-implementability)
+included a selector for querying a container
+more explicitly:
 
-[If there are a suite of interacting APIs, show how they work together to solve the key scenarios described.]
+```css
+/* syntax */
+@container <selector> (<container-media-query>)? {
+  /* ... */
+}
 
-### Scenario 1
-
-[Description of the end-user scenario]
-
-```js
-// Sample code demonstrating how to use these APIs to address that scenario.
+/* example */
+@container .media-object (width > 45em) {
+  .media-object {
+    grid-template: 'img content' auto / auto 1fr;
+  }
+}
 ```
 
-### Scenario 2
+Since all known use-cases attempt to query
+the _most immediate available space_,
+we don't see any need for querying containers
+with an explicit syntax,
+or any way to "skipping over" one container to query the next.
 
-[etc.]
+Adding a selector to the query would also raise new problems:
 
-## Detailed design discussion
+- Explicitly targeted queries are less modular,
+  so components would not be able to query
+  _whatever space they happen to be in_.
+- It's not clear if the query can be recursive --
+  styling the same element that it queries.
 
-### [Tricky design choice #1]
+However,
+it might be helpful to consider
+a more explicit way of defining the containers initially,
+to make this more clear for authors --
+such as `query`, `inline-query`, & `block-query` values
+that would apply both layout and size containment.
+This needs more discussion & consideration.
 
-[Talk through the tradeoffs in coming to the specific design point you want to make.]
+### Combining scope with container queries
 
-```js
-// Illustrated with example code.
+David Baron's proposal also uses
+the explicit container selector
+to attach the concept of `scope`
+to containers --
+only matching selectors inside the query
+against a subtree of the DOM.
+
+This might be useful
+for use-cases where a component both:
+
+- Establishes it's own containment context, and
+- Establishes it's own selector scope
+
+But in our exploration of use-cases,
+it seems more common that components
+will want to query _external_ context,
+while establishing _internal_ scope.
+
+For that reason,
+we think the two features --
+container queries and scope --
+should remain separate.
+
+### (???) Interleaving layout & style
+
+For elements relying on a container query,
+internal style calculation would need to happen
+_after_ external layout has concluded.
+
+@@@ Do we need to cover this in the explainer?
+
+### @-Rule or pseudo-class?
+
+Many proposals
+& Javascript implementations
+use a pseudo-class
+rather than an @-rule.
+
+```css
+/* pseudo-class */
+.selector:container(<query>) { /* ... */ }
 ```
 
-[This may be an open question,
-in which case you should link to any active discussion threads.]
+We think the @-rule block provides several advantages:
 
-### [Tricky design choice 2]
+- The @-rule syntax matches more closely
+  with existing conditional rules,
+  and builds on existing query-list syntax.
+- It's likely that a responsive component
+  will have multiple moving parts,
+  and each might require unique selectors
+  based on the same query.
+  These can be grouped in an @-rule.
+- We avoid the issues mentioned above
+  with having an explicit selector attached to the query.
 
-[etc.]
+We also think the syntax can lead to confusion.
+It's not immediately clear what these different selectors would mean:
 
-## Considered alternatives
-
-[This should include as many alternatives as you can,
-from high level architectural decisions down to alternative naming choices.]
-
-### [Alternative 1]
-
-[Describe an alternative which was considered,
-and why you decided against it.]
-
-### [Alternative 2]
-
-[etc.]
+```css
+:context(width < 40em) { font-size: small; }
+.media-object:context(width < 40em) { font-size: small; }
+:context(width < 40em) .media-object { font-size: small; }
+```
 
 ## Stakeholder Feedback / Opposition
 
-[Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
-
-- [Implementor A] : Positive
-- [Stakeholder B] : No signals
-- [Implementor C] : Negative
-
-[If appropriate, explain the reasons given by other implementors for their concerns.]
+- Chromium : Positive --
+  Google was involved in developing this proposal
+- Gecko : No signals
+- Webkit : No signals
 
 ## References & acknowledgements
 
-[Your design will change and be informed by many people; acknowledge them in an ongoing way! It helps build community and, as we only get by through the contributions of many, is only fair.]
+This proposal is based on the previous work of many people:
 
-[Unless you have a specific reason not to, these should be in alphabetical order.]
+- Brian Kardell: [All Them Switches][switch]
+- David Baron: [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
+- Mat Marquis: [A rough proposal for syntax](https://github.com/WICG/container-queries/issues/2)
+- Matthew Dean: [2019 Proposal/Solution for Container Queries](https://github.com/WICG/container-queries/issues/12)
+- Viktor Hubert: [Container Query Plugin](https://github.com/ZeeCoder/container-query/blob/master/docs/syntax.md#Queries)
+- WICG: [Use Cases and Requirements](https://wicg.github.io/cq-usecases/)
+- And more: [Who is Working on Container Queries](http://whoisworkingoncontainerqueries.com/)
 
-Many thanks for valuable feedback and advice from:
+Thanks also for valuable feedback and advice from:
 
-- [Person 1]
-- [Person 2]
-- [etc.]
+- Amelia Bellamy-Royds
+- Anders Hartvoll Ruud
+- Chris Coyier
+- Christopher Kirk-Nielsen
+- Eric Portis
+- Ethan Marcotte
+- Florian Rivoal
+- Geoff Graham
+- Gregory Wild-Smith
+- Ian Kilpatrick
+- Jen Simmons
+- Martin Auswöger
+- Martine Dowden
+- Mike Riethmuller
+- Morten Stenshorne
+- Nicole Sullivan
+- Rune Lillesveen
+- Scott Jehl
+- Scott Kellum
+- Tab Atkins
+- Theresa O’Connor
