@@ -43,7 +43,6 @@ CSSWG Issues:
   - [Single-axis containment issues](#single-axis-containment-issues)
   - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
   - [Combining scope with container queries](#combining-scope-with-container-queries)
-  - [(???) Interleaving layout & style](#-interleaving-layout--style)
   - [@-Rule or pseudo-class?](#-rule-or-pseudo-class)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
@@ -65,7 +64,7 @@ for conditional styling of descendants.
 This solution works by applying size & layout containment
 to the queried elements.
 Any element with both size & layout containment
-can be queried using a new `@continer` rule,
+can be queried using a new `@container` rule,
 with similar syntax to existing media-queries.
 Currently, size containment is all-or-nothing.
 In order to make that less restrictive for authors,
@@ -227,7 +226,7 @@ and uses a similar syntax to existing media queries:
 ```
 
 This would target
-any `.media-object` who's
+any `.media-object` whose
 _containment context_
 (nearest ancestor with containment applied)
 is greater-than `45em`.
@@ -238,7 +237,7 @@ to resolve the query.
 Unlike media-queries,
 each element that is targeted by a conditional group rule
 will need to resolve the query
-against it's own containment context.
+against its own containment context.
 Multiple elements targeted by the same selector
 within the same group
 may still resolve differently
@@ -481,7 +480,7 @@ so that the card component has an external track-sized container to query:
 }
 
 /* which gives .card something to query against */
-@contain (width > 30em) {
+@container (width > 30em) {
   .card {
     grid-template: 'image content' 1fr 'image footer' auto / 1fr 3fr;
   }
@@ -604,8 +603,9 @@ Adding a selector to the query would also raise new problems:
 - Explicitly targeted queries are less modular,
   so components would not be able to query
   _whatever space they happen to be in_.
-- It's not clear if the query can be recursive --
-  styling the same element that it queries.
+- It adds potential confusion about
+  what selectors are allowed in the block --
+  since authors would not be able to style the container itself.
 
 However,
 it might be helpful to consider
@@ -627,26 +627,23 @@ against a subtree of the DOM.
 This might be useful
 for use-cases where a component both:
 
-- Establishes it's own containment context, and
-- Establishes it's own selector scope
+- Establishes its own containment context, and
+- Establishes its own selector scope
 
 But in our exploration of use-cases,
 it seems more common that components
 will want to query _external_ context,
 while establishing _internal_ scope.
 
-For that reason,
+There is also a mis-match
+where authors expect to style the root element of a given scope,
+but should not be able to style the root of a container-query.
+
+For those reasons,
 we think the two features --
 container queries and scope --
-should remain separate.
-
-### (???) Interleaving layout & style
-
-For elements relying on a container query,
-internal style calculation would need to happen
-_after_ external layout has concluded.
-
-@@@ Do we need to cover this in the explainer?
+should remain distinct,
+and be solved separately.
 
 ### @-Rule or pseudo-class?
 
@@ -677,9 +674,9 @@ We also think the syntax can lead to confusion.
 It's not immediately clear what these different selectors would mean:
 
 ```css
-:context(width < 40em) { font-size: small; }
-.media-object:context(width < 40em) { font-size: small; }
-:context(width < 40em) .media-object { font-size: small; }
+:container(width < 40em) { font-size: small; }
+.media-object:container(width < 40em) { font-size: small; }
+:container(width < 40em) .media-object { font-size: small; }
 ```
 
 ## Stakeholder Feedback / Opposition
@@ -703,6 +700,7 @@ This proposal is based on the previous work of many people:
 
 Thanks also for valuable feedback and advice from:
 
+- Adam Argyle
 - Amelia Bellamy-Royds
 - Anders Hartvoll Ruud
 - Chris Coyier
@@ -724,3 +722,4 @@ Thanks also for valuable feedback and advice from:
 - Scott Kellum
 - Tab Atkins
 - Theresa O’Connor
+- Una Kravets
