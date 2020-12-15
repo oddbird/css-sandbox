@@ -139,24 +139,24 @@ specifically
 [size containment](https://drafts.csswg.org/css-contain/#containment-size)._
 
 In order for container-queries to work in a performant way,
-authors will need to apply both `size` and `layout` containment
-to any element being queried.
-In particular,
-container elements will need size containment
-_on the axis being queried_.
+authors will need to define container elements
+with explicit containment on their layout and queried-dimensions.
+This can be done with the existing `contain` property,
+using the `size` and `layout` values:
 
-The majority of web layout
+```css
+.container {
+  contain: size layout;
+}
+```
+
+While that will work for some use-cases,
+the majority of web layout
 is managed through constraints
-on a single (often inline) axis,
-with intrinsic sizing on the cross (often block) axis.
-That flexibility on the cross-axis is required
-to allow for changes in content, font size, etc.
-While there are some situations where
-sizes are extrinsic (and containable) on both axis,
-making 2D containment a pre-requisite for container-queries
-would eliminate the vast majority of use-cases.
-
-We're proposing two new single-axis values:
+on a _single (often inline) axis_.
+Intrinsic sizing on the cross (often block) axis
+is required to allow for changes in content, font size, etc.
+So we're proposing two new single-axis values for `contain`:
 
 ```css
 .inline-container {
@@ -175,6 +175,18 @@ determined without any contributions from their children.
 In most cases,
 that should be the same as current `contain: size` behavior,
 only applied to a single axis.
+
+Of these two values,
+it is clear that `block-size`
+has the fewer use-cases,
+and more potential implementation issues.
+While we're not ready to give up on it entirely,
+support for `block-size` is not required
+to make container queries useful.
+
+See our discussion of
+[single-axis containment issues](#single-axis-containment-issues)
+for more detail.
 
 ### Containment context
 
