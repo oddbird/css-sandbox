@@ -44,6 +44,7 @@ CSSWG Issues:
   - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
   - [Combining scope with container queries](#combining-scope-with-container-queries)
   - [@-Rule or pseudo-class?](#-rule-or-pseudo-class)
+  - [Other questions to explore](#other-questions-to-explore)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 
@@ -72,8 +73,15 @@ can be queried using a new `@container` rule,
 with similar syntax to existing media-queries.
 Currently, size containment is all-or-nothing.
 In order to make that less restrictive for authors,
-we are also proposing `inline-size` & `block-size` values
+I'm also proposing `inline-size` & `block-size` values
 for the `contain` property.
+
+This is an early outline
+of the feature as I imagine it in the abstract --
+but there are a number of questions
+that could only be resolved with a prototype.
+The purpose of this document
+is to outline a direction for more testing & exploration.
 
 ## Goals
 
@@ -90,7 +98,7 @@ This can happen at multiple levels of layout --
 even inside nested components.
 The important distinction is that
 the "container" is distinct from the "component" being styled.
-We can query one to style the other.
+Authors can query one to style the other.
 
 ## Non-goals
 
@@ -106,7 +114,7 @@ from a repeating `auto-fit`/`auto-fill` grid.
 In this case there is no external "container" element to query
 for an accurate sense of available space.
 
-We have a [reasonable workaround](#component-in-a-responsive-grid-track),
+There is a [reasonable workaround](#component-in-a-responsive-grid-track),
 but an ideal solution might look more like
 Brian Kardell's [`switch()` proposal][switch] --
 which allows a limited set of properties
@@ -156,7 +164,7 @@ is managed through constraints
 on a _single (often inline) axis_.
 Intrinsic sizing on the cross (often block) axis
 is required to allow for changes in content, font size, etc.
-So we're proposing two new single-axis values for `contain`:
+So I'm proposing two new single-axis values for `contain`:
 
 ```css
 .inline-container {
@@ -180,11 +188,11 @@ Of these two values,
 it is clear that `block-size`
 has the fewer use-cases,
 and more potential implementation issues.
-While we're not ready to give up on it entirely,
-support for `block-size` is not required
+While I'm not ready to eliminate it immediately,
+support for `block-size` would not be required
 to make container queries useful.
 
-See our discussion of
+See the discussion of
 [single-axis containment issues](#single-axis-containment-issues)
 for more detail.
 
@@ -196,7 +204,7 @@ Since size and layout containment are required,
 we instead need to define the _containment context_
 for each element.
 
-We propose that any element with
+I propose that any element with
 layout and size containment on a given axis
 generates a new _containment context_ in that axis,
 which descendants can query against:
@@ -217,6 +225,15 @@ which descendants can query against:
   contain: layout block-size;
 }
 ```
+
+When size-containment is only available on a single axis,
+queries on the cross-axis will not resolve
+against that query context.
+
+When no containment context is established,
+there should be a fallback akin to the
+_Initial Containing Block_
+which queries resolve against.
 
 ### Container queries (`@container`)
 
@@ -474,7 +491,7 @@ accurately reflect the available space for a given card,
 but there is no other external "container"
 that `.card` can use to adjust the `grid-template`.
 
-Authors using our proposal
+Authors using this proposal
 would need to add an extra wrapping element --
 so that the card component has an external track-sized container to query:
 
@@ -550,13 +567,13 @@ can have an impact on the inline-axis layout:
 
 There are likely more issues
 that would be revealed during implementation --
-but we expect the number to remain low.
+but I expect the number to remain low.
 
 These are not entirely new issues.
 The sizing/layout specs all have
 module-specific caveats for handling
 percentages based on available size.
-Our proposal is to begin prototyping this feature,
+The proposal is to begin prototyping this feature,
 and attempt to address each issue as they arise --
 using similar workarounds.
 For example:
@@ -608,7 +625,7 @@ more explicitly:
 
 Since all known use-cases attempt to query
 the _most immediate available space_,
-we don't see any need for querying containers
+I don't see any need for querying containers
 with an explicit syntax,
 or any way to "skipping over" one container to query the next.
 
@@ -644,7 +661,7 @@ for use-cases where a component both:
 - Establishes its own containment context, and
 - Establishes its own selector scope
 
-But in our exploration of use-cases,
+But in my exploration of use-cases,
 it seems more common that components
 will want to query _external_ context,
 while establishing _internal_ scope.
@@ -654,7 +671,7 @@ where authors expect to style the root element of a given scope,
 but should not be able to style the root of a container-query.
 
 For those reasons,
-we think the two features --
+I think the two features --
 container queries and scope --
 should remain distinct,
 and be solved separately.
@@ -671,7 +688,7 @@ rather than an @-rule.
 .selector:container(<query>) { /* ... */ }
 ```
 
-We think the @-rule block provides several advantages:
+I think the @-rule block provides several advantages:
 
 - The @-rule syntax matches more closely
   with existing conditional rules,
@@ -684,7 +701,7 @@ We think the @-rule block provides several advantages:
 - We avoid the issues mentioned above
   with having an explicit selector attached to the query.
 
-We also think the syntax can lead to confusion.
+I also think the syntax can lead to confusion.
 It's not immediately clear what these different selectors would mean:
 
 ```css
@@ -692,6 +709,15 @@ It's not immediately clear what these different selectors would mean:
 .media-object:container(width < 40em) { font-size: small; }
 :container(width < 40em) .media-object { font-size: small; }
 ```
+
+### Other questions to explore
+
+- Is it possible to apply containment within a container query?
+  In what cases might that lead to cyclic dependencies?
+- Will a default root fallback container feel like expected behavior,
+  or should we require explicit containment in order to match queries?
+- Are there special considerations required for a shadow-DOM `@container`
+  to resolve queries against contained host element?
 
 ## Stakeholder Feedback / Opposition
 

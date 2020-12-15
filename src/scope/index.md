@@ -24,7 +24,7 @@ my sense is that
 both shadow-DOM
 and the abandoned "scope" specification
 were focused around strong isolation use-cases --
-which Shdaow-DOM has now partly addressed:
+which Shadow-DOM has now partly addressed:
 
 - Declarative Shadow-DOM would help make that more widely usable
 - People want better ways to style across the shadow-boundary
@@ -64,9 +64,8 @@ with Custom Elements & Shadow DOM.
 The [First Public Working Draft](https://www.w3.org/TR/css-scoping-1/)
 had more scoping features that have since been removed:
 
-
 A `<style scoped>` attribute,
-which would apply to sibling elements and their decendants.
+which would apply to sibling elements and their descendants.
 This had a few limitations:
 
 - Need to repeat in the DOM for every instance of the scope
@@ -78,7 +77,7 @@ Scoping has two primary effects:
 
 - The selector of the scoped style rule
   is restricted to match only elements within scope.
-- The cascade prioritizes scoped rules over unscoped ones,
+- The cascade prioritizes scoped rules over un-scoped ones,
   regardless of specificity.
   - This results in proximity-weighting across scopes
   - But also means scope overrides everything
@@ -100,7 +99,7 @@ Scoping has two primary effects:
 All CSS Selectors are global,
 matching against the entire DOM.
 As projects grow,
-or adqapt a more modular "component-composition" approach,
+or adapt a more modular "component-composition" approach,
 it can be hard to track what names have been used,
 and avoid conflicts.
 
@@ -209,7 +208,7 @@ explicitly scoped.
 General page styles do not apply.
 
 I don't think this is the most common concern,
-but it has recieved the most attention.
+but it has received the most attention.
 Shadow DOM is entirely constructed around this behavior,
 and the initial unimplemented scope spec
 built on a similar premise (with some hybrid flexibility).
@@ -225,7 +224,7 @@ I have not attempted to address this type of scope in my proposal,
 because it feels like a significantly different issue
 that already has work underway.
 
-## Pior art
+## Prior art
 
 ### Naming conventions (BEM)
 
@@ -259,7 +258,7 @@ CSS Modules, Vue, Styled-JSX, and other tools often use a similar pattern
 ```
 
 - The donut is achieved by selectively adding attributes
-- Proximity-weight is achieved only thorugh limiting the donut of scope
+- Proximity-weight is achieved only through limiting the donut of scope
 - Added selector gives scoped styles _some_ (but very little)
   extra specificity weight in the cascade
 
@@ -286,7 +285,7 @@ designed to build on top of existing shadow DOM logic.
 ## Possible syntax
 
 I like this general direction proposed by Giuseppe --
-which builds on the original un-implimented spec,
+which builds on the original un-implemented spec,
 but adds lower boundaries:
 
 ```css
@@ -438,7 +437,7 @@ Given a syntax of `@scope <selector>` are we placing any restrictions on the `<s
 }
 ```
 
-Counter-point: is there a reson to dis-allow complex selectors?
+Counter-point: is there a reason to dis-allow complex selectors?
 
 ### Where does scope fit in the cascade?
 
