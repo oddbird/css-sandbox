@@ -6,66 +6,62 @@ eleventyNavigation:
   parent: rwd
 ---
 
-I think **both of these are worth pusuing**,
+I think **both of these are worth pursuing**,
 because they come with a number of important trade-offs:
 
 ### Ability to Implement
 
-The `@container` syntax is surrently blocked
+The `@container` syntax is currently blocked
 by a dependence on [single axis containment](/rwd/query/contain/),
-which might be difficult or even impossible.
+but there is a prototype underway.
 
 The `switch()` syntax already has working prototypes.
 
-### Power vs Performance
+### Summary
 
 The switch proposal avoids containment
-by providing a very limited set of features
+by providing a limited set of features
 that will resolve after the browser-engine
-has completed the layout pass:
+has completed the layout pass.
+That allows more flexibility for querying
+"available space" in a more abstract way --
+but only on certain properties.
+
+Currently that's handled inline,
+one property at a time --
+but more work could be done to explore
+a block syntax that works within the limitations:
 
 - only query `available-inline-size` of the element itself
-- apply that query to one property at a time
 - only apply to properties that have no impact on size
-- without any use of `calc()` or other math functions.
 
-On the plus side,
-that will be:
-
-- Much easier to implement
-- Much more performant
-
-By depending on containment,
-the `@container` proposal
-would allow us to:
+The `@container` proposal
+requires authors to define explicit "containers"
+that are no longer able to size based on intrinsic values --
+but provide a stable context for resolving queries.
+That would allow us to:
 
 - query the context, not just the element
   (this is useful for adjusting the parts of a larger component)
 - adjust any properties inside that context
 
+There are tradeoffs to either approach,
+and they could work well in unison.
+
 ### The Query Target
 
 Container queries require an element that will be adjusted,
 and a context that will be queried.
+The query target is always an element
+that is extrinsically sized.
 
-The `switch()` proposal allows you to (only)
-_adjust the element that is being queried_.
+The `switch()` proposal allows you to
+adjust properties of an element based on _its own dimensions_.
 The target of a switch query is the element itself.
-
-My version of the `@container` proposal would query
-_the nearest contained ancestor_
-of any element that will be adjusted.
-The target of the query is always a separate container
-that the adjusted element is inside.
-
-David Baron's proposal aims to allow
-querying-and-adjusting a single element,
-but it would require switch-like limitations
-in order to work.
 
 ### Block vs Property Conditions
 
-You can tihnk of them a bit like
+You can think of them a bit like
 inline & block conditional statements
 in other languages.
 Sass, for example, has both:

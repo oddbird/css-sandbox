@@ -11,8 +11,8 @@ similar to the Sass `if()` function,
 but with access to some essential client-side values for comparison:
 primarily `available-inline-size`.
 
-If you think of it as a full solution,
-it can look bulky --
+If you think of it as a full solution
+it can look bulky,
 because it works one-property-at-a-time.
 But if you think about use-cases where
 _you only need to adjust one property_,
@@ -40,18 +40,19 @@ to avoid infinite loops -
 and specifically [single-axis size containment](https://github.com/w3c/csswg-drafts/issues/1031)
 which _might not be possible_.
 
-The `switch()` proposal avoids those issues by limiting:
-
-- The properties that an author is able to switch,
-  to ensure they never impact container size
-  (no `font-size`, `width`, etc)
-- The values that can be used inside a switch,
-  to avoid calculations that have to run at layout-time
-  (no `attr()`, `calc()`, etc)
+The `switch()` proposal avoids those issues by limiting
+the properties that an author is able to switch,
+ensuring they never impact container size
+(no `font-size`, `width`, etc).
 
 Those limits come from the internal architecture of browser engines,
 and make it possible to implement `switch()`
 without relying on other hypothetical CSS features.
+
+This might require teaching authors
+the essential phases of browser rendering,
+for a better understanding of _why_
+only certain properties are supported.
 
 Igalia has already developed a working prototype:
 
@@ -106,11 +107,13 @@ with a proposal to make the syntax more efficient.
 
 ## Thoughts
 
-This is not a full solution to Container Queries
-because of the built-in limitations and single-property approach,
-but it could quickly help address
-several of the most common and most basic layout use-cases --
-especially as demonstrated with grid layout.
+The two main "responsive component" approaches
+complement each other well --
+because they come at the same question (and all the tradeoffs)
+from opposite sides.
+The main advantages of `switch()` show up
+when you want to query the size of a grid-track
+rather than the element generating that track.
 
 The `switch()` function is also very flexible,
 and could solve many other context-responsive styling issues --
@@ -118,7 +121,7 @@ like adjusting `<em>` styles based on the inherited `font-style`,
 or toggling values based on a variable.
 That seems promising on multiple fronts.
 
-Any inline-contitional syntax is bound to take up space,
+Any inline-conditional syntax is bound to take up space,
 and add clutter to CSS.
 I'm not sure that's avoidable,
 but it would be good to try and make the syntax
