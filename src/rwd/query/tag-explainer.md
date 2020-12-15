@@ -51,17 +51,21 @@ CSSWG Issues:
 
 Media-queries allow an author to make style changes
 based on the overall viewport dimensions --
-making responsive design possible in CSS.
-But in many cases,
-authors are styling modular components
-that might appear in a wide variety of contexts within a page,
-and there is currently no way to query the available dimensions
-based on that context.
-This proposal would allow an author to query
-the dimensions of a container element
-for conditional styling of descendants.
+but in many cases,
+authors would prefer styling modular components
+based on their context and available space within a layout.
+Earlier this year,
+David Baron & Brian Kardell
+proposed two complementary approaches to explore:
+a [`@container` rule][dbaron-cq],
+and a [`switch()`][switch] function.
+Both could be useful in different cases.
 
-This solution works by applying size & layout containment
+[dbaron-cq]: https://github.com/dbaron/container-queries-implementability
+[switch]: https://bkardell.com/blog/AllThemSwitches.html
+
+This proposal builds on David Baron's `@container` approach,
+which works by applying size & layout containment
 to the queried elements.
 Any element with both size & layout containment
 can be queried using a new `@container` rule,
@@ -109,8 +113,6 @@ which allows a limited set of properties
 to query the space available,
 rather than any explicit container.
 It would be good to consider these approaches in tandem.
-
-[switch]: https://bkardell.com/blog/AllThemSwitches.html
 
 Improvements to flexbox & grid --
 such as
@@ -574,7 +576,7 @@ based on the value of `contain`.
 Similar behavior for positioning & stacking
 has sometimes been confusing for authors.
 
-[David Baron's proposal](https://github.com/dbaron/container-queries-implementability)
+[David Baron's proposal][dbaron-cq]
 included a selector for querying a container
 more explicitly:
 
@@ -691,7 +693,7 @@ It's not immediately clear what these different selectors would mean:
 This proposal is based on the previous work of many people:
 
 - Brian Kardell: [All Them Switches][switch]
-- David Baron: [Thoughts on an implementable path forward](https://github.com/dbaron/container-queries-implementability)
+- David Baron: [Thoughts on an implementable path forward][dbaron-cq]
 - Mat Marquis: [A rough proposal for syntax](https://github.com/WICG/container-queries/issues/2)
 - Matthew Dean: [2019 Proposal/Solution for Container Queries](https://github.com/WICG/container-queries/issues/12)
 - Viktor Hubert: [Container Query Plugin](https://github.com/ZeeCoder/container-query/blob/master/docs/syntax.md#Queries)
