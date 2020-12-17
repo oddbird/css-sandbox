@@ -17,6 +17,8 @@ _Based on the
 ## Participate
 
 CSSWG Issues:
+
+- [This proposal](https://github.com/w3c/csswg-drafts/issues/5796)
 - [Single-Axis Containment](https://github.com/w3c/csswg-drafts/issues/1031)
 
 ## Table of Contents
@@ -251,7 +253,7 @@ and uses a similar syntax to existing media queries:
 /* @container <container-query-list> { <stylesheet> } */
 @container (width > 45em) {
   .media-object {
-    grid-template: 'img content' auto / auto 1fr;
+    grid-template: "img content" auto / auto 1fr;
   }
 }
 ```
@@ -277,29 +279,40 @@ Consider the following CSS & HTML together:
 
 ```css
 /* css */
-section { contain: layout inline-size; }
+section {
+  contain: layout inline-size;
+}
 
-div { background: red; }
+div {
+  background: red;
+}
 
 @container (width > 500px) {
-  div { background: yellow; }
+  div {
+    background: yellow;
+  }
 }
 
 @container (width > 1000px) {
-  div { background: green; }
+  div {
+    background: green;
+  }
 }
 ```
 
 ```html
 <!-- html -->
-<section style="width: 1500px"> <!-- container 1 -->
+<section style="width: 1500px">
+  <!-- container 1 -->
   <div>green background</div>
 
-  <section style="width: 50%"> <!-- container 2 (nested) -->
+  <section style="width: 50%">
+    <!-- container 2 (nested) -->
     <div>yellow background (resolves against container 2)</div>
   </section>
 </section>
-<section style="width: 400px"> <!-- container 3 -->
+<section style="width: 400px">
+  <!-- container 3 -->
   <div>red background</div>
 </section>
 ```
@@ -368,16 +381,17 @@ a _containment context_ for responsive components:
 ```css
 body {
   display: grid;
-  grid-template: 'main' auto 'aside' auto / 100%;
+  grid-template: "main" auto "aside" auto / 100%;
 }
 
 @media (width > 40em) {
   body {
-    grid-template: 'aside main' auto / 1fr 3fr;
+    grid-template: "aside main" auto / 1fr 3fr;
   }
 }
 
-main, aside {
+main,
+aside {
   contain: layout inline-size;
 }
 ```
@@ -405,12 +419,12 @@ Or "media objects" that respond to available space:
 
 ```css
 .media-object {
-  grid-template: 'img' auto 'content' auto / 100%;
+  grid-template: "img" auto "content" auto / 100%;
 }
 
 @container (width > 45em) {
   .media-object {
-    grid-template: 'img content' auto / auto 1fr;
+    grid-template: "img content" auto / auto 1fr;
   }
 }
 ```
@@ -452,7 +466,7 @@ while also defining nested containers:
 
   /* queried against the day */
   .event {
-    grid-template: 'img content' auto / auto 1fr;
+    grid-template: "img content" auto / auto 1fr;
   }
 }
 ```
@@ -482,7 +496,7 @@ Consider the following HTML & CSS:
 .card {
   display: grid;
   /* we want to change this value based on the track size */
-  grid-template: 'image' auto 'content' 1fr 'footer' auto / 100%;
+  grid-template: "image" auto "content" 1fr "footer" auto / 100%;
 }
 ```
 
@@ -513,7 +527,7 @@ so that the card component has an external track-sized container to query:
 /* which gives .card something to query against */
 @container (width > 30em) {
   .card {
-    grid-template: 'image content' 1fr 'image footer' auto / 1fr 3fr;
+    grid-template: "image content" 1fr "image footer" auto / 1fr 3fr;
   }
 }
 ```
@@ -618,7 +632,7 @@ more explicitly:
 /* example */
 @container .media-object (width > 45em) {
   .media-object {
-    grid-template: 'img content' auto / auto 1fr;
+    grid-template: "img content" auto / auto 1fr;
   }
 }
 ```
@@ -685,7 +699,9 @@ rather than an @-rule.
 
 ```css
 /* pseudo-class */
-.selector:container(<query>) { /* ... */ }
+.selector:container(<query >) {
+  /* ... */
+}
 ```
 
 I think the @-rule block provides several advantages:
@@ -705,9 +721,15 @@ I also think the syntax can lead to confusion.
 It's not immediately clear what these different selectors would mean:
 
 ```css
-:container(width < 40em) { font-size: small; }
-.media-object:container(width < 40em) { font-size: small; }
-:container(width < 40em) .media-object { font-size: small; }
+:container(width < 40em) {
+  font-size: small;
+}
+.media-object:container(width < 40em) {
+  font-size: small;
+}
+:container(width < 40em) .media-object {
+  font-size: small;
+}
 ```
 
 ### Other questions to explore

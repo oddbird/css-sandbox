@@ -36,6 +36,10 @@ that would require a much lighter touch.
 I've been mainly interested in those low-isolation problems,
 but this document contains notes on both.
 
+## My Proposal
+
+{{ collections.all | eleventyNavigation('scope') | eleventyNavigationToHtml | typogr | safe }}
+
 ## Existing specs that mention scope
 
 ### [CSS Selectors - Level 4](https://www.w3.org/TR/selectors-4/)
@@ -54,7 +58,10 @@ but this document contains notes on both.
 
 In CSS, this is the same as `:root`, since there is no way to scope elements. However, it is used by JS APIs to refer to the base element of e.g. `element.querySelector()`
 
-> “Specifications intending for this pseudo-class to match specific elements     rather than the document’s root element must define either a scoping root (if using scoped selectors) or an explicit set of :scope elements.”
+> “Specifications intending for this pseudo-class to match specific elements
+> rather than the document’s root element
+> must define either a scoping root (if using scoped selectors)
+> or an explicit set of :scope elements.”
 
 ### [CSS Scoping - Level 1](https://drafts.csswg.org/css-scoping/)
 
@@ -91,138 +98,6 @@ Scoping has two primary effects:
   to the cascade, for handling Shadow DOM
   - Outer context wins for *normal* layer conflicts
   - Inner context wins for `!important` layer conflicts
-
-## The scope of scoped CSS
-
-### The "namespace" problem
-
-All CSS Selectors are global,
-matching against the entire DOM.
-As projects grow,
-or adapt a more modular "component-composition" approach,
-it can be hard to track what names have been used,
-and avoid conflicts.
-
-To solve this,
-authors rely on
-convoluted naming conventions (BEM)
-and JS tooling (CSS Modules & Scoped Styles)
-to "isolate" selector names inside a single component.
-
-That may partly be solved by ancestor selectors,
-but that raises additional issues…
-
-### The nearest-ancestor "proximity" problem
-
-Ancestor selectors already allow us to
-filter the "scope" of nested selectors
-to a sub-tree in the DOM:
-
-```css
-/* link colors for light and dark backgrounds */
-.light a { color: purple; }
-.dark a { color: plum; }
-```
-
-But problems show up quickly
-when you start thinking of these as modular styles
-that should nest in any arrangement.
-
-```html
-<div class="dark">
-  <a href="#">plum</a>
-
-  <div class="light">
-    <a href="#">also plum???</a>
-  </div>
-</div>
-```
-
-Our selectors appropriately have the same specificity,
-but they are not weighted by
-"proximity" to the element being styled.
-Instead we fallback to source order,
-and `.dark` will always take precedence.
-
-There is no selector/specificity solution
-that accurately reflects what we want here --
-with the "nearest ancestor" taking precedence.
-
-This was one of the
-[original issues highlighted by OOCSS][oocss-proximity]
-
-[oocss-proximity]: https://www.slideshare.net/stubbornella/object-oriented-css/62-CSS_WISH_LIST
-
-### The lower-boundary, or "ownership" problem ("donut scope")
-
-While "proximity" is loosely concerned with nesting styles,
-the problem comes into more focus
-with the concept of modular components --
-which can be more complex.
-
-To use BEM terminology,
-Components are generally comprised of:
-
-- An outer "block" component wrapper
-- Inner "elements" that belong to that block explicitly
-
-In html templating languages,
-and JS frameworks,
-this can be represented by an "include"
-or "single file component".
-
-BEM is useful in establishing ownership in CSS:
-
-```css
-/* any title inside the component tree */
-.component .title { /* too broad */ }
-
-/* any title inside the component tree */
-.component > .title { /* too limiting of DOM structures */ }
-
-/* just the title of the component */
-.component__title { /* just right! */ }
-```
-
-JS frameworks automate this process
-with single file components --
-but it would be useful to express "ownership" more clearly
-in native HTML/CSS.
-
-Nicole Sullivan coined the term
-["donut" scope][donut] for this issue in 2011.
-
-[donut]: http://www.stubbornella.org/content/2011/10/08/scope-donuts/
-
-### Fully isolated styles
-
-There is a more extreme use-case,
-often used for widgets that should appear unchanged
-across multiple projects --
-but sometimes used for component libraries
-on larger projects.
-
-Full isolation blocks off a section of the DOM,
-so that it _only_ accepts styles that are
-explicitly scoped.
-General page styles do not apply.
-
-I don't think this is the most common concern,
-but it has received the most attention.
-Shadow DOM is entirely constructed around this behavior,
-and the initial unimplemented scope spec
-built on a similar premise (with some hybrid flexibility).
-
-[Yu Han](#yu-han’s-notes-%26-proposal) has
-an interesting proposal
-for improving on the Shadow DOM approach,
-and making it available in the light DOM.
-That requires a new `scoped` HTML attribute,
-because that sort of isolation has to be defined on the element itself.
-
-I have not attempted to address this type of scope in my proposal,
-because it feels like a significantly different issue
-that already has work underway.
 
 ## Prior art
 
@@ -282,27 +157,6 @@ designed to build on top of existing shadow DOM logic.
 1. Allow shadow-DOM elements to opt-in to global styles
 2. Allow light-DOM elements to opt-in to style isolation
 
-## Possible syntax
-
-I like this general direction proposed by Giuseppe --
-which builds on the original un-implemented spec,
-but adds lower boundaries:
-
-```css
-@scope (from: .carousel) and (to: .carousel-slide-content) {
-  p { color: red }
-}
-```
-
-I wonder if `from` can be implicit & required.
-Something like…
-
-```css
-@scope (.carousel) to (.carousel-slide-content) {
-  p { color: red }
-}
-```
-
 ## Questions
 
 ### Does this really help with name conflicts?
@@ -355,89 +209,6 @@ But both help to describe the relationship
 between parent & child selectors.
 While it might be a mistake to make one rely on the other --
 they clearly have some overlap.
-
-### Are scope attributes useful in html?
-
-Yu Han's proposal requires a scope attribute in HTML
-because the full-isolation use-case
-would require elements to opt-in or out of global page styles.
-But is it required or useful for less isolated use-cases?
-It does come up regularly,
-as a form of syntax sugar.
-From [Sebastian](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-693022720):
-
-```css
-p { color: blue; }
-
-@scope main {
-  p { color: green; }
-}
-@scope note {
-  p { color: gray; }
-}
-```
-
-```html
-<p>This text is blue</p>
-<section scope="main">
-  <p>This text is green</p>
-  <div scope="note">
-    <p>This text is gray</p>
-  </div>
-</section>
-<div scope="note">
-  <p>This text is gray</p>
-</div>
-```
-
-I think you could achieve the same goal manually,
-with only minor syntax changes --
-so at this point I'm not convinced we need it:
-
-```css
-p { color: blue; }
-
-@scope ([data-scope=main]) to ([data-scope]) {
-  p { color: green; }
-}
-@scope ([data-scope=note]) to ([data-scope]) {
-  p { color: gray; }
-}
-```
-
-```html
-<p>This text is blue</p>
-<section data-scope="main">
-  <p>This text is green</p>
-  <div data-scope="note">
-    <p>This text is gray</p>
-  </div>
-</section>
-<div data-scope="note">
-  <p>This text is gray</p>
-</div>
-```
-
-### Do we need complex selectors to define scope?
-
-Given a syntax of `@scope <selector>` are we placing any restrictions on the `<selector>`?
-
-```css
-/* In most cases we expect a single/simple selector to work */
-@scope [data-component=tabs] { /* ... */  }
-
-/* Not sure there are strong use-cases for context selectors */
-@scope .page-context [data-component=tabs] { /* ... */ }
-@scope [data-component=tabs].horizontal { /* ... */ }
-
-/* modifiers could be handled internally */
-@scope [data-component=tabs] {
-  .page-context :scope { /* ... */ }
-  :scope.horizontal { /* ... */ }
-}
-```
-
-Counter-point: is there a reason to dis-allow complex selectors?
 
 ### Where does scope fit in the cascade?
 
