@@ -1,0 +1,6 @@
+title: Container Query Proposal & Explainer
+raw_md: true
+eleventyNavigation:
+  key: query-explainer
+  title: Proposal & Explainer
+  parent: container-queries

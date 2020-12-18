@@ -6,5 +6,6 @@
       / <a href="{{ item.url }}">{{ (item.title or item.key) | mdInline | safe }}</a>
     {% endfor %}
     /
+    <strong>{{ (eleventyNavigation.title or title) | mdInline | safe }}</strong>
   </nav>
 {% endif %}

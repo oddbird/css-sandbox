@@ -13,7 +13,7 @@ html {
 body {
   display: grid;
   grid-gap: 1em;
-  grid-template: auto 1fr auto / auto;
+  grid-template: auto 1fr auto / 100%;
   margin: 0 auto;
   max-width: 70ch;
   min-height: 100vh;

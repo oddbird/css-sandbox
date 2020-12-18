@@ -15,20 +15,24 @@ date: Last Modified
 <body>
   <header>
     {% include "nav.njk" %}
-    <h1>{{ title }}</h1>
-
-    {% if page.url != '/' %}
+    {% if eleventyNavigation and eleventyNavigation.parent %}
       <time datetime="{{ page.date.toISOString() }}">
         Updated {{ page.date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
       </time>
     {% endif %}
   </header>
 
-  {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
-    {{ content | toc | cleanToc | safe }}
-  {% endif %}
-
   <main>
+    {% if not raw_md %}
+      {% if title %}
+        <h1>{{ title | mdInline | safe }}</h1>
+      {% endif %}
+
+      {% if eleventyNavigation and eleventyNavigation.parent %}
+        {{ content | toc | cleanToc | safe }}
+      {% endif %}
+    {% endif %}
+
     {{ content | typogr | safe }}
   </main>
 
