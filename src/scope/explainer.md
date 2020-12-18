@@ -1018,6 +1018,7 @@ thanks for valuable feedback and advice from:
 
 - Anders Hartvoll Ruud
 - Ian Kilpatrick
+- Keith Grant
 - Mason Freed
 - Nicole Sullivan
 - Rune Lillesveen
