@@ -16,13 +16,20 @@
   - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
   - [Scope "proximity" in the cascade](#scope-proximity-in-the-cascade)
 - [Key scenarios](#key-scenarios)
+  - [Avoid naming conflicts without custom conventions](#avoid-naming-conflicts-without-custom-conventions)
+  - [Express ownership boundaries in nested components](#express-ownership-boundaries-in-nested-components)
+  - [Recursive nesting with ownership](#recursive-nesting-with-ownership)
+  - [Recognizing proximity of nested components without lower-bounds](#recognizing-proximity-of-nested-components-without-lower-bounds)
+  - [JS tools & "single file components"](#js-tools--single-file-components)
 - [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
   - [Is there a global `:scope` selector?](#is-there-a-global-scope-selector)
   - [Are scope attributes useful in html?](#are-scope-attributes-useful-in-html)
   - [Should we be building on Shadow DOM?](#should-we-be-building-on-shadow-dom)
+  - [Do we need special handling around the shadow-DOM?](#do-we-need-special-handling-around-the-shadow-dom)
   - [What selectors can be used to describe a scope root?](#what-selectors-can-be-used-to-describe-a-scope-root)
   - [Can scoped selectors reference external context?](#can-scoped-selectors-reference-external-context)
   - [Where does scope fit in the cascade?](#where-does-scope-fit-in-the-cascade)
+  - [Can we improve on the syntax?](#can-we-improve-on-the-syntax)
 - [Spec History & Context](#spec-history--context)
   - [CSS Scoping](#css-scoping)
   - [CSS Selectors - Level 4](#css-selectors---level-4)
@@ -88,6 +95,28 @@ authors rely on
 convoluted naming conventions (BEM)
 and JS tooling (CSS Modules & Scoped Styles)
 to "isolate" selector matching inside a single "component".
+
+BEM helps authors by ensuring that only
+component "blocks" need unique naming:
+
+```css
+.media { /* block */ }
+.tabs { /* block */ }
+```
+
+Meanwhile,
+any internal "elements" or "modifiers"
+will be scoped to the block:
+
+```css
+.media--reverse { /* modifier */ }
+.media__img { /* element */ }
+.media__text { /* element */ }
+
+.tabs--left { /* modifier */ }
+.tabs__list { /* element */ }
+.tabs__panel { /* element */ }
+```
 
 ### The nearest-ancestor "proximity" problem
 
@@ -274,7 +303,7 @@ it feels like a significantly different approach
 that already has work underway.
 
 See Yu Han's proposals for
-[building on shadow DOM](#building-on-shadow-dom)
+[building on shadow DOM](#should-we-be-building-on-shadow-dom)
 below.
 
 ## Proposed Solution
@@ -312,30 +341,32 @@ In terms of selector-matching,
 this would be the same as
 `.media-block img`,
 but with slightly different cascade implications
-(see cascade section).
+([see cascade section](#scope-proximity-in-the-cascade)).
 
 The second ("to") clause would be optional,
 and accept a list of selectors
 that represent lower-boundary "slots" in the scope.
-The lower-boundary elements are included in the scope,
+The targeted lower-boundary elements are included in the scope,
 but their descendants are not:
 
 ```css
 @scope (.media-block) to (.content) {
   img { border-radius: 50%; }
+  .content { padding: 1em; }
 }
 ```
 
-Which would only match `img`
-inside `.media-block`
-_if there is no intervening `.content`
+Which would only match `img` and `.content`
+inside `.media-block` --
+_but not if there is no intervening `.content`
 between the scope root and selector target_:
 
 ```html
 <div class="media-block">
   <img src="..."><!-- this img is in the .media-block scope -->
-  <div class="content">
-    <img src="..."><!-- this img is NOT in scope -->
+  <div class="content"><!-- this .content is in-scope -->
+    <img src="..."><!-- this img is NOT -->
+    <div class="more content">...</div><!-- this .content is NOT -->
   </div>
 </div>
 ```
@@ -362,7 +393,7 @@ However, it is used by JS APIs
 to refer to the base element of e.g. `element.querySelector()`.
 
 This can be used by authors to style the root of any scope --
-as defined by the `@scope`-rile selector:
+as defined in the `@scope`-rule:
 
 ```css
 @scope (.media-block) {
@@ -394,11 +425,11 @@ over outer/global "less proximate" scopes:
 
 ```css
 @scope (.light-theme) {
-  p { color: purple; }
+  a { color: purple; }
 }
 
 @scope (.dark-theme) {
-  p { color: plum; }
+  a { color: plum; }
 }
 ```
 
@@ -432,6 +463,202 @@ source order would continue to be the final cascade filter:
 ```
 
 ## Key scenarios
+
+### Avoid naming conflicts without custom conventions
+
+Authors currently rely on intricate naming conventions
+to avoid duplicate naming within components:
+
+```css
+.article__title {
+  font-size: 2em;
+}
+.article__meta {
+  font-size: 2em;
+}
+
+.form__title {
+  font-weight: bold;
+}
+.form__meta {
+  font-weight: bold;
+}
+```
+
+Sometimes authors will automate that process,
+and group names visually,
+using nested syntax in a pre-processor like Sass:
+
+```scss
+.article {
+  &__title { font-size: 2em; }
+  &__meta { font-style: italic; }
+}
+
+.form {
+  &__title { font-weight: bold; }
+  &__meta { text-align: center; }
+}
+```
+
+This syntax would provide a uniform solution
+that is native to CSS.
+Authors can reduce naming conflicts
+across CSS "components"/"objects"
+by scoping internal selectors
+so they only match within a particular block:
+
+```css
+@scope (article) {
+  .title { font-size: 2em; }
+  .meta { font-style: italic; }
+}
+
+@scope (form) {
+  .title { font-weight: bold; }
+  .meta { text-align: center; }
+}
+```
+
+### Express ownership boundaries in nested components
+
+By adding lower boundaries or "slots" to the scope,
+ownership becomes more clear
+when the scopes are nested.
+
+Using the example above,
+we can allow comment forms to be nested inside articles
+while continuing to maintain the
+distinction between article-elements
+and form-elements:
+
+```css
+@scope (article) to (.comments) {
+  .title { font-size: 2em; }
+  .meta { font-style: italic; }
+}
+
+@scope (form) {
+  .title { font-weight: bold; }
+  .meta { text-align: center; }
+}
+```
+
+### Recursive nesting with ownership
+
+This can also be useful
+when applying modifiers to components
+that might nest indefinitely --
+such as the popular "media-object"
+containing a fixed image and responsive content
+that flows around it.
+Modifiers can be added to an outer component
+without impacting nested components of the same type.
+
+For example,
+nested "media objects"
+of different types:
+
+```html
+<div class="media reverse">
+  <img src="...">
+  <div class="content">
+    <div class="media">
+      <img src="...">
+      <div class="content">
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Rather than adding the `.reverse` modifier
+to every element in the outer media block,
+we can scope the effects of the modifier:
+
+```css
+@scope (.media) to (.content) {
+  /* only the inner image */
+  :scope:not(.reverse) img { margin-right: 1em; }
+
+  /* only the outer image */
+  :scope.reverse img { margin-left: 1em; }
+}
+```
+
+### Recognizing proximity of nested components without lower-bounds
+
+As [demonstrated above](#scope-proximity-in-the-cascade),
+authors could establish
+scope precedence
+even when lower bounds are not required.
+For example,
+light and dark themes
+that can be nested
+in any arrangement:
+
+```css
+@scope (.light-theme) {
+  a { color: purple; }
+}
+
+@scope (.dark-theme) {
+  a { color: plum; }
+}
+```
+
+```html
+<div class="dark-theme">
+  <a href="#">plum</a>
+
+  <div class="light-theme">
+    <a href="#">purple</a>
+
+    <div class="light-theme">
+      <a href="#">plum again</a>
+    </div>
+  </div>
+</div>
+```
+
+### JS tools & "single file components"
+
+Existing tools could move to automating
+this syntax over time,
+rather than using custom attributes,
+since the result is very similar.
+Without any changes visible to the user,
+output that currently looks like:
+
+```css
+/* component.vue styles after scoping */
+.component[scope=component] { /* ... */ }
+.element[scope=component] { /* ... */ }
+.sub-component[scope=component] { /* ... */ }
+
+/* sub-component.vue styles after scoping */
+/* note that both style `.element` without any overlap or naming conflicts */
+.sub-component[scope=sub-component] { /* ... */ }
+.element[scope=sub-component] { /* ... */ }
+```
+
+Could be converted to:
+
+```css
+/* component.vue styles after scoping */
+@scope (.component) to (.sub-component) {
+  :scope { /* ... */ }
+  .element { /* ... */ }
+  .sub-component { /* ... */ }
+}
+
+/* sub-component.vue styles after scoping */
+@scope (.sub-component) {
+  :scope { /* ... */ }
+  .element { /* ... */ }
+}
+```
+
 ## Detailed design discussion & alternatives
 
 ### Is there a global `:scope` selector?
@@ -569,6 +796,15 @@ could be used to achieve the same goal:
 }
 ```
 
+### Do we need special handling around the shadow-DOM?
+
+I _think_ this should work inside and outside of the shadow DOM
+without any special concern for shadow boundaries.
+Shadow-DOM already provides "encapsulation context" --
+a more isolated form of scope.
+But that is a use-case where I have least experience,
+and it's possible I missed something.
+
 ### What selectors can be used to describe a scope root?
 
 Given a syntax of `@scope (<selector>)`,
@@ -665,6 +901,30 @@ That seems like a sensible solution,
 but I think it also makes the
 weight of a selector unnecessarily complicated
 for authors.
+
+### Can we improve on the syntax?
+
+The syntax could use some discussion,
+especially around the proper label for lower boundaries.
+There has been discussion of other keywords like `until`,
+as well as a function syntax (eg `to(<selector>)`).
+I'd also consider rephrasing to label these as "slots"
+rather than "end-points":
+
+```css
+@scope root(.media-block) slots(.content) { /* ... */ }
+```
+
+We could also consider building on
+the proposed specification
+for [CSS nesting](https://drafts.csswg.org/css-nesting/)
+in order to reference the scope root:
+
+```css
+@scope (.media) {
+  &.reversed img { margin-left: 1em; }
+}
+```
 
 ## Spec History & Context
 
