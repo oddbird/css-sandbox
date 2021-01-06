@@ -34,6 +34,7 @@
   - [CSS Scoping](#css-scoping)
   - [CSS Selectors - Level 4](#css-selectors---level-4)
   - [CSS Cascade - Level 4](#css-cascade---level-4)
+- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 
 ## Authors
@@ -42,19 +43,13 @@
 
 ## Participate on CSSWG threads
 
-This issue:
+Please leave any feedback on the CSSWG issues for this proposal:
 
 - [Proposal for light-dom scoping/namespacing](https://github.com/w3c/csswg-drafts/issues/5809)
+- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/593)
 
-Related Issues:
-
-- [Bring Back Scope](https://github.com/w3c/csswg-drafts/issues/3547):
-  - [@scope with lower-bounds](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-524206816)
-  - [@scope with name & attribute](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-693022720)
-- [Selector Boundaries](https://github.com/w3c/csswg-drafts/issues/5057)
-- [CSS Namespaces](https://github.com/w3c/csswg-drafts/issues/270)
-  ([priorities](https://github.com/w3c/csswg-drafts/issues/270#issuecomment-231586786))
-
+Typos or other document-specific issues
+[can be reported in this repo]({{ github.issues }}).
 
 ## Introduction
 
@@ -779,34 +774,6 @@ before any styles are applied.
 I think those would be good to consider,
 but out-of-scope (🤷🏻‍♀️) for this proposal.
 
-My initial instinct is that --
-while the target of a selector must be in-scope to match --
-scoped selectors should be _otherwise unaware_ of the scope.
-That would allow scoped selectors
-to reference ancestor context
-that is out of scope:
-
-```css
-@scope (.my-component) {
-  .my-host-page .my-component-part {
-    /* selector matches when both... */
-    /* - `.my-host-page .my-component-part` matches globally */
-    /* - the targeted element is inside the `.my-component` scope */
-  }
-}
-```
-
-However, it may also work
-to restrict the syntax so the entire selector is in-scope.
-Additional context in the scoping selector
-could be used to achieve the same goal:
-
-```css
-@scope (.my-host-page .my-component) {
-  .my-component-part { /* ... */ }
-}
-```
-
 ### Do we need special handling around the shadow-DOM?
 
 I _think_ this should work inside and outside of the shadow DOM
@@ -1011,7 +978,23 @@ and mostly acts as a protection from naming conflicts.
   - Outer context wins for *normal* layer conflicts
   - Inner context wins for `!important` layer conflicts
 
+## Stakeholder Feedback / Opposition
+
+- Chromium : Positive --
+  Google was involved in developing this proposal
+- Gecko : No signals
+- Webkit : No signals
+
 ## References & acknowledgements
+
+Related/previous issues and discussions:
+
+- [Bring Back Scope](https://github.com/w3c/csswg-drafts/issues/3547):
+  - [@scope with lower-bounds](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-524206816)
+  - [@scope with name & attribute](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-693022720)
+- [Selector Boundaries](https://github.com/w3c/csswg-drafts/issues/5057)
+- [CSS Namespaces](https://github.com/w3c/csswg-drafts/issues/270)
+  ([priorities](https://github.com/w3c/csswg-drafts/issues/270#issuecomment-231586786))
 
 In addition to the open issue threads mentioned above,
 thanks for valuable feedback and advice from:

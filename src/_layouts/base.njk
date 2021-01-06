@@ -28,7 +28,7 @@ date: Last Modified
         <h1>{{ title | mdInline | safe }}</h1>
       {% endif %}
 
-      {% if eleventyNavigation and eleventyNavigation.parent %}
+      {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
         {{ content | toc | cleanToc | safe }}
       {% endif %}
     {% endif %}

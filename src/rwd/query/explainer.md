@@ -32,10 +32,14 @@
 
 ## Participate
 
-CSSWG Issues:
+Please leave any feedback on the CSSWG issues for this proposal:
 
-- [This proposal](https://github.com/w3c/csswg-drafts/issues/5796)
-- [Single-Axis Containment](https://github.com/w3c/csswg-drafts/issues/1031)
+- [This container query proposal](https://github.com/w3c/csswg-drafts/issues/5796)
+- [Single-axis containment](https://github.com/w3c/csswg-drafts/issues/1031)
+- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
+
+Typos or other document-specific issues
+[can be reported in this repo]({{ github.issues }}).
 
 ## Introduction
 
@@ -238,7 +242,7 @@ and uses a similar syntax to existing media queries:
 
 ```css
 /* @container <container-query-list> { <stylesheet> } */
-@container (width > 45em) {
+@container (inline-size > 45em) {
   .media-object {
     grid-template: "img content" auto / auto 1fr;
   }
@@ -274,13 +278,13 @@ div {
   background: red;
 }
 
-@container (width > 500px) {
+@container (inline-size > 500px) {
   div {
     background: yellow;
   }
 }
 
-@container (width > 1000px) {
+@container (inline-size > 1000px) {
   div {
     background: green;
   }
@@ -371,7 +375,7 @@ body {
   grid-template: "main" auto "aside" auto / 100%;
 }
 
-@media (width > 40em) {
+@media (inline-size > 40em) {
   body {
     grid-template: "aside main" auto / 1fr 3fr;
   }
@@ -395,7 +399,7 @@ h2 {
   font-size: 120%;
 }
 
-@container (width > 40em) {
+@container (inline-size > 40em) {
   h2 {
     font-size: calc(130% + 0.5vw);
   }
@@ -409,7 +413,7 @@ Or "media objects" that respond to available space:
   grid-template: "img" auto "content" auto / 100%;
 }
 
-@container (width > 45em) {
+@container (inline-size > 45em) {
   .media-object {
     grid-template: "img content" auto / auto 1fr;
   }
@@ -440,7 +444,7 @@ while also defining nested containers:
 }
 
 /* despite having different containers, these could share a query */
-@container (width > 40em) {
+@container (inline-size > 40em) {
   /* queried against external page context */
   .calendar {
     grid-template: repeat(7, 1fr);
@@ -512,7 +516,7 @@ so that the card component has an external track-sized container to query:
 }
 
 /* which gives .card something to query against */
-@container (width > 30em) {
+@container (inline-size > 30em) {
   .card {
     grid-template: "image content" 1fr "image footer" auto / 1fr 3fr;
   }
@@ -617,7 +621,7 @@ more explicitly:
 }
 
 /* example */
-@container .media-object (width > 45em) {
+@container .media-object (inline-size > 45em) {
   .media-object {
     grid-template: "img content" auto / auto 1fr;
   }
@@ -708,13 +712,13 @@ I also think the syntax can lead to confusion.
 It's not immediately clear what these different selectors would mean:
 
 ```css
-:container(width < 40em) {
+:container(inline-size < 40em) {
   font-size: small;
 }
-.media-object:container(width < 40em) {
+.media-object:container(inline-size < 40em) {
   font-size: small;
 }
-:container(width < 40em) .media-object {
+:container(inline-size < 40em) .media-object {
   font-size: small;
 }
 ```

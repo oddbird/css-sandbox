@@ -1,15 +1,36 @@
 ---
 title: Container Queries
+manual_toc: true
 eleventyNavigation:
   key: container-queries
   title: Container Queries
   parent: rwd
 ---
 
+- [My Explainer & Proposal](https://github.com/oddbird/css-sandbox/blob/main/src/rwd/query/explainer.md)
+- [CSSWG issue thread](https://github.com/w3c/csswg-drafts/issues/5796)
+- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
+
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Summary](#summary)
+- [Status](#status)
+- [Resources](#resources)
+- [Constraints](#constraints)
+  - [Size & Layout Containment](#size--layout-containment)
+  - [Interleaving Layout & Style](#interleaving-layout--style)
+  - [@-Rule or Selector? [👍 @-rule]](#-rule-or-selector---rule)
+  - [Should we build this into `@media`? [❌]](#should-we-build-this-into-media-)
+
+## Summary
+
 Since container-queries are often seen as
 an extension of media-queries,
 the most common proposal is to add an @-rule
 block syntax that works similar to existing `@media`.
+
+{{ collections.all | eleventyNavigation('container-queries') | eleventyNavigationToHtml | typogr | safe }}
 
 ## Status
 
@@ -23,10 +44,6 @@ block syntax that works similar to existing `@media`.
 - Matthew Dean: [2019 Proposal/Solution for Container Queries](https://github.com/WICG/container-queries/issues/12)
 - W3C: [CSS Containment Module](https://drafts.csswg.org/css-contain/)
 - Chrome: [Container Queries Project](https://docs.google.com/document/d/1ekz9JNJVQnvt_Xxd1BmanJpamGApyp5vRW_hpuh24h8/edit?usp=sharing)
-
-## My Notes
-
-{{ collections.all | eleventyNavigation('container-queries') | eleventyNavigationToHtml | typogr | safe }}
 
 ## Constraints
 
