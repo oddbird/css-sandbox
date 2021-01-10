@@ -1,6 +1,6 @@
 # Cascade Layers Explainer
 
-## Authors:
+## Authors
 
 - Miriam Suzanne
 
@@ -15,37 +15,36 @@ With significant input from:
 
 - [Cascade 5, Editor's Draft](https://drafts.csswg.org/css-cascade-5/)
 - [Cascade 5 label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
-- [Cascade 5 + "layers"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layers)
-- [Initial CSSWG Issue](https://github.com/w3c/csswg-drafts/issues/4470)
-- [Initial Syntax Proposal](https://gist.github.com/mirisuzanne/4224caca74a0d4be33a2b565df34b9e7)
+- [Cascade 5 + "layer"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layer)
 
-Some specific issues:
+Open issues for discussion:
 
+- [Layers terminology bikeshed][5840]
 - [Do we need a keyword similar to `revert`, but for cascade layers?][5793]
 - [Should unnamed cascade layers be allowed?][5792]
 - [What is the appropriate syntax for appending to nested layers?][5791]
 - [Cascade layers need an import syntax][5681]
-- [Where do Cascade Layers fit in the cascade?][5003]
 - [What is the migration path for Cascade Layers?][4985]
 - [How do Cascade Layers interact with Shadow DOM][4984]
-- [How do Cascade Layers interact with `!important`?][4971]
 - [What are the proper "levels" for managing Cascade Layers?][4969]
-- [Where do Cascade Layers fit in the cascade?][5003]
 
+[5840]: https://github.com/w3c/csswg-drafts/issues/5840
 [5793]: https://github.com/w3c/csswg-drafts/issues/5793
 [5792]: https://github.com/w3c/csswg-drafts/issues/5792
 [5791]: https://github.com/w3c/csswg-drafts/issues/5791
 [5681]: https://github.com/w3c/csswg-drafts/issues/5681
-[5003]: https://github.com/w3c/csswg-drafts/issues/5003
 [4985]: https://github.com/w3c/csswg-drafts/issues/4985
 [4984]: https://github.com/w3c/csswg-drafts/issues/4984
-[4971]: https://github.com/w3c/csswg-drafts/issues/4971
 [4969]: https://github.com/w3c/csswg-drafts/issues/4969
-[5003]: https://github.com/w3c/csswg-drafts/issues/5003
+
+Historic context:
+
+- [Initial CSSWG Issue](https://github.com/w3c/csswg-drafts/issues/4470)
+- [Initial Syntax Proposal](https://gist.github.com/mirisuzanne/4224caca74a0d4be33a2b565df34b9e7)
 
 ## Table of Contents
 
-- [Authors:](#authors)
+- [Authors](#authors)
 - [Participate](#participate)
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
