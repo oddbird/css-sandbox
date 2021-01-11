@@ -24,18 +24,18 @@ Open issues for discussion:
 - [Should unnamed cascade layers be allowed?][5792]
 - [What is the appropriate syntax for appending to nested layers?][5791]
 - [Cascade layers need an import syntax][5681]
-- [What is the migration path for Cascade Layers?][4985]
-- [How do Cascade Layers interact with Shadow DOM][4984]
-- [What are the proper "levels" for managing Cascade Layers?][4969]
+- [Provide a syntax for re-using cascade layers across encapsulation context?][5854]
+- [Provide an attribute for assigning `<link>` or `<style>` elements to cascade layers][5853]
+- [Rename @layers to @layer][5855]
 
 [5840]: https://github.com/w3c/csswg-drafts/issues/5840
 [5793]: https://github.com/w3c/csswg-drafts/issues/5793
 [5792]: https://github.com/w3c/csswg-drafts/issues/5792
 [5791]: https://github.com/w3c/csswg-drafts/issues/5791
 [5681]: https://github.com/w3c/csswg-drafts/issues/5681
-[4985]: https://github.com/w3c/csswg-drafts/issues/4985
-[4984]: https://github.com/w3c/csswg-drafts/issues/4984
-[4969]: https://github.com/w3c/csswg-drafts/issues/4969
+[5854]: https://github.com/w3c/csswg-drafts/issues/5854
+[5853]: https://github.com/w3c/csswg-drafts/issues/5853
+[5855]: https://github.com/w3c/csswg-drafts/issues/5855
 
 Historic context:
 
@@ -497,8 +497,6 @@ exposing that functionality to web authors in the future.
 [top layer]: https://github.com/whatwg/html/issues/4633
 
 ### What is the migration path for authors?
-
-[See issue #4985][4985]
 
 Since this proposal defines Cascade Layers
 directly above Specificity in the cascade,
