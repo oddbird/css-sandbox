@@ -52,12 +52,11 @@ Historic context:
 - [Non-goals](#non-goals)
 - [Layering Styles](#layering-styles)
   - [The `@layer` rule](#the-layer-rule)
-  - [Layer identifiers & unnamed layers](#layer-identifiers--unnamed-layers)
+  - [Layer names](#layer-names)
   - [Nesting layers](#nesting-layers)
 - [Layers in the cascade](#layers-in-the-cascade)
   - [Cascade sort order](#cascade-sort-order)
   - [Layer sorting](#layer-sorting)
-  - [The `@layers` rule](#the-layers-rule)
 - [Key scenarios](#key-scenarios)
   - [Third-party libraries](#third-party-libraries)
   - [Targeted defaults](#targeted-defaults)
@@ -162,31 +161,47 @@ The block syntax is:
 
 The contents os a `<<url>>` import or `<<stylesheet>>` block
 will be appended to the layer in question.
+
 The `@layer` rule can also be used with only an identifier
-to define a named layer without attaching any style rules.
+to define a layer without attaching any style rules.
 This can be useful for establishing a layer order
 in advance.
 
 ```css
-/* @layer <<layer-ident>>; */
+/* @layer <<layer-ident>> [, <<layer-ident>>]*; */
 @layer reset;
 @layer typography;
 @layer design-system;
 ```
 
-### Layer identifiers & unnamed layers
+As a shorthand syntax,
+multiple layer identifiers can be provided
+in a single comma-separated rule (see related [issue #5855][5855]).
+The following example has exactly the same behavior:
+
+```css
+@layer reset, typography, design-system;
+```
+
+Both the url-import and ident-only syntax
+would need to be allowed before `@import` rules.
+
+### Layer names
 
 The optional `layer-ident` is a [CSS identifier][]
-that either matches an existing layer name,
-or defines a new _named layer_.
+that represents its _layer name_.
+If the given layer-name matches that of an existing layer
+defined in the same layer-scope, encapsulation context, and origin,
+then its style rules are assigned to that existing layer.
 If no identifier is given,
-an _unnamed layer_ is created.
+or no existing layer name matches the given identifier,
+then a new layer is created.
 
 [CSS identifier]: https://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
 
-Layer identifiers provide a way
+Layer names provide a way
 to apply multiple style blocks
-to a single layer:
+to that single layer:
 
 ```css
 @layer default url(headings.css);
@@ -199,9 +214,8 @@ to a single layer:
 }
 ```
 
-Layers without an identifier
-cannot be added to or sorted explicitly
-from any other location in the document styles.
+Layers without a name
+cannot be referenced from any other location.
 While these layers behave exactly like named layers in every way,
 they do not provide a "hook" for merging or re-ordering `@layer` rules:
 
@@ -249,7 +263,9 @@ on the order of identically-named layers in the shadow DOM.
 ### Nesting layers
 
 When multiple `@layer` rules are nested,
-internal layer identifiers are scoped to their parent layer.
+the resulting layer names are a combination
+of outer and inner identifiers,
+separated by whitespace.
 
 In this example,
 the nested "framework default" layer is distinct
@@ -273,42 +289,35 @@ from the top-level "default" layer:
 }
 ```
 
-The resulting layers can be represented as a tree:
+The resulting layers & layer-order are:
 
-1. default
-2. framework
-   1. _un-nested_
-   2. default
-   3. theme
+1. _unlayered_
+2. default
+3. framework
+4. framework default
+5. framework theme
 
-or as a flat list with nested identifiers:
-
-1. default
-2. framework
-3. framework default
-4. framework theme
-
-While it's not possible for nested layers
-to reference a more global identifier,
-it should be possible to reference nested layers
-from an outer scope.
-Our proposed syntax is to
-combine nested identifiers with a full stop (. U+002E) character:
+As a shorthand,
+nested layers can also be described
+by combining identifiers with whitespace
+in a single layer rule:
 
 ```css
-@layer framework {
-   @layer default {
-     p { margin-block: 0.75em; }
-   }
-
-   @layer theme {
-     p { color: #222; }
-   }
-}
-
-@layer framework.theme {
-   /* These styles will be added to the theme layer inside the framework layer */
+@layer framework theme {
    blockquote { color: rebeccapurple; }
+}
+```
+
+When using layer names inside a nested context,
+outer identifiers are prepended to any layer names.
+That means it is not possible for nested layers
+to reference layer names in a more global layer-scope:
+
+```css
+@layer default;
+@layer framework {
+   @layer default { /* framework default */ }
+   @layer theme default { /* framework theme default */ }
 }
 ```
 
@@ -398,7 +407,6 @@ For example, the following CSS:
   /* authors can add to an existing layer */
   /* without changing where it appears in the layer order */
 }
-
 ```
 
 Results in the following layer orders:
@@ -417,31 +425,20 @@ Results in the following layer orders:
    4. base layer
    5. reset layer
 
-### The `@layers` rule
-
-If authors do want to re-order layers,
-they can do that by listing empty layer identifiers
-before any other layers:
+Authors can use the ident-only `@layer` syntax
+to establish explicit (or "deterministic") sorting of layers
+before any styles are defined:
 
 ```css
-@layer reset;
-@layer base;
-@layer bootstrap;
-@layer components;
+/* establish the layer order */
+@layer reset, base, patterns, components;
+
+/* import into pre-ordered layers */
+@layer base url(base.css);
+@layer components url(library.css);
+@layer patterns url(system.css);
+@layer reset url(remedy.css);
 ```
-
-Still, it might be nice for authors
-to have an explicit shorthand for achieving the same outcome.
-We could add a `@layers` rule that has exactly the same functionality:
-
-```css
-@layers reset, base, bootstrap, components;
-```
-
-This would also help resolve
-the fact that `@import` rules are required before all other CSS blocks.
-By allowing `@layers` to appear before/between `@import` rules,
-we can avoid  allowing `@layer` in that position.
 
 ## Key scenarios
 
