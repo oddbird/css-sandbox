@@ -39,7 +39,7 @@ Please leave any feedback on the CSSWG issues for this proposal:
 - [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
 
 Typos or other document-specific issues
-[can be reported in this repo]({{ github.issues }}).
+[can be reported in this repo](https://github.com/oddbird/css-sandbox/issues).
 
 ## Introduction
 

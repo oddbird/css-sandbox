@@ -13,6 +13,9 @@ With significant input from:
 
 ## Participate
 
+Please leave any feedback on the CSSWG issues for this proposal,
+or open new issues when appropriate:
+
 - [Cascade 5, Editor's Draft](https://drafts.csswg.org/css-cascade-5/)
 - [Cascade 5 label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
 - [Cascade 5 + "layer"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layer)
@@ -41,6 +44,9 @@ Historic context:
 
 - [Initial CSSWG Issue](https://github.com/w3c/csswg-drafts/issues/4470)
 - [Initial Syntax Proposal](https://gist.github.com/mirisuzanne/4224caca74a0d4be33a2b565df34b9e7)
+
+Typos or other document-specific issues
+[can be reported in this repo](https://github.com/oddbird/css-sandbox/issues).
 
 ## Table of Contents
 
