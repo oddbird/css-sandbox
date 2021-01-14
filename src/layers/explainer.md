@@ -19,6 +19,7 @@ or open new issues when appropriate:
 - [Cascade 5, Editor's Draft](https://drafts.csswg.org/css-cascade-5/)
 - [Cascade 5 label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
 - [Cascade 5 + "layer"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layer)
+- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/597)
 
 Specific issues for discussion:
 
