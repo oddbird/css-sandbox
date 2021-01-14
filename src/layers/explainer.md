@@ -17,7 +17,7 @@ With significant input from:
 - [Cascade 5 label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
 - [Cascade 5 + "layer"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layer)
 
-Open issues for discussion:
+Specific issues for discussion:
 
 - [Layers terminology bikeshed][5840]
 - [Do we need a keyword similar to `revert`, but for cascade layers?][5793]
@@ -26,7 +26,7 @@ Open issues for discussion:
 - [Cascade layers need an import syntax][5681]
 - [Provide a syntax for re-using cascade layers across encapsulation context?][5854]
 - [Provide an attribute for assigning `<link>` or `<style>` elements to cascade layers][5853]
-- [Rename @layers to @layer][5855]
+- [Does nested `@layer` syntax work for declaring layer order?][5849]
 
 [5840]: https://github.com/w3c/csswg-drafts/issues/5840
 [5793]: https://github.com/w3c/csswg-drafts/issues/5793
@@ -35,7 +35,7 @@ Open issues for discussion:
 [5681]: https://github.com/w3c/csswg-drafts/issues/5681
 [5854]: https://github.com/w3c/csswg-drafts/issues/5854
 [5853]: https://github.com/w3c/csswg-drafts/issues/5853
-[5855]: https://github.com/w3c/csswg-drafts/issues/5855
+[5849]: https://github.com/w3c/csswg-drafts/issues/5849
 
 Historic context:
 
@@ -57,17 +57,20 @@ Historic context:
 - [Layers in the cascade](#layers-in-the-cascade)
   - [Cascade sort order](#cascade-sort-order)
   - [Layer sorting](#layer-sorting)
+- [Reverting layered properties with `revert-layer`](#reverting-layered-properties-with-revert-layer)
 - [Key scenarios](#key-scenarios)
-  - [Third-party libraries](#third-party-libraries)
-  - [Targeted defaults](#targeted-defaults)
-  - [Utility classes](#utility-classes)
   - [CSS architecture: the "inverted triangle"](#css-architecture-the-inverted-triangle)
+  - [Targeted defaults, and general overrides](#targeted-defaults-and-general-overrides)
+  - [CSS libraries](#css-libraries)
 - [Detailed design discussion](#detailed-design-discussion)
   - [What is the proper name for this feature?](#what-is-the-proper-name-for-this-feature)
   - [What is the migration path for authors?](#what-is-the-migration-path-for-authors)
   - [Use for refactoring](#use-for-refactoring)
 - [Considered alternatives](#considered-alternatives)
-  - [[Alternative 1]](#alternative-1)
+  - [Top-level custom origins](#top-level-custom-origins)
+  - [Variations on important layering](#variations-on-important-layering)
+  - [Layering with selectors or flags](#layering-with-selectors-or-flags)
+- [Alternative layer sorting](#alternative-layer-sorting)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 
@@ -168,7 +171,7 @@ This can be useful for establishing a layer order
 in advance.
 
 ```css
-/* @layer <<layer-ident>> [, <<layer-ident>>]*; */
+/* @layer <<layer-ident>>#; */
 @layer reset;
 @layer typography;
 @layer design-system;
@@ -176,7 +179,7 @@ in advance.
 
 As a shorthand syntax,
 multiple layer identifiers can be provided
-in a single comma-separated rule (see related [issue #5855][5855]).
+in a single comma-separated rule.
 The following example has exactly the same behavior:
 
 ```css
@@ -440,25 +443,207 @@ before any styles are defined:
 @layer reset url(remedy.css);
 ```
 
+## Reverting layered properties with `revert-layer`
+
+Cascade Level 4 added the
+[`revert` keyword](https://drafts.csswg.org/css-cascade/#default)
+for rolling back values
+to their definition in the previous origin.
+We're proposing a similar syntax for rolling back
+to the value defined in a previous layer.
+
+```css
+@layer default {
+  h3 { color: rebeccapurple; }
+}
+
+@layer theme {
+  h3 { color: maroon; }
+  .no-theme { color: revert-layer; }
+}
+```
+
 ## Key scenarios
-
-### Third-party libraries
-
-@@@
-
-### Targeted defaults
-
-@@@
-
-### Utility classes
-
-@@@
 
 ### CSS architecture: the "inverted triangle"
 
-@@@
+CSS is designed around the concept
+of layering a cascade of styles --
+starting with browser defaults, user preferences, and document design.
+CSS provides a syntax for both broad-strokes
+and minute details,
+and selector specificity attempts to capture
+the way those layers build on top of each other.
+
+This has lead to common rules or "conventions" in CSS
+that advocate keeping specificity low at all costs
+(only using single-class selectors, as with [BEM])
+or attempting to match specificity
+with discreet layers
+(as with [Inverted Triangle CSS][itcss])
+
+[BEM]: http://getbem.com/
+[itcss]: http://technotif.com/manage-large-css-projects-with-itcss/
+
+Cascade layers would provide an explicit & built-in
+way to author and name these layers,
+without flattening selectors & specificity
+within each layer:
+
+```css
+@layer settings url(settings.css);
+@layer tools url(tools.css);
+@layer generic url(generic.css);
+@layer elements url(elements.css);
+@layer objects url(objects.css);
+@layer components url(components.css);
+@layer trumps url(trumps.css);
+```
+
+### Targeted defaults, and general overrides
+
+There are often particular issues
+at the two extreme ends of
+"inverted triangle" architecture --
+targeted defaults, and general overrides.
+
+A glance at default browser stylesheets
+will show how much specificity can be required
+to establish robust defaults.
+In Firefox `resource://gre-resources/html.css`
+we can find many examples like the following:
+
+```css
+/* only specified rules override 'border' settings
+  (increased specificity to achieve this) */
+table[rules]:not([rules=""])> tr > td,
+table[rules]:not([rules=""])> * > tr > td,
+table[rules]:not([rules=""])> tr > th,
+table[rules]:not([rules=""])> * > tr > th,
+table[rules]:not([rules=""])> td,
+table[rules]:not([rules=""])> th
+{
+  border-width: thin;
+  border-style: none;
+}
+```
+
+While browsers can't rely on public classes & IDs,
+they often do rely on attributes, pseudo-classes,
+and complex nesting to create a reliable default.
+The same would be useful for authors
+to establish targeted defaults:
+
+```css
+@layer default {
+  input[type=text]:invalid:not(:focus),
+  input[type=url]:invalid:not(:focus),
+  input[type=email]:invalid:not(:focus) {
+    color: maroon;
+  }
+}
+
+/* un-layered rules override the default layer */
+.no-invalid {
+  border-color: slategray;
+}
+```
+
+CSS "Utilities" live at the other end
+of the specificity/targeting mis-match.
+The goal is to have a reusable selector
+that accomplishes a single,
+very specific, but generally-applicable task.
+These are often intended for broad usage,
+but require high cascade precedence.
+
+Layers provide two interesting approaches --
+either by treating utilities as `!important` defaults,
+or by adding a `utility` layer
+higher up in the cascade.
+
+### CSS libraries
+
+Shared CSS design systems, frameworks,
+and component libraries are popular --
+weather developed internally, or by a third-party.
+These tools often provide several layers of abstraction,
+from "design tokens" to layouts,
+reusable patterns, and fully designed components.
+
+This proposal would help both in
+the development and usage of "third-party" CSS
+from design systems, frameworks, or component libraries.
+First, it allows library authors
+to write more targeted/semantic selectors,
+without forcing users to override each selector's specificity.
+
+```css
+@layer bootstrap url(bootstrap.css);
+@layer override {
+  /* override bootstrap without specificity conflicts */
+}
+```
+
+Library authors can use `!important`
+for its intended purpose,
+to mark declarations that are required for functionality:
+
+```css
+@layer library {
+  .tooltip {
+    position: absolute !important;
+  }
+}
+```
+
+Users of the library would not need to use important
+in order to override any normal library styles.
+We hope that this would reduce the use of `!important`
+by framework users.
+
+Libraries would also be able to define
+a public architecture for interacting with the
+internal layers of the system:
+
+```css
+/* bootstrap.css */
+@layer configuration url(configuration.css);
+@layer content url(content.css);
+@layer components url(components.css);
+@layer utilities url(utilities.css);
+```
+
+Library users would then have the option
+to slot custom layers _between_
+layers of the library as desired:
+
+```css
+@layer bootstrap url(bootstrap.css);
+
+@layer bootstrap content {
+  /* append styles to the bootstrap content layer */
+}
+```
+
+Library authors may also decide that
+some internal layering should be "private" --
+and not available for users to interact with.
+They can do that using anonymous layers:
+
+```css
+/* bootstrap.css */
+@layer url(configuration.css);
+@layer url(content.css);
+@layer url(components.css);
+@layer url(utilities.css);
+```
 
 ## Detailed design discussion
+
+See the
+[existing issues marked for discussion](#participate)
+for more.
 
 ### What is the proper name for this feature?
 
@@ -553,10 +738,142 @@ it may not be trivial to write.
 
 ## Considered alternatives
 
+### Top-level custom origins
 
-### [Alternative 1]
+The initial idea was to allow
+"custom origins" be added into the cascade
+in place of the existing "author" origins.
+That would have allowed us to re-use
+existing origin logic in browser engines.
 
-@@@
+There was concern about how that would
+interact with Shadow DOM isolation.
+To quote the original transcript:
+
+> emilio: Shadow DOM introduces a stack of origins;
+> introducing this naively makes it a matrix, which is harder.
+
+Since none of the known use-cases
+required power over shadow-DOM context --
+only over specificity --
+we were able to avoid that issue
+by moving "layers" after "context"
+in the cascade sorting order.
+
+This also allows us to easily define layers
+below the style attribute
+(and any other element-attached styles)
+in the cascade.
+
+See issues
+[#5003](https://github.com/w3c/csswg-drafts/issues/5003)
+and
+[#4984](https://github.com/w3c/csswg-drafts/issues/4984)
+
+### Variations on important layering
+
+We considered several variations
+for how cascade importance would interact with layers.
+There were several basic options
+for sorting important layers:
+
+- **Maintain** the same order used for normal styles
+- **Reverse** the order of layers
+- **Intertwine** the order of layers,
+  so that normal styles from one layer
+  can override important styles from the previous layer
+- **Customize** the ordering of important layers
+  by providing additional syntax
+
+All of these approaches would usable
+by authors to resolve the desired use-cases,
+but they present different issues,
+and different levels of complexity.
+
+By making layers work the same as origins --
+by reversing the order of important layers --
+we are building on the original intent of the `!important` flag,
+and helping teach proper usage.
+Since authors are in control of the layering order,
+it should still be possible to generate any overrides necessary.
+
+See issue [#4971](https://github.com/w3c/csswg-drafts/issues/4971)
+
+### Layering with selectors or flags
+
+There was brief discussion of
+providing this functionality
+through new selectors
+or `!` value flags.
+
+Since the goal is to achieve
+some author control of the cascade
+without being tied to
+the semantics of selection,
+that approach didn't make much sense.
+
+Similarly,
+the use of a layering flag
+(`!layer-2`?)
+seemed more difficult to manage or define,
+and too granular for most use-cases.
+
+See issue [#4969](https://github.com/w3c/csswg-drafts/issues/4969)
+
+## Alternative layer sorting
+
+When the Working Group
+first began discussing this feature,
+there was a fear that it could
+add significant confusion & complexity
+around ordering layers.
+
+We were mostly imagining something like z-index,
+with each layer assigned an integer.
+But that raised a lot of issues:
+
+- Would the layer number be declared on the layer itself, or somewhere else?
+- Would we need a way to map integers to names for readability?
+
+That could have resulted in something like:
+
+```css
+@layers {
+  --default: 0;
+  --theme: 10;
+}
+
+@layer 15 { /* ... */ }
+@layer (--theme) { /* ... */ }
+```
+
+In the Sass community there has been a long tradition
+of generating z-index values from lists --
+entirely replacing integers with names
+for the author.
+A function or mixin is used to return the index (from 1)
+of a given name in the list:
+
+```scss
+$z-index: dropdown, sticky-header, notification, modal;
+
+.modal-overlay {
+  @include z-index(modal); // z-index: 4;
+}
+```
+
+By avoiding the association
+between layers and integers,
+we were able to improve readability
+in a similar way --
+avoiding the temptation to
+try random numbers,
+or use extremes like `999999` as an override.
+
+Layers have both a reliable default (source order),
+and a syntax that allows pre-sorting
+in cases where the final order is
+unknown or un-controllable.
 
 ## Stakeholder Feedback / Opposition
 
