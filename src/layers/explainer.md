@@ -169,7 +169,7 @@ The block syntax is:
 }
 ```
 
-The contents os a `<<url>>` import or `<<stylesheet>>` block
+The contents of a `<<url>>` import or `<<stylesheet>>` block
 will be appended to the layer in question.
 
 The `@layer` rule can also be used with only an identifier
