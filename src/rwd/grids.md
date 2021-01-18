@@ -8,7 +8,7 @@ eleventyNavigation:
 
 Auto-fit and auto-fill grids
 can be very helpful for
-adjuting layouts to fit available space --
+adjusting grid layouts to fit available space --
 but they come with several limitations.
 
 Are there ways we can improve the tools we have,
@@ -18,6 +18,6 @@ inside the layout tools themselves?
 ## Current Issues
 
 - Fit/fill require all columns to be identical
-- There is no span-available, or minmax-span
+- There is no way to span "all" implicit & explicit tracks
+- There is no way to clamp a span based on how many auto-tracks are generated
 
-==TODO: Needs more exploration==

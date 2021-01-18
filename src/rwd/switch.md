@@ -138,7 +138,15 @@ and I think that might also be the way to go in CSS.
 
 ### Can we improve the balance of readability/efficiency?
 
-==TODO: The syntax could use some bike-shedding...==
+This question seems intertwined
+with a few other active discussions
+about more generic block & inline conditionals.
+Several of them are linked from
+this proposal by Lea Verou:
+
+[Higher level custom properties that control multiple declarations][5624]
+
+[5624]: https://github.com/w3c/csswg-drafts/issues/5624
 
 ### What observations can we support, on what properties?
 

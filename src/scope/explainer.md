@@ -36,6 +36,8 @@
   - [CSS Cascade - Level 4](#css-cascade---level-4)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
+- [Change log](#change-log)
+  - [2021.01.18](#20210118)
 
 ## Authors
 
@@ -411,6 +413,15 @@ as defined in the `@scope`-rule:
 }
 ```
 
+Scoped selectors using the `:scope` pseudo-class
+can also reference context beyond the scope
+
+```css
+@scope (.media-block) {
+  .sidebar :scope img { /* ... */ }
+}
+```
+
 ### Scope "proximity" in the cascade
 
 _This would likely belong in
@@ -776,12 +787,10 @@ but out-of-scope (🤷🏻‍♀️) for this proposal.
 
 ### Do we need special handling around the shadow-DOM?
 
-I _think_ this should work inside and outside of the shadow DOM
-without any special concern for shadow boundaries.
-Shadow-DOM already provides "encapsulation context" --
-a more isolated form of scope.
-But that is a use-case where I have least experience,
-and it's possible I missed something.
+This should have no impact on existing shadow DOM behavior.
+Scoped styles can be used either in light or shadow DOM.
+All scopes & scoped styles continue to respect the shadow boundary,
+the same as any other CSS rules.
 
 ### What selectors can be used to describe a scope root?
 
@@ -791,21 +800,22 @@ are we placing any restrictions on the `<selector>`?
 In most cases we expect a single/simple selector to work:
 
 ```css
-@scope [data-component=tabs] { /* ... */  }
+@scope ([data-component=tabs]) { /* ... */  }
 ```
 
 Do we need to support complex selectors?
 
 ```css
-@scope .page-context [data-component=tabs] { /* ... */ }
-@scope [data-component=tabs].horizontal { /* ... */ }
+@scope (.page-context [data-component=tabs]) { /* ... */ }
+@scope ([data-component=tabs].horizontal) { /* ... */ }
 ```
 
 I don't see any reason to restrict them,
 besides an attempt to simplify the resulting code.
 
 Getting even more complex,
-is there reason to allow selector lists --
+is there reason to allow selector lists
+in the scope-root syntax --
 defining multiple roots
 for a single scope block?
 
@@ -813,9 +823,14 @@ for a single scope block?
 @scope (.scope-a, .scope-b) { /* ... */ }
 ```
 
+While selector lists are clearly required
+for establishing lower-boundary,
+it's not clear to me if there are use-cases
+for the upper-boundary/scope-root.
+
 ### Can scoped selectors reference external context?
 
-My initial instinct is that --
+My initial instinct was that --
 while the target of a selector must be in-scope to match --
 scoped selectors should be _otherwise unaware_ of the scope.
 That would allow scoped selectors
@@ -832,53 +847,155 @@ that is out of scope:
 }
 ```
 
-However, it may also work
-to restrict the syntax so the entire selector is in-scope.
-Additional context in the scoping selector
-could be used to achieve the same goal:
+However,
+as [Lea Verou points out][tag1],
+that causes unexpected behavior where
+the following CSS:
 
 ```css
-@scope (.my-host-page .my-component) {
-  .my-component-part { /* ... */ }
+@scope (.b) {
+	.a .c { /* ... */ }
+}
+```
+
+Would match both of the following HTML blocks:
+
+```html
+<div class="b">
+	<div class="a">
+		<div class="c"></div>
+	</div>
+</div>
+```
+
+```html
+<div class="a">
+	<div class="b">
+		<div class="c"></div>
+	</div>
+</div>
+```
+
+That is likely not the intended behavior.
+Requiring the [`:scope` selector](#the-existing-scope-pseudo-class)
+helps to clarify the intent:
+
+```css
+@scope (.b) {
+	.a .c { /* matches the first (.b .a .c) example */ }
+}
+
+@scope (.b) {
+	.a :scope .c { /* matches the second (.a .b .c) example */ }
 }
 ```
 
 ### Where does scope fit in the cascade?
 
-The original scope specification
-had scope override specificity in the cascade.
-Un-scoped styles are treated as-though scoped to the document-root,
+The [original scope specification][initial-spec]
+put scope above specificity in the cascade,
 and the layering was importance-relative:
 
 > For normal declarations the inner scope's declarations override,
 > but for ''!important'' rules outer scope's override.
 
-But I think those semantics should not be coupled with scope,
-and will soon be provided by
-[cascade layers][https://drafts.csswg.org/css-cascade/].
+That would mean first
+that scope takes precedence over specificity.
+By default, the more locally-scoped style always wins:
+
+In this example
+from the outdated specification,
+a paragraph matched by both selectors
+would be green:
+
+```css
+@scope aside {
+ p { color: green; }
+}
+
+aside#sidebar p { color: red; }
+```
+
+But the roles would reverse
+when `!important` is used,
+and the following example paragraph would be red:
+
+```css
+@scope aside {
+ p { color: green !important; }
+}
+
+aside#sidebar p { color: red !important; }
+```
+
+I'm not convinced that scope
+should have that much power in the cascade,
+or that the importance-reversal makes sense here.
+The [cascade layers][https://drafts.csswg.org/css-cascade/]
+specification already provides that same functionality,
+with much more flexibility.
 Both specificity & layers can be used in-conjunction with scope
 to control weighting when desired.
 
-Another idea that I considered
-was to combine the specificity of the scope selector
+I expect this to be controversial.
+It's the biggest change that I'm proposing
+in comparison to the original specification,
+and makes scope much less powerful in the cascade.
+In my mind _that's a good thing_.
+While authors do want scope-proximity to be considered,
+the current expectation
+(using both BEM and CSS-in-JS)
+is that proximity matters _less than specificity_.
+
+In my mind this is the big differentiator
+between shadow-DOM and my version of `@scope` --
+the former provides tight encapsulation/separation
+between global and local context,
+while the latter is meant to help _integrate_
+the two with more finesse.
+
+So far [an informal twitter survey][survey]
+has backed up that expectation.
+Though there have also been some proposals
+that would split the difference --
+with proximity at the end of the cascade,
+but additional specificity added from the scope.
+
+[survey]: https://twitter.com/mirisuzanne/status/1351247559738621952
+
+I initially considered
+a combined specificity of the scope selector
 to the specificity of nested rule-blocks:
 
 ```css
-@scope [data-component=tabs] {
+@scope ([data-component=tabs]) {
   /* `[data-component=tabs] .tab-item`: 0,2,0 */
   .tab-item { /* ... */ }
 }
 
-@scope #tabs {
+@scope (#tabs) {
   /* `#tabs .tab-item`: 1,1,0 */
   .tab-item { /* ... */ }
 }
 ```
 
-That seems like a sensible solution,
-but I think it also makes the
-weight of a selector unnecessarily complicated
-for authors.
+[Sara Soueidan has also proposed][scope-id]
+giving `@scope` the selector-weight of an `#ID`.
+That would acknowledge the targeting weight of scopes,
+without making them override all specificity.
+That seems to be a popular idea.
+
+[scope-id]: https://twitter.com/sarasoueidan/status/1351248295969103873?s=21
+
+Neither specificity solution would help
+with the proximity requirements of scoping,
+so it would need to be additional --
+giving `@scope` rules a double-impact on the cascade,
+as part of specificity,
+and then again in relation to proximity.
+I can absolutely see an argument for that,
+but I'm also concerned that it might be
+unnecessarily complicated.
 
 ### Can we improve on the syntax?
 
@@ -1000,11 +1117,31 @@ In addition to the open issue threads mentioned above,
 thanks for valuable feedback and advice from:
 
 - Anders Hartvoll Ruud
+- Giuseppe Gurgone
 - Ian Kilpatrick
 - Keith Grant
+- Kenneth Rohde Christiansen
+- Lea Verou
 - Mason Freed
 - Nicole Sullivan
 - Rune Lillesveen
+- Sara Soueidan
 - Tab Atkins
 - Una Kravets
 - Yu Han
+
+## Change log
+
+### 2021.01.18
+
+Based on [review from TAG member Lea Verou][tag1]...
+
+[tag1]: https://github.com/w3ctag/design-reviews/issues/593#issuecomment-761295677
+
+- Update acknowledgements
+- CHANGE: Require `:scope` pseudo-class in scoped selectors that reference
+  [context outside of the scope](#can-scoped-selectors-reference-external-context)
+- CLARIFY: Shadow DOM behavior (scope respects shadow boundaries)
+- CLARIFY: question about selector-lists in scope-root syntax
+- CLARIFY: consistently use parenthesis around scope-root selectors
+- CLARIFY: additional discussion of scope in the cascade

@@ -11,9 +11,9 @@ because they come with a number of important trade-offs:
 
 ### Ability to Implement
 
-The `@container` syntax is currently blocked
+The `@container` syntax is blocked
 by a dependence on [single axis containment](/rwd/query/contain/),
-but there is a prototype underway.
+but there is a prototype of both underway.
 
 The `switch()` syntax already has working prototypes.
 
@@ -32,8 +32,8 @@ one property at a time --
 but more work could be done to explore
 a block syntax that works within the limitations:
 
-- only query `available-inline-size` of the element itself
-- only apply to properties that have no impact on size
+- query `available-inline-size` (and others?) the element itself
+- only apply to properties that have no impact on size (many of them!)
 
 The `@container` proposal
 requires authors to define explicit "containers"
