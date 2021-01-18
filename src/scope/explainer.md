@@ -663,7 +663,7 @@ in any arrangement:
   <div class="light-theme">
     <a href="#">purple</a>
 
-    <div class="light-theme">
+    <div class="dark-theme">
       <a href="#">plum again</a>
     </div>
   </div>
@@ -1177,3 +1177,4 @@ Based on [review from TAG member Lea Verou][tag1]...
 - CLARIFY: question about selector-lists in scope-root syntax
 - CLARIFY: consistently use parenthesis around scope-root selectors
 - CLARIFY: additional discussion of scope in the cascade
+- CLARIFY: fix typo in proximity example
