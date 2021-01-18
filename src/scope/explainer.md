@@ -14,7 +14,7 @@
 - [Proposed Solution](#proposed-solution)
   - [Re-introducing the `@scope` rule](#re-introducing-the-scope-rule)
   - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
-  - [Scope "proximity" in the cascade](#scope-proximity-in-the-cascade)
+  - [Scope proximity in the cascade](#scope-proximity-in-the-cascade)
 - [Key scenarios](#key-scenarios)
   - [Avoid naming conflicts without custom conventions](#avoid-naming-conflicts-without-custom-conventions)
   - [Express ownership boundaries in nested components](#express-ownership-boundaries-in-nested-components)
@@ -422,7 +422,7 @@ can also reference context beyond the scope
 }
 ```
 
-### Scope "proximity" in the cascade
+### Scope proximity in the cascade
 
 _This would likely belong in
 [CSS Cascading & Inheritance](https://drafts.csswg.org/css-cascade/)._
@@ -434,7 +434,6 @@ My sense is that scope proximity
 should override _source order_,
 but otherwise cascade layers & specificity
 should take precedence.
-This is a big point of departure from the original spec.
 
 Given the same origin & importance, layering, and specificity --
 inner "more proximate" scope would take precedence
@@ -478,6 +477,39 @@ source order would continue to be the final cascade filter:
   <a href="#">maroon</a>
 </div>
 ```
+
+However, in this proposal
+**specificity would override scope proximity**.
+Given the following CSS,
+a paragraph matched by both rules
+would be `red`,
+thanks to the added specificity:
+
+```css
+@scope aside {
+ p { color: green; }
+}
+
+aside#sidebar p { color: red; }
+```
+
+This is a big point of departure
+from both Shadow-DOM and the original spec,
+and I
+[discuss it in more detail below](#where-does-scope-fit-in-the-cascade).
+While Shadow-DOM & the original spec
+have focussed on _isolation of scopes_
+to avoid "scope leaks" --
+I believe that many authors
+are specifically interested in
+an alternative to that model.
+
+We want the benefits of namespace,
+selector-boundaries,
+and proximity-over-source-order --
+but we _do not want_
+to strongly prioritize scoped styles
+over global styles.
 
 ## Key scenarios
 
