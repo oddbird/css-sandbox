@@ -13,11 +13,10 @@
 - [Non-goals](#non-goals)
 - [Proposed Solution](#proposed-solution)
   - [Re-introducing the `@scope` rule](#re-introducing-the-scope-rule)
-  - [Representing the scope root in selectors](#representing-the-scope-root-in-selectors)
-    - [The `&` nesting selector](#the--nesting-selector)
-    - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
+  - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
+  - [A new donut selector?](#a-new-donut-selector)
   - [Scope in the cascade](#scope-in-the-cascade)
-    - [Nested specificity](#nested-specificity)
+    - [Specificity](#specificity)
     - [Scope Proximity](#scope-proximity)
 - [Key scenarios](#key-scenarios)
   - [Avoid naming conflicts without custom conventions](#avoid-naming-conflicts-without-custom-conventions)
@@ -31,7 +30,10 @@
   - [Should we be building on Shadow DOM?](#should-we-be-building-on-shadow-dom)
   - [Do we need special handling around the shadow-DOM?](#do-we-need-special-handling-around-the-shadow-dom)
   - [What selectors can be used to describe a scope root?](#what-selectors-can-be-used-to-describe-a-scope-root)
-  - [Can scoped selectors reference external context?](#can-scoped-selectors-reference-external-context)
+  - [Should we have a selector syntax for lower boundaries?](#should-we-have-a-selector-syntax-for-lower-boundaries)
+  - [A JS API for fetching "donut scope" elements?](#a-js-api-for-fetching-donut-scope-elements)
+  - [How does scope interact with the nesting module?](#how-does-scope-interact-with-the-nesting-module)
+  - [Can scope rules be nested in other scope rules?](#can-scope-rules-be-nested-in-other-scope-rules)
   - [Where does scope fit in the cascade?](#where-does-scope-fit-in-the-cascade)
     - [The 2014 scope proposal](#the-2014-scope-proposal)
     - [Shadow-DOM encapsulation context](#shadow-dom-encapsulation-context)
@@ -46,6 +48,7 @@
 - [References & acknowledgements](#references--acknowledgements)
 - [To Be Addressed](#to-be-addressed)
 - [Change log](#change-log)
+  - [2021.01.28](#20210128)
   - [2021.01.27](#20210127)
   - [2021.01.18](#20210118)
 
@@ -400,7 +403,7 @@ provide syntax sugar for single-file components --
 automatically generating the from/to clauses --
 but move the primary functionality into CSS.
 
-### Representing the scope root in selectors
+### The (existing) `:scope` pseudo-class
 
 In most cases we can infer
 that the `@scope` root selector
@@ -414,61 +417,42 @@ with an ancestor/descendant relationship:
 }
 ```
 
-But there are many use-cases
-where an author will need to reference
-context _outside the scope_
-as part of a scoped selector.
-In that case,
-users need a way to explicitly
-place the scope-root
-inside their selector.
-There are two (not necessarily exclusive) approaches
-currently being discussed.
-
-#### The `&` nesting selector
-
-This proposal has some overlap with
-the [CSS Nesting Module][nesting]
-(currently an Editor's Draft).
-That specification already defines a syntax
-for referencing a parent selector,
-and the same _nesting selector_ (`&`) syntax
-could be used here.
-
-[nesting]: https://drafts.csswg.org/css-nesting/
-
-The `&` acts as a stand-in
-for the entire scope root selector,
-and can be implied at the start of each scoped selector,
-unless otherwise specified.
-The following code blocks have the same meaning:
+There is even an existing
+[Reference Element Pseudo-class][scope-class]
+(`:scope` selector),
+which we can use to represent that behavior.
+It is currently supported in JS APIs
+to refer to the base element of e.g. `element.querySelector()`.
+The following blocks would be identical:
 
 ```css
 @scope (.media) {
-  img { object-fit: cover; }
+  img { /* .media img */ }
+  .content { /* .media .content */ }
 }
 
 @scope (.media) {
-  & img { object-fit: cover; }
+  :scope img { /* .media img */ }
+  :scope .content { /* .media .content */ }
 }
 ```
 
-Authors can also use `&`
+Authors can also use `:scope`
 to express more complex relationships
 between a scoped selector and the scope-root.
 For example, adding an explicit combinator:
 
 ```css
 @scope (.media) {
-  & > img { object-fit: cover; }
+  :scope > img { object-fit: cover; }
 }
 ```
 
-Or adding contextual information:
+Or adding contextual information outside the scope:
 
 ```css
 @scope (.media) {
-  .sidebar & img { object-fit: cover; }
+  .sidebar :scope img { object-fit: cover; }
 }
 ```
 
@@ -476,127 +460,69 @@ Or styling the scope-root directly:
 
 ```css
 @scope (.media) {
-  & { display: grid; }
+  :scope { display: grid; }
 }
 ```
 
-With the nesting syntax,
-we could also allow
-the `@scope` rule to be nested inside
-an existing selector block,
-much like `@nest`,
-and establish scope-root based on the outer selector.
-In this case, the scope-root selector
-_must be [nest-containing](https://drafts.csswg.org/css-nesting/#nest-containing)_
-(have `&` somewhere in it),
-with an implied value of `&`.
-These three code-blocks
-would have the same meaning:
-
-```css
-/* explicit scope with root */
-@scope (.media) to (.content) {
-  img { object-fit: cover; }
-}
-
-.media {
-  /* nested scope with explicit nesting root */
-  @scope (&) to (.content) {
-    img { object-fit: cover; }
-  }
-}
-
-.media {
-  /*nested scope with implicit nesting root */
-  @scope to (.content) {
-    img { object-fit: cover; }
-  }
-}
-```
-
-#### The (existing) `:scope` pseudo-class
-
-There is also an existing
-[Reference Element Pseudo-class][scope-class]
-(`:scope` selector),
-to select the root of any scope.
-In existing CSS,
-this is the same as `:root`,
-since there is no way to scope elements.
-However, it is used by JS APIs
-to refer to the base element of e.g. `element.querySelector()`.
-
-In many cases
-that would be similar to the `&` selector:
+This is especially useful
+if we want to target a nested instance
+of the scope root selector:
 
 ```css
 @scope (.media) {
-  & { display: grid; }
-  .sidebar & img { /* ... */ }
-}
+  /* select only the scope-root .media  */
+  :scope { display: grid; }
 
+  /* select nested .media inside the scope */
+  .media { background: gray; }
+  :scope .media { background: gray; }
+}
+```
+
+Since there is no way
+to have the root element inside itself,
+we would not support nested instances of `:scope` itself:
+
+```css
 @scope (.media) {
-  :scope { display: grid; }
-  .sidebar :scope img { /* ... */ }
-}
-```
-
-The difference is that
-`:scope` refers to a specific element
-(the root element of the current scope),
-while `&` is syntax sugar
-resolving to `:is(<parent-selector>)`.
-That distinction becomes important
-when differentiating between
-the scope root element,
-and nested versions of the same selector.
-The following are all allowed:
-
-```css
-@scope (.media-block) {
-  /* select only the scope-root .media-block  */
-  :scope { display: grid; }
-  & { display: grid; }
-
-  /* select nested media-blocks (implicit .media-block ancestor) */
-  .media-block { background: gray; }
-  :scope .media-block { background: gray; }
-  & .media-block { background: gray; }
-  & & { background: gray; }
-}
-```
-
-While it works to use
-`&` multiple times in a single selector,
-it would not make sense
-to combine `:scope` in the same way.
-There is no way to have the root element inside itself,
-or as its own sibling.
-For example:
-
-```css
-@scope (.media-block) {
-  /* allowed */
-  & & { background: gray; }
-  & + & { background: gray; }
-
   /* no match */
   :scope :scope { background: gray; }
   :scope + :scope { background: gray; }
 }
 ```
 
-I think the combination of both
-should work smoothly,
-assuming the `:scope` class
-is only used once
-in a given selector:
+### A new donut selector?
+
+Lea Verou has pointed out
+that it might be useful for authors
+to access "donut-matching" as a distinct feature,
+apart from the cascade rules of scoping.
+
+That could be done with a pseudo-selector
+(name to-be-determined)
+akin to `:is()` or `:not()`.
+This new selector would need to describe the entire donut,
+taking two arguments:
+a root selector,
+and lower-boundary selector.
+Since spaces and commas exist inside selectors,
+we could borrow the slash as a delimiter.
+Imagine a syntax like:
 
 ```css
-@scope (.media-block) {
-  & :scope { background: gray; }
-  :scope + & { background: gray; }
+/* :in(<selector> / <selector>) */
+:in(.root .selector / .lower .boundary)
+```
+
+The following selectors
+would match the same elements:
+
+```css
+@scope (.media) to (.content) {
+  img { border: red; }
 }
+
+img:in(.media / .content) { border: red; }
 ```
 
 ### Scope in the cascade
@@ -610,29 +536,41 @@ At first that seemed potentially confusion,
 but after many conversations,
 I think it may be the most expected behavior.
 
-#### Nested specificity
+#### Specificity
 
-The scope-root would be considered a part
-of any scoped selector's specificity --
-following the same logic as the [nesting module][]:
+It seems to me that `@scope`,
+a donut-pseudo-class like `:in()`,
+and explicit use of `:scope`
+should all have matching specificity.
+
+Existing CSS-in-JS tools
+often add a single attribute to achieve scope.
+We could achieve the same result
+by relying on the default weight of pseudo-class selectors.
+All the following would have
+an (ID, class, element) specificity of `(0, 2, 0)`:
 
 ```css
-@scope ([data-component=tabs]) {
-  /* `:is([data-component=tabs]) .tab-item`: 0,2,0 */
+@scope (#tabs) to (.panel) {
+  /* implied ancestor :scope */
   .tab-item { /* ... */ }
+  /* explicit :scope */
+  :scope .tab-item { /* ... */ }
+  .sidebar :scope { /* ... */ }
 }
 
-@scope (#tabs) {
-  /* `:is(#tabs) .tab-item`: 1,1,0 */
-  .tab-item { /* ... */ }
-}
+.tab-item:in(#tabs / .panel) { /* ... */ }
 ```
 
-Note: Existing CSS-in-JS tools
-often add a single attribute to achieve scope --
-increasing specificity slightly.
-This would be similar,
-but allow more flexibility in the specificity added.
+Alternatively,
+we could attempt to
+follow the [nesting module][nesting] approach:
+with scope-root considered a part
+of any scoped selector's specificity.
+That would mean giving both `:scope` and `:in()`
+the specificity of the root selector,
+resulting in a specificity of `(1, 1, 0)`
+for the examples above.
 
 #### Scope Proximity
 
@@ -1067,67 +1005,195 @@ for establishing lower-boundary,
 it's not clear to me if there are use-cases
 for the upper-boundary/scope-root.
 
-### Can scoped selectors reference external context?
+### Should we have a selector syntax for lower boundaries?
 
-My initial instinct was that --
-while the target of a selector must be in-scope to match --
-scoped selectors should be _otherwise unaware_ of the scope.
-That would allow scoped selectors
-to reference ancestor context
-that is out of scope:
+Since the "lower-boundary" aspect of scope
+is closely related to selector-matching,
+my first instinct was to try and create
+a selector syntax for that feature.
+That could also be useful in cases
+where an author wants lower-boundaries
+without the addition of cascade scope.
+
+What makes this difficult
+is that selectors are meant to _match something_.
+Lower boundaries aren't intended to match,
+but to establish a context in which
+a match is possible.
+
+Let's start with the `@scope` syntax
+described above,
+and see if we can recreate it using selectors.
+Here's rule we're attempting to replicate:
 
 ```css
-@scope (.my-component) {
-  .my-host-page .my-component-part {
-    /* selector matches when both... */
-    /* - `.my-host-page .my-component-part` matches globally */
-    /* - the targeted element is inside the `.my-component` scope */
+@scope (root) to (boundary) {
+  selector { /* ... */ }
+}
+```
+
+We can get close to that already by using `:is()`
+along with `:not()`.
+This selector-string is close:
+
+```css
+selector:is(root *):not(root boundary *) {
+  /* ...  */
+}
+```
+
+([example on codepen][selector-pen])
+[selector-pen]: https://codepen.io/mirisuzanne/pen/jOVNJoj
+
+But that approach fails when nesting:
+
+```html
+<root>
+  <selector>This is a match</selector>
+  <boundary>
+    <selector>This is not a match</selector>
+    <root>
+      <selector>This is a false negative</selector>
+    </root>
+  </boundary>
+</root>
+```
+
+In order to work,
+we need to establish that
+only the most immediate `root`/`boundary`
+matches are relevant.
+Establishing scope makes that possible,
+since `:scope` only matches
+the root element of the tree:
+
+```css
+/* this should work if `root` is the scope root element */
+selector:is(:scope *):not(:scope boundary *) {
+  /* ...  */
+}
+```
+
+While this isn't supported in plain CSS,
+it does work in JS already --
+where the `:scope` selector is more clearly defined.
+Starting with a `root` element,
+we can select everything between than root scope
+and our lower boundary:
+
+```js
+const matches = root.querySelectorAll(":not(:scope boundary *)");
+```
+
+Coming back around to CSS syntax,
+we could imagine a boundary-setting pseudo-class
+called `:to()`,
+which would work like the `to` clause of `@scope`...
+
+```css
+root:to(boundary) selector { /* … */ }
+```
+
+But that doesn't really work as a pseudo-class,
+because `:to()` doesn't _match_ anything.
+
+However,
+a pseudo-class that describes the "entire donut"
+would be able to match on it's own.
+I've added this to the proposal above.
+
+### A JS API for fetching "donut scope" elements?
+
+While the existing pattern above
+allows JS to match elements _within_ a donut scope,
+it doesn't provide a way to
+fetch the "donut" initially.
+
+I think
+the proposed `:in()` pseudo-class
+would have a similar issue --
+allowing us to target all or some elements in the donut,
+but not to return a tree fragment of the donut itself:
+
+```js
+document.querySelectorAll(":in(root / boundary)");
+```
+
+I think a feature like this
+would better be expressed
+with a second "exclusions" parameter
+on methods like `querySelector()` and `querySelectorAll()`:
+
+```js
+document.querySelector("root", "boundary");
+```
+
+### How does scope interact with the nesting module?
+
+This proposal has some overlap with
+the [CSS Nesting Module][nesting]
+(currently an Editor's Draft).
+
+[nesting]: https://drafts.csswg.org/css-nesting/
+
+With the nesting syntax,
+we could allow
+the `@scope` rule to be nested inside
+an existing selector block,
+much like `@nest`,
+and establish scope-root based on the outer selector.
+In this case, the scope-root selector
+_must be [nest-containing](https://drafts.csswg.org/css-nesting/#nest-containing)_
+(have `&` somewhere in it),
+with an implied value of `&`.
+These three code-blocks
+would have the same meaning:
+
+```css
+/* explicit scope with root */
+@scope (.media) to (.content) {
+  img { object-fit: cover; }
+}
+
+.media {
+  /* nested scope with explicit nesting root */
+  @scope (&) to (.content) {
+    img { object-fit: cover; }
+  }
+}
+
+.media {
+  /*nested scope with implicit nesting root */
+  @scope to (.content) {
+    img { object-fit: cover; }
   }
 }
 ```
 
-However,
-as [Lea Verou points out][tag1],
-that causes unexpected behavior where
-the following CSS:
+### Can scope rules be nested in other scope rules?
+
+I can imagine use-cases for nesting scope rules,
+though I don't think this is currently supported anywhere.
+I think we could describe a behavior
+that works as expected.
+Let's take, for example:
 
 ```css
-@scope (.b) {
-	.a .c { /* ... */ }
+@scope (.media) to (.content) {
+   @scope (figure) to (figcontent) {
+     img { border: red; }
+   }
 }
 ```
 
-Would match both of the following HTML blocks:
-
-```html
-<div class="b">
-	<div class="a">
-		<div class="c"></div>
-	</div>
-</div>
-```
-
-```html
-<div class="a">
-	<div class="b">
-		<div class="c"></div>
-	</div>
-</div>
-```
-
-That is likely not the intended behavior.
-Requiring the
-nesting-selector (`&`)
-or `:scope` pseudo-class
-helps to clarify the intent:
+I believe we can achieve the desired behavior
+by flattening this to a single scope,
+with our `:in()` donut selector
+as part of our scope root:
 
 ```css
-@scope (.b) {
-	.a .c { /* matches the first (.b .a .c) example */ }
-}
-
-@scope (.b) {
-	.a & .c { /* matches the second (.a .b .c) example */ }
+@scope (figure:in(.media / .content)) to (figcontent) {
+  img { border: red; }
 }
 ```
 
@@ -1417,12 +1483,21 @@ Some questions that have been raised,
 but I have not had a chance to address --
 and they need more consideration:
 
-- Should there be a way to express "donut scope"
-  using selectors, rather than an at-rule?
-- (if not) Is there a JS API for fetching a donut scope,
-  rather than filtering `element.matches()`?
+From [Rune Lillesveen](https://github.com/w3ctag/design-reviews/issues/593#issuecomment-768992509)…
+
+- Are `:host`, `::slotted`, and `::part` allowed in scope root selectors?
+- Can tree-abiding pseudo elements (like `::before`) be scope roots?
 
 ## Change log
+
+### 2021.01.28
+
+- NEW: Add proposal for `:in()` donut-scope selector
+- CHANGE: Update specificity definition to reflect pseudo-class alternative
+- CHANGE: Remove `&` syntax, to avoid conflicts with nesting
+- Detailed discussion of selector syntax
+- Detailed discussion of JS API for fetching a donut scope
+- Detailed discussion of scope-nesting
 
 ### 2021.01.27
 
@@ -1440,10 +1515,6 @@ and they need more consideration:
   to flow-through scopes in a single direction
 
 ### 2021.01.18
-
-Based on [review from TAG member Lea Verou][tag1]...
-
-[tag1]: https://github.com/w3ctag/design-reviews/issues/593#issuecomment-761295677
 
 - Update acknowledgements
 - CHANGE: Require `:scope` pseudo-class in scoped selectors that reference
