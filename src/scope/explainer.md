@@ -13,8 +13,12 @@
 - [Non-goals](#non-goals)
 - [Proposed Solution](#proposed-solution)
   - [Re-introducing the `@scope` rule](#re-introducing-the-scope-rule)
-  - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
-  - [Scope proximity in the cascade](#scope-proximity-in-the-cascade)
+  - [Representing the scope root in selectors](#representing-the-scope-root-in-selectors)
+    - [The `&` nesting selector](#the--nesting-selector)
+    - [The (existing) `:scope` pseudo-class](#the-existing-scope-pseudo-class)
+  - [Scope in the cascade](#scope-in-the-cascade)
+    - [Nested specificity](#nested-specificity)
+    - [Scope Proximity](#scope-proximity)
 - [Key scenarios](#key-scenarios)
   - [Avoid naming conflicts without custom conventions](#avoid-naming-conflicts-without-custom-conventions)
   - [Express ownership boundaries in nested components](#express-ownership-boundaries-in-nested-components)
@@ -29,6 +33,10 @@
   - [What selectors can be used to describe a scope root?](#what-selectors-can-be-used-to-describe-a-scope-root)
   - [Can scoped selectors reference external context?](#can-scoped-selectors-reference-external-context)
   - [Where does scope fit in the cascade?](#where-does-scope-fit-in-the-cascade)
+    - [The 2014 scope proposal](#the-2014-scope-proposal)
+    - [Shadow-DOM encapsulation context](#shadow-dom-encapsulation-context)
+    - [The case for less isolation, and weak proximity](#the-case-for-less-isolation-and-weak-proximity)
+    - [Additional specificity](#additional-specificity)
   - [Can we improve on the syntax?](#can-we-improve-on-the-syntax)
 - [Spec History & Context](#spec-history--context)
   - [CSS Scoping](#css-scoping)
@@ -36,7 +44,9 @@
   - [CSS Cascade - Level 4](#css-cascade---level-4)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
+- [To Be Addressed](#to-be-addressed)
 - [Change log](#change-log)
+  - [2021.01.27](#20210127)
   - [2021.01.18](#20210118)
 
 ## Authors
@@ -390,9 +400,125 @@ provide syntax sugar for single-file components --
 automatically generating the from/to clauses --
 but move the primary functionality into CSS.
 
-### The (existing) `:scope` pseudo-class
+### Representing the scope root in selectors
 
-A `:scope` selector has already been defined,
+In most cases we can infer
+that the `@scope` root selector
+is prepended to all internal selectors
+with an ancestor/descendant relationship:
+
+```css
+@scope (.media) {
+  img { /* .media img */ }
+  .content { /* .media .content */ }
+}
+```
+
+But there are many use-cases
+where an author will need to reference
+context _outside the scope_
+as part of a scoped selector.
+In that case,
+users need a way to explicitly
+place the scope-root
+inside their selector.
+There are two (not necessarily exclusive) approaches
+currently being discussed.
+
+#### The `&` nesting selector
+
+This proposal has some overlap with
+the [CSS Nesting Module][nesting]
+(currently an Editor's Draft).
+That specification already defines a syntax
+for referencing a parent selector,
+and the same _nesting selector_ (`&`) syntax
+could be used here.
+
+[nesting]: https://drafts.csswg.org/css-nesting/
+
+The `&` acts as a stand-in
+for the entire scope root selector,
+and can be implied at the start of each scoped selector,
+unless otherwise specified.
+The following code blocks have the same meaning:
+
+```css
+@scope (.media) {
+  img { object-fit: cover; }
+}
+
+@scope (.media) {
+  & img { object-fit: cover; }
+}
+```
+
+Authors can also use `&`
+to express more complex relationships
+between a scoped selector and the scope-root.
+For example, adding an explicit combinator:
+
+```css
+@scope (.media) {
+  & > img { object-fit: cover; }
+}
+```
+
+Or adding contextual information:
+
+```css
+@scope (.media) {
+  .sidebar & img { object-fit: cover; }
+}
+```
+
+Or styling the scope-root directly:
+
+```css
+@scope (.media) {
+  & { display: grid; }
+}
+```
+
+With the nesting syntax,
+we could also allow
+the `@scope` rule to be nested inside
+an existing selector block,
+much like `@nest`,
+and establish scope-root based on the outer selector.
+In this case, the scope-root selector
+_must be [nest-containing](https://drafts.csswg.org/css-nesting/#nest-containing)_
+(have `&` somewhere in it),
+with an implied value of `&`.
+These three code-blocks
+would have the same meaning:
+
+```css
+/* explicit scope with root */
+@scope (.media) to (.content) {
+  img { object-fit: cover; }
+}
+
+.media {
+  /* nested scope with explicit nesting root */
+  @scope (&) to (.content) {
+    img { object-fit: cover; }
+  }
+}
+
+.media {
+  /*nested scope with implicit nesting root */
+  @scope to (.content) {
+    img { object-fit: cover; }
+  }
+}
+```
+
+#### The (existing) `:scope` pseudo-class
+
+There is also an existing
+[Reference Element Pseudo-class][scope-class]
+(`:scope` selector),
 to select the root of any scope.
 In existing CSS,
 this is the same as `:root`,
@@ -400,29 +526,115 @@ since there is no way to scope elements.
 However, it is used by JS APIs
 to refer to the base element of e.g. `element.querySelector()`.
 
-This can be used by authors to style the root of any scope --
-as defined in the `@scope`-rule:
+In many cases
+that would be similar to the `&` selector:
 
 ```css
-@scope (.media-block) {
-  /* this selects only the scope-root .media-block  */
-  :scope { display: grid; }
-
-  /* this would select nested media-blocks */
-  .media-block { background: gray; }
+@scope (.media) {
+  & { display: grid; }
+  .sidebar & img { /* ... */ }
 }
-```
 
-Scoped selectors using the `:scope` pseudo-class
-can also reference context beyond the scope
-
-```css
-@scope (.media-block) {
+@scope (.media) {
+  :scope { display: grid; }
   .sidebar :scope img { /* ... */ }
 }
 ```
 
-### Scope proximity in the cascade
+The difference is that
+`:scope` refers to a specific element
+(the root element of the current scope),
+while `&` is syntax sugar
+resolving to `:is(<parent-selector>)`.
+That distinction becomes important
+when differentiating between
+the scope root element,
+and nested versions of the same selector.
+The following are all allowed:
+
+```css
+@scope (.media-block) {
+  /* select only the scope-root .media-block  */
+  :scope { display: grid; }
+  & { display: grid; }
+
+  /* select nested media-blocks (implicit .media-block ancestor) */
+  .media-block { background: gray; }
+  :scope .media-block { background: gray; }
+  & .media-block { background: gray; }
+  & & { background: gray; }
+}
+```
+
+While it works to use
+`&` multiple times in a single selector,
+it would not make sense
+to combine `:scope` in the same way.
+There is no way to have the root element inside itself,
+or as its own sibling.
+For example:
+
+```css
+@scope (.media-block) {
+  /* allowed */
+  & & { background: gray; }
+  & + & { background: gray; }
+
+  /* no match */
+  :scope :scope { background: gray; }
+  :scope + :scope { background: gray; }
+}
+```
+
+I think the combination of both
+should work smoothly,
+assuming the `:scope` class
+is only used once
+in a given selector:
+
+```css
+@scope (.media-block) {
+  & :scope { background: gray; }
+  :scope + & { background: gray; }
+}
+```
+
+### Scope in the cascade
+
+The `@scope` rule has a double-impact
+on the cascade of scoped selectors --
+as part of specificity,
+and then again in relation to proximity.
+
+At first that seemed potentially confusion,
+but after many conversations,
+I think it may be the most expected behavior.
+
+#### Nested specificity
+
+The scope-root would be considered a part
+of any scoped selector's specificity --
+following the same logic as the [nesting module][]:
+
+```css
+@scope ([data-component=tabs]) {
+  /* `:is([data-component=tabs]) .tab-item`: 0,2,0 */
+  .tab-item { /* ... */ }
+}
+
+@scope (#tabs) {
+  /* `:is(#tabs) .tab-item`: 1,1,0 */
+  .tab-item { /* ... */ }
+}
+```
+
+Note: Existing CSS-in-JS tools
+often add a single attribute to achieve scope --
+increasing specificity slightly.
+This would be similar,
+but allow more flexibility in the specificity added.
+
+#### Scope Proximity
 
 _This would likely belong in
 [CSS Cascading & Inheritance](https://drafts.csswg.org/css-cascade/)._
@@ -479,7 +691,7 @@ source order would continue to be the final cascade filter:
 ```
 
 However, in this proposal
-**specificity would override scope proximity**.
+**specificity can override scope proximity**.
 Given the following CSS,
 a paragraph matched by both rules
 would be `red`,
@@ -493,23 +705,16 @@ thanks to the added specificity:
 aside#sidebar p { color: red; }
 ```
 
-This is a big point of departure
-from both Shadow-DOM and the original spec,
-and I
-[discuss it in more detail below](#where-does-scope-fit-in-the-cascade).
-While Shadow-DOM & the original spec
-have focussed on _isolation of scopes_
-to avoid "scope leaks" --
-I believe that many authors
-are specifically interested in
-an alternative to that model.
+This is a major departure from both
+the [original scope specification][initial-spec]
+and Shadow-DOM [encapsulation context][],
+which override specificity.
+That is useful in certain cases,
+but many authors desire a lighter-touch scope --
+allowing global styles to easily flow through scoped components,
+while preventing scoped styles from leaking out.
 
-We want the benefits of namespace,
-selector-boundaries,
-and proximity-over-source-order --
-but we _do not want_
-to strongly prioritize scoped styles
-over global styles.
+I [discuss this in more detail below](#where-does-scope-fit-in-the-cascade).
 
 ## Key scenarios
 
@@ -803,12 +1008,14 @@ So I'm not convinced we need any scope attribute.
 ### Should we be building on Shadow DOM?
 
 Yu Han has
-an [interesting proposal](https://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharinghttps://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharing)
+an [interesting proposal][han]
 in two parts,
 designed to build on top of existing shadow DOM logic:
 
 1. Allow shadow-DOM elements to opt-in to global styles
 2. Allow light-DOM elements to opt-in to style isolation
+
+[han]: https://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharinghttps://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharing
 
 This would require a new `scoped` HTML attribute,
 because that sort of isolation has to be defined
@@ -909,7 +1116,9 @@ Would match both of the following HTML blocks:
 ```
 
 That is likely not the intended behavior.
-Requiring the [`:scope` selector](#the-existing-scope-pseudo-class)
+Requiring the
+nesting-selector (`&`)
+or `:scope` pseudo-class
 helps to clarify the intent:
 
 ```css
@@ -918,11 +1127,13 @@ helps to clarify the intent:
 }
 
 @scope (.b) {
-	.a :scope .c { /* matches the second (.a .b .c) example */ }
+	.a & .c { /* matches the second (.a .b .c) example */ }
 }
 ```
 
 ### Where does scope fit in the cascade?
+
+#### The 2014 scope proposal
 
 The [original scope specification][initial-spec]
 put scope above specificity in the cascade,
@@ -960,74 +1171,118 @@ and the following example paragraph would be red:
 aside#sidebar p { color: red !important; }
 ```
 
-I'm not convinced that scope
-should have that much power in the cascade,
-or that the importance-reversal makes sense here.
-The [cascade layers][https://drafts.csswg.org/css-cascade/]
-specification already provides that same functionality,
-with much more flexibility.
-Both specificity & layers can be used in-conjunction with scope
-to control weighting when desired.
+#### Shadow-DOM encapsulation context
 
-I expect this to be controversial.
-It's the biggest change that I'm proposing
-in comparison to the original specification,
-and makes scope much less powerful in the cascade.
-In my mind _that's a good thing_.
-While authors do want scope-proximity to be considered,
-the current expectation
-(using both BEM and CSS-in-JS)
-is that proximity matters _less than specificity_.
+Shadow-DOM [encapsulation context][]
+also comes above/before specificity in the cascade,
+with an importance-reversal.
+To quote the spec:
 
-In my mind this is the big differentiator
-between shadow-DOM and my version of `@scope` --
-the former provides tight encapsulation/separation
-between global and local context,
-while the latter is meant to help _integrate_
-the two with more finesse.
+> When comparing two declarations
+> that are sourced from different encapsulation contexts,
+> then for normal rules the declaration from the outer context wins,
+> and for important rules the declaration from the inner context wins.
 
-So far [an informal twitter survey][survey]
-has backed up that expectation.
-Though there have also been some proposals
-that would split the difference --
-with proximity at the end of the cascade,
-but additional specificity added from the scope.
+This is the opposite of the original scope proposal,
+and means:
 
-[survey]: https://twitter.com/mirisuzanne/status/1351247559738621952
+> …normal declarations belonging to an encapsulation context
+> can set defaults that are easily overridden by the outer context,
+> while important declarations belonging to an encapsulation context
+> can enforce requirements that cannot be overridden by the outer context.
 
-I initially considered
-a combined specificity of the scope selector
-to the specificity of nested rule-blocks:
+[encapsulation context]: https://drafts.csswg.org/css-cascade-5/#cascade-context
+
+#### The case for less isolation, and weak proximity
+
+I have intentionally gone in the other direction,
+making scope proximity _less powerful_ than specificity
+in the cascade.
+There is clearly interest in both strong & weak approaches to scope,
+but I believe encapsulation context
+can be expanded and improved on
+for the high-isolation use-cases.
+Meanwhile low-isolation scope has not been addressed.
+
+By placing _scope proximity_
+below/after specificity in the cascade,
+I am explicitly & intentionally allowing
+more global styles to flow through,
+interact with,
+and even override scoped styles:
 
 ```css
-@scope ([data-component=tabs]) {
-  /* `[data-component=tabs] .tab-item`: 0,2,0 */
-  .tab-item { /* ... */ }
+@​scope (aside) {
+  p { color: green; }
 }
 
-@scope (#tabs) {
-  /* `#tabs .tab-item`: 1,1,0 */
-  .tab-item { /* ... */ }
-}
+aside#sidebar p { color: red; }
 ```
 
-[Sara Soueidan has also proposed][scope-id]
+```html
+<aside id="sidebar">
+	<p>This is red</p>
+</aside>
+```
+
+The primary use-case that I'm trying to address
+is one in which component-styles are "locked-in"
+to avoid cross-contamination,
+but global styles are used to "tie it all together"
+with consistent patterns like typography and branding.
+The desired behavior is to prevent scoped styles from leaking out,
+without getting in the way of global patterns
+that should flow through easily.
+
+If we give scope proximity more weight than specificity,
+authors are left with very few tools to manage that relationship.
+By putting proximity _below_ specificity,
+authors can manage it in several ways:
+
+- Adjust specificity to reflect desired priority,
+  with equal specificity to trigger _proximity_ results
+- Add lower boundaries to avoid overlap of styles
+
+This _in-but-not-out_ approach
+also matches the existing JS tools & CSS naming conventions
+that authors already use.
+Those tools add lower-boundaries,
+and a single attribute-selector of increased specificity --
+very easy to override from the global scope.
+I think this low-weight approach to scope is also backed up by…
+
+- much of the [long-running conversation on CSSWG][bring back scope]
+- a [quick informal survey on Twitter][survey]
+- Nicole Sullivan's [explainer from a couple years ago][nicole-scope]
+
+Anecdotally,
+I hear many CSS beginners surprised
+that the fallback for specificity
+is source-order rather than proximity.
+This proposal would allow authors to opt-into
+that expected proximity-over-source-order fallback behavior.
+
+Meanwhile,
+encapsulation could be expanded
+for [use in the light DOM][isolation],
+and proposal would continue to be distinct --
+covering a significantly different set of use-cases.
+
+[survey]: https://twitter.com/mirisuzanne/status/1351247559738621952
+[isolation]: https://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharinghttps://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharing
+[nicole-scope]: https://docs.google.com/presentation/d/1Ki-IUCEWU-mNlS-019QVV9I9JsytvafQJHTxpBNfYvI/edit?usp=sharing
+
+#### Additional specificity
+
+[Sara Soueidan has proposed][scope-id]
 giving `@scope` the selector-weight of an `#ID`.
 That would acknowledge the targeting weight of scopes,
 without making them override all specificity.
-That seems to be a popular idea.
+I can see the thought behind it,
+but that would not be flexible
+or match existing behavior in any way.
 
 [scope-id]: https://twitter.com/sarasoueidan/status/1351248295969103873?s=21
-
-Neither specificity solution would help
-with the proximity requirements of scoping,
-so it would need to be additional --
-giving `@scope` rules a double-impact on the cascade,
-as part of specificity,
-and then again in relation to proximity.
-I can absolutely see an argument for that,
-but I'm also concerned that it might be
-unnecessarily complicated.
 
 ### Can we improve on the syntax?
 
@@ -1040,17 +1295,6 @@ rather than "end-points":
 
 ```css
 @scope root(.media-block) slots(.content) { /* ... */ }
-```
-
-We could also consider building on
-the proposed specification
-for [CSS nesting](https://drafts.csswg.org/css-nesting/)
-in order to reference the scope root:
-
-```css
-@scope (.media) {
-  &.reversed img { margin-left: 1em; }
-}
 ```
 
 ## Spec History & Context
@@ -1113,9 +1357,11 @@ and mostly acts as a protection from naming conflicts.
 
 - [Scoped Selectors](https://www.w3.org/TR/selectors-4/#scoping),
   which only refer to a subtree or fragment of the document
-- [Reference Element](https://www.w3.org/TR/selectors-4/#the-scope-pseudo)
+- [Reference Element][scope-class]
   (`:scope`) pseudo-class ":scope elements" or the root of any scope
   (currently used in JS APIs only)
+
+[scope-class]: https://www.w3.org/TR/selectors-4/#the-scope-pseudo
 
 ### [CSS Cascade - Level 4](https://www.w3.org/TR/css-cascade-4/)
 
@@ -1138,12 +1384,14 @@ and mostly acts as a protection from naming conflicts.
 
 Related/previous issues and discussions:
 
-- [Bring Back Scope](https://github.com/w3c/csswg-drafts/issues/3547):
+- [Bring Back Scope][]:
   - [@scope with lower-bounds](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-524206816)
   - [@scope with name & attribute](https://github.com/w3c/csswg-drafts/issues/3547#issuecomment-693022720)
 - [Selector Boundaries](https://github.com/w3c/csswg-drafts/issues/5057)
 - [CSS Namespaces](https://github.com/w3c/csswg-drafts/issues/270)
   ([priorities](https://github.com/w3c/csswg-drafts/issues/270#issuecomment-231586786))
+
+[Bring Back Scope]: https://github.com/w3c/csswg-drafts/issues/3547
 
 In addition to the open issue threads mentioned above,
 thanks for valuable feedback and advice from:
@@ -1159,10 +1407,37 @@ thanks for valuable feedback and advice from:
 - Rune Lillesveen
 - Sara Soueidan
 - Tab Atkins
+- Theresa O'Connor
 - Una Kravets
 - Yu Han
 
+## To Be Addressed
+
+Some questions that have been raised,
+but I have not had a chance to address --
+and they need more consideration:
+
+- Should there be a way to express "donut scope"
+  using selectors, rather than an at-rule?
+- (if not) Is there a JS API for fetching a donut scope,
+  rather than filtering `element.matches()`?
+
 ## Change log
+
+### 2021.01.27
+
+- CHANGE: Follow the [nesting module][] rules
+  for combining specificity of the scope selector
+  with specificity of nested/scoped selectors.
+- CHANGE: Allow [nesting module][] syntax
+  to be used [in scoped selectors](#the--nesting-selector)
+- CLARIFY: The scope-root is prepended (as an ancestor)
+  to all scoped selectors
+  unless explicitly placed by use of `&` or `:scope`
+- CLARIFY: The placement of
+  [scope in the cascade](#where-does-scope-fit-in-the-cascade),
+  and my reasons for allowing specificity
+  to flow-through scopes in a single direction
 
 ### 2021.01.18
 
