@@ -1426,10 +1426,10 @@ and they need more consideration:
 
 ### 2021.01.27
 
-- CHANGE: Follow the [nesting module][] rules
+- CHANGE: Follow the [nesting module][nesting] rules
   for combining specificity of the scope selector
   with specificity of nested/scoped selectors.
-- CHANGE: Allow [nesting module][] syntax
+- CHANGE: Allow [nesting module][nesting] syntax
   to be used [in scoped selectors](#the--nesting-selector)
 - CLARIFY: The scope-root is prepended (as an ancestor)
   to all scoped selectors
