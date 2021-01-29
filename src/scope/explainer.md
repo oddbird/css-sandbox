@@ -491,6 +491,16 @@ we would not support nested instances of `:scope` itself:
 }
 ```
 
+Note: There has also been some discussion
+of using the [nesting module][nesting]
+`&` nested-selector for this.
+But `&` acts as an alias for duplicating a selector list,
+while `:scope` refers to a specific element
+that is acting as the root of a given context.
+Given the likelihood that
+nesting and scope will be used together,
+it seemed important that these ideas remain distinct.
+
 ### A new donut selector?
 
 Lea Verou has pointed out
@@ -1489,6 +1499,10 @@ From [Rune Lillesveen](https://github.com/w3ctag/design-reviews/issues/593#issue
 - Can tree-abiding pseudo elements (like `::before`) be scope roots?
 
 ## Change log
+
+### 2021.01.29
+
+- CLARIFY reasons for using `:scope` rather than `&`
 
 ### 2021.01.28
 
