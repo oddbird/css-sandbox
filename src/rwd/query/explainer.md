@@ -34,7 +34,7 @@
 
 Please leave any feedback on the CSSWG issues for this proposal:
 
-- [This container query proposal](https://github.com/w3c/csswg-drafts/issues/5796)
+- [CSSWG Issue for this proposal](https://github.com/w3c/csswg-drafts/issues/5796)
 - [Single-axis containment](https://github.com/w3c/csswg-drafts/issues/1031)
 - [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
 
