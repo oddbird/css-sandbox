@@ -275,11 +275,11 @@ on the order of identically-named layers in the shadow DOM.
 When multiple `@layer` rules are nested,
 the resulting layer names are a combination
 of outer and inner identifiers,
-separated by whitespace.
+separated by a period.
 
 In this example,
-the nested "framework default" layer is distinct
-from the top-level "default" layer:
+the nested `framework.default` layer is distinct
+from the top-level `default` layer:
 
 ```css
 @layer default {
@@ -304,16 +304,15 @@ The resulting layers & layer-order are:
 1. _unlayered_
 2. default
 3. framework
-4. framework default
-5. framework theme
+4. framework.default
+5. framework.theme
 
 As a shorthand,
 nested layers can also be described
-by combining identifiers with whitespace
-in a single layer rule:
+by combining identifiers in a single layer rule:
 
 ```css
-@layer framework theme {
+@layer framework.theme {
    blockquote { color: rebeccapurple; }
 }
 ```
@@ -326,8 +325,8 @@ to reference layer names in a more global layer-scope:
 ```css
 @layer default;
 @layer framework {
-   @layer default { /* framework default */ }
-   @layer theme default { /* framework theme default */ }
+   @layer default { /* framework.default */ }
+   @layer theme.default { /* framework.theme.default */ }
 }
 ```
 
@@ -354,7 +353,8 @@ it is described through the scoping mechanism,
 but that's not implemented anywhere.
 In order to achieve all three of the goals above,
 we propose adding explicit cascade sorting steps
-for both style attributes and custom layers:
+for both style attributes and custom layers
+(in order of cascade priority, highest to lowest):
 
 1. Origins & Importance
 2. Encapsulation Context (eg Shadow DOM)
@@ -394,7 +394,8 @@ and for **important** rules
 the declaration whose cascade layer is first wins.
 
 In other words,
-the order of explicit layers
+non-layered styles normally override layered styles,
+but order of layer priority
 will be reversed inside the **important** origins.
 This follows the same logic used for layering
 normal and important origins,
@@ -411,7 +412,8 @@ For example, the following CSS:
 @layer patterns url(system.css);
 @layer components url(library.css);
 
-/* un-layerd styles can appear anywhere */
+/* un-layerd styles can appear anywhere, */
+/* and have the highest cascade priority */
 
 @layer reset {
   /* authors can add to an existing layer */
@@ -419,7 +421,8 @@ For example, the following CSS:
 }
 ```
 
-Results in the following layer orders:
+Results in the following layer orders
+(in order of cascade priority, highest to lowest):
 
 1. Important **Author** Origin
    1. Important reset layer
@@ -628,7 +631,7 @@ layers of the library as desired:
 ```css
 @layer bootstrap url(bootstrap.css);
 
-@layer bootstrap content {
+@layer bootstrap.content {
   /* append styles to the bootstrap content layer */
 }
 ```
@@ -886,7 +889,8 @@ unknown or un-controllable.
 
 - Chromium : Positive --
   Google funded development of this explainer
-- Gecko : [No signals](https://github.com/mozilla/standards-positions/issues/471)
+- [Mozilla Standards Position](https://github.com/mozilla/standards-positions/issues/471)
+  (positive)
 - Webkit : No signals
 
 ## References & acknowledgements
@@ -898,7 +902,17 @@ Many thanks for valuable feedback and advice from:
 - Elika Etemad
 - Florian Rivoal
 - Jen Simmons
+- Lea Verou
 - Nicole Sullivan
+- Peter Linss
+- Rossen Atanassov
 - Rune Lillesveen
 - Tab Atkins Jr.
 - Theresa O’Connor
+
+## Changelog
+
+### 2021.01.29
+
+- CLARIFY the priority order of layers in relation to unlayered styles
+- CHANGE to reflect current dot-syntax for nested layers
