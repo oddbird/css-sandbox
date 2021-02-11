@@ -808,25 +808,34 @@ I think the @-rule block provides several advantages:
   and each might require unique selectors
   based on the same query.
   These can be grouped in an @-rule.
-- Layout occurs after selectors-matching in the render process,
-  so keeping them distinct makes for simpler implementation logic
-- We avoid the issues mentioned above
-  with having an explicit selector attached to the query.
 
-I also think the syntax can lead to confusion.
-It's not immediately clear what these different selectors would mean:
+The nesting syntax might help resolve the latter,
+since these would likely have the same meaning:
 
 ```css
-:container(inline-size < 40em) {
-  font-size: small;
+@container (inline-size < 40em) {
+  & .card { /* ... */ }
 }
-.media-object:container(inline-size < 40em) {
-  font-size: small;
-}
-:container(inline-size < 40em) .media-object {
-  font-size: small;
+
+.card:container(inline-size < 40em) {
+  /* ... */
 }
 ```
+
+There's even a potential advantage here,
+for specifying which part of a complex selector
+should resolve the query:
+
+```css
+.card:container(inline-size < 40em) {
+  & h2 { /* nesting syntax... */ }
+}
+```
+
+That's not easily represented
+by any `@container` syntax.
+(David Baron's selector argument doesn't match
+the querying element, but the queried container)
 
 ### Other questions to explore
 
