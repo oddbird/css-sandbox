@@ -8,21 +8,18 @@ eleventyNavigation:
 
 The `switch()` function would provide conditional logic in CSS values,
 similar to the Sass `if()` function,
-but with access to some essential client-side values for comparison:
-primarily `available-inline-size`.
+but with access to some essential client-side values for comparison.
+The initial proposal resolves around `available-inline-size`,
+but that could be extended down the road.
 
-If you think of it as a full solution
-it can look bulky,
-because it works one-property-at-a-time.
-But if you think about use-cases where
-_you only need to adjust one property_,
-this becomes much more attractive
-than adding fully distinct blocks
-for each breakpoint.
-
-## Status
-
-- Igalia: [Prototype in Chromium](https://www.youtube.com/embed/8QFST9MvjyA)
+Switches work off the built-in "phases"
+that a browser rendering-engine goes through.
+Some properties (like `display`) need to resolve early,
+while other properties (eg `color`)
+are not resolved until later.
+The switch function could make different queries available
+on different properties,
+based on their place in the rendering lifecycle.
 
 ## Resources
 
@@ -34,31 +31,81 @@ _From [Brian Kardell](https://bkardell.com/) & [Igalia](https://www.igalia.com/)
 
 ## Background
 
-The [query-block](../query/) approach
+The [@container block](../query/) approach
 relies on [CSS Containment](https://drafts.csswg.org/css-contain/)
-to avoid infinite loops -
-and specifically [single-axis size containment](https://github.com/w3c/csswg-drafts/issues/1031)
-which _might not be possible_.
+and external-queries
+to avoid infinite loops.
+That approach would require
+[single-axis size containment](https://github.com/w3c/csswg-drafts/issues/1031)
+for most use-cases.
+Such 1D containment is still theoretical,
+and Safari/webkit
+[do not yet support 2D containment](https://developer.mozilla.org/en-US/docs/Web/CSS/contain#browser_compatibility).
 
 The `switch()` proposal avoids those issues by limiting
-the properties that an author is able to switch,
-ensuring they never impact container size
-(no `font-size`, `width`, etc).
-
+the queries that can be switched on different properties --
+ensuring e.g. `available-inline-size` cannot be queried
+until it has been resolved.
 Those limits come from the internal architecture of browser engines,
 and make it possible to implement `switch()`
 without relying on other hypothetical CSS features.
 
 This might require teaching authors
 the essential phases of browser rendering,
-for a better understanding of _why_
-only certain properties are supported.
+for a better understanding of which
+properties would support what queries.
+But that is similar to teaching the values of `contain`
+when using a container-based approach.
 
-Igalia has already developed a working prototype:
+## Prototype
+
+Igalia has already developed a working
+[prototype in Chromium](https://www.youtube.com/embed/8QFST9MvjyA).
 
 <figure data-ratio>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/8QFST9MvjyA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </figure>
+
+## Related conditional functions
+
+There have been
+[several proposals](https://github.com/w3c/csswg-drafts/issues/5009#issuecomment-626072319)
+and a [draft spec](https://drafts.csswg.org/css-conditional-values-1/#if)
+for inline conditional functions
+in CSS.
+Here are some highlights…
+
+### Nth-value
+
+```css
+/* nth-value(<index>; <value>; <value> [; <value>]*) */
+.card {
+  color: nth-value(var(--color-index, 1); maroon; tomato);
+  gap: nth-value(var(--size-index, 1); 1em; 2em);
+  flex-direction: nth-value(var(--size-index, 1); column; row);
+}
+
+/* change the value based on media/container sizes */
+@media (prefers-color-scheme: dark) { html { --color-index: 2; } }
+@container (min-width: 45em) { .card { --size-index: 2; } }
+```
+
+This can be used anywhere
+to toggle between a number of different values
+by changing the value of a custom property.
+It doesn't provide any new features,
+but useful syntax sugar
+for quickly switching between inline values
+based on existing conditionals.
+Those values can all remain defined in a single place,
+rather than being split across at-rules.
+
+- conditions: `<integer>`
+- consequents: `<any-value>`
+- properties: any
+- resolved: var-like (invalid at computed value time)
+
+### Condition
 
 ## Syntax
 
