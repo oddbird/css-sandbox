@@ -103,15 +103,106 @@ Here are a few uses that only `@container` can solve
 - Adjust multiple descendant elements based on a shared query
 
 There are two potential advantages of `switch()`
-that I'll dig into a bit more...
+in theory:
 
-### Avoiding containment
+- There _might_ be cases where even 1D containment is too restrictive?
+- Child elements in a grid/flex parent should respond to the "track" size
+  rather than the parent size.
 
-==@@@ todo==
+It's hard to comment on the first case.
+So far I haven't had much trouble
+using the early prototype of 1D containment --
+but we still don't know exactly where things will land.
 
-### Flex & grid tracks
+The second case is more clear,
+and has been the basis of all `switch()` demos so far.
+Consider the following HTML & CSS:
 
-==@@@ todo==
+```html
+<section class="card-grid">
+  <div class="card">...</div>
+  <div class="card">...</div>
+  <div class="card">...</div>
+  <div class="card">...</div>
+</section>
+```
+
+```css
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20em, 1fr));
+}
+
+.card {
+  display: grid;
+  /* we want to change this value based on the track size */
+  grid-template: "image" auto "content" 1fr "footer" auto / 100%;
+}
+```
+
+The size of `.card-grid` does not
+accurately reflect the available space for a given card,
+but there is no other external "container"
+that `.card` can use to adjust the `grid-template`.
+
+Switch allows us to solve that on the `.card`,
+without any extra elements:
+
+```css
+.card {
+  display: grid;
+  grid-template: switch(
+    (available-inline-size > 40em) "image content" 1fr "footer footer" auto / auto 1fr;
+    "image" auto "content" 1fr "footer" auto / 100%;
+  );
+}
+```
+
+Using `@container`,
+we would need to add an extra wrapping element --
+so that the card component has an external track-sized container to query:
+
+```html
+<section class="card-grid">
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+  <div class="card-container"><div class="card">...</div></div>
+</section>
+```
+
+```css
+/* the outer element can get containment… */
+.card-container {
+  contain: layout inline-size;
+}
+
+/* which gives .card something to query against */
+@container (inline-size > 30em) {
+  .card {
+    grid-template: "image content" 1fr "image footer" auto / 1fr 3fr;
+  }
+}
+```
+
+The extra markup might not be ideal?
+But on the other hand,
+I'm not sure this single use-case
+warrants a second approach?
+
+## Other inline-conditions
+
+There are various other discussions
+about adding inline-conditional functions to CSS --
+`if()`, `nth()`, `cond()`, etc.
+Some of those proposals also allow
+comparisons against `100%` as part of the condition statement.
+
+In _most cases_
+`100%` would be identical or similar to `available-inline-size`.
+It might be interesting to see if one of these
+more generic proposals
+can be used to cover the `switch()` use-case.
 
 ## Learning & Teaching
 
