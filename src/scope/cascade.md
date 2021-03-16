@@ -201,4 +201,12 @@ I expect it to be an easy concept to learn & teach.
 
 ## Use Cases
 
+Inner scopes should not override outer states.
+Said more generically,
+scoped styles should be able to
+update a _default_ pattern
+without overriding all the global _variations_
+of that pattern.
+
 ==@@@ work in progress==
+

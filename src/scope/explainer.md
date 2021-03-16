@@ -382,7 +382,7 @@ but their descendants are not:
 
 Which would only match `img` and `.content`
 inside `.media-block` --
-_but not if there is no intervening `.content`
+_but not if there are intervening `.content`
 between the scope root and selector target_:
 
 ```html
@@ -554,7 +554,7 @@ on the cascade of scoped selectors --
 as part of specificity,
 and then again in relation to proximity.
 
-At first that seemed potentially confusion,
+At first that seemed potentially confusing,
 but after many conversations,
 I think it may be the most expected behavior.
 

@@ -17,6 +17,10 @@ More specific issues for discussion:
 - ["container width" and "container height" units](https://github.com/w3c/csswg-drafts/issues/5888)
 - [`srcset` and `sizes` interaction with container queries](https://github.com/w3c/csswg-drafts/issues/5889)
 
+Implementations:
+
+- [Chromium](https://crbug.com/1145970) [in development]
+
 Typos or other document-specific issues
 [can be reported in this repo](https://github.com/oddbird/css-sandbox/issues).
 
