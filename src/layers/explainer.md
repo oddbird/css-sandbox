@@ -24,8 +24,6 @@ or open new issues when appropriate:
 Specific issues for discussion:
 
 - [Layers terminology bikeshed][5840]
-- [Do we need a keyword similar to `revert`, but for cascade layers?][5793]
-- [Should unnamed cascade layers be allowed?][5792]
 - [What is the appropriate syntax for appending to nested layers?][5791]
 - [Cascade layers need an import syntax][5681]
 - [Provide a syntax for re-using cascade layers across encapsulation context?][5854]
@@ -33,13 +31,17 @@ Specific issues for discussion:
 - [Does nested `@layer` syntax work for declaring layer order?][5849]
 
 [5840]: https://github.com/w3c/csswg-drafts/issues/5840
-[5793]: https://github.com/w3c/csswg-drafts/issues/5793
-[5792]: https://github.com/w3c/csswg-drafts/issues/5792
 [5791]: https://github.com/w3c/csswg-drafts/issues/5791
 [5681]: https://github.com/w3c/csswg-drafts/issues/5681
 [5854]: https://github.com/w3c/csswg-drafts/issues/5854
 [5853]: https://github.com/w3c/csswg-drafts/issues/5853
 [5849]: https://github.com/w3c/csswg-drafts/issues/5849
+
+Browser implementations:
+
+- [Mozilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1699214)
+- [Webkit](https://bugs.webkit.org/show_bug.cgi?id=220779)
+- [Chromium](https://crbug.com/1095765)
 
 Historic context:
 
