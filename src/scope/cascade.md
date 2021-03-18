@@ -138,7 +138,7 @@ of each selector block:
 
 ```css
 .title { color: red; } /* specificity [0,1,0] */
-.title.special { color: purple; } /* specificity [0,1,0] */
+.title.special { color: purple; } /* specificity [0,2,0] */
 
 @scope (:where(.article)) to (.lower-bounds) {
   .title { /* specificity [0,1,0] */
