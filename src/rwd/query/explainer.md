@@ -27,7 +27,8 @@ Implementations:
 
 - [Chromium](https://crbug.com/1145970) --
   in Chrome Canary, go to `chrome://flags` & "Enable CSS Container Queries"
-  [this is a draft prototype and my not match the final design]
+  (This is a draft prototype and my not match the final design.
+  I use syntax in this document that is not yet supported in the prototype.)
 
 Demos & Articles:
 
