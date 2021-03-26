@@ -6,6 +6,12 @@
 
 ## Participate
 
+The CSSWG has resolved to begin moving this proposal
+into the CSS specification,
+as part of the
+[CSS Containment Module level 3](https://drafts.csswg.org/css-contain-3/).
+(So far, that's an empty document. I'm working on it.)
+
 Please leave any feedback on the CSSWG issues for this proposal:
 
 - [Fleshing out @container queries with single-axis containment](https://github.com/w3c/csswg-drafts/issues/5796)
@@ -19,10 +25,20 @@ More specific issues for discussion:
 
 Implementations:
 
-- [Chromium](https://crbug.com/1145970) [in development]
+- [Chromium](https://crbug.com/1145970) --
+  in Chrome Canary, go to `chrome://flags` & "Enable CSS Container Queries"
+  [this is a draft prototype and my not match the final design]
 
-Typos or other document-specific issues
-[can be reported in this repo](https://github.com/oddbird/css-sandbox/issues).
+Demos & Articles:
+
+- [My collection of codepen demos](https://codepen.io/collection/XQrgJo)
+
+This Document:
+
+- [On github](https://github.com/oddbird/css-sandbox/blob/main/src/rwd/query/explainer.md)
+- [On css.OddBird.net](https://css.oddbird.net/rwd/query/explainer/)
+- Typos or other
+  [issues can be reported in github](https://github.com/oddbird/css-sandbox/issues)
 
 ## Table of contents
 
@@ -54,6 +70,7 @@ Typos or other document-specific issues
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 - [Changelog](#changelog)
+  - [2021.03.26](#20210326)
   - [2021.01.29](#20210129)
 
 ## Introduction
@@ -898,6 +915,12 @@ Thanks also for valuable feedback and advice from:
 - Una Kravets
 
 ## Changelog
+
+### 2021.03.26
+
+- NOTE: CSSWG Resolution and link to Containment Level 3
+- NOTE: Chrome experimental prototype information
+- NOTE: Link to demos & articles
 
 ### 2021.01.29
 
