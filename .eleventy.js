@@ -1,6 +1,6 @@
 const nav = require("@11ty/eleventy-navigation");
 const hljs = require('@11ty/eleventy-plugin-syntaxhighlight');
-const toc = require('eleventy-plugin-nesting-toc');
+const toc = require('eleventy-plugin-toc');
 const yaml = require('js-yaml');
 
 const type = require('./filters/type');
@@ -19,7 +19,6 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('typogr', type.set);
   eleventyConfig.addFilter('md', type.render);
   eleventyConfig.addFilter('mdInline', type.inline);
-  eleventyConfig.addFilter('cleanToc', type.cleanToc);
 
   // config
   eleventyConfig.setLibrary('md', type.mdown);

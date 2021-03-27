@@ -1,6 +1,11 @@
 'use strict';
 
 const typogr = require('typogr');
+const ghSlugger = require('github-slugger');
+const slugger = new ghSlugger();
+
+const ghSlug = s => slugger.slug(s);
+
 const mdown = require('markdown-it')({
   html: true,
   breaks: false,
@@ -11,6 +16,7 @@ const mdown = require('markdown-it')({
   .use(require('markdown-it-mark'))
   .use(require('markdown-it-footnote'))
   .use(require('markdown-it-anchor'), {
+    slugify: ghSlug,
     permalink: true,
   });
 
@@ -25,13 +31,10 @@ const render = (content, type = true) =>
 const inline = (content, type = true) =>
   type ? set(mdown.renderInline(content)) : mdown.renderInline(content);
 
-const cleanToc = (content) => set(content.replace(/\s¶/g,''));
-
 module.exports = {
   mdown,
   amp,
   set,
   render,
   inline,
-  cleanToc,
 };

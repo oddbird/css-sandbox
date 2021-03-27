@@ -29,7 +29,7 @@ date: Last Modified
       {% endif %}
 
       {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
-        {{ content | toc | cleanToc | safe }}
+        {{ content | toc | safe }}
       {% endif %}
     {% endif %}
 
