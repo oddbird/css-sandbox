@@ -20,6 +20,9 @@ Please leave any feedback on the CSSWG issues for this proposal:
 
 More specific issues for discussion:
 
+See also the [github project for css-contain-3](https://github.com/w3c/csswg-drafts/projects/18).
+
+- [:root/body viewport propagation and containment](https://github.com/w3c/csswg-drafts/issues/5913)
 - ["container width" and "container height" units](https://github.com/w3c/csswg-drafts/issues/5888)
 - [`srcset` and `sizes` interaction with container queries](https://github.com/w3c/csswg-drafts/issues/5889)
 - [CQ vs shadow boundaries](https://github.com/w3c/csswg-drafts/issues/5984)
