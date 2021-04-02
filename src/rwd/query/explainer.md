@@ -22,6 +22,13 @@ More specific issues for discussion:
 
 - ["container width" and "container height" units](https://github.com/w3c/csswg-drafts/issues/5888)
 - [`srcset` and `sizes` interaction with container queries](https://github.com/w3c/csswg-drafts/issues/5889)
+- [CQ vs shadow boundaries](https://github.com/w3c/csswg-drafts/issues/5984)
+- [What container features can be queried?](https://github.com/w3c/csswg-drafts/issues/5989)
+- [Should there be a new syntax for establishing queryable containers?](https://github.com/w3c/csswg-drafts/issues/6174)
+- [What is the migration path for Container Queries?](https://github.com/w3c/csswg-drafts/issues/6175)
+- [Is there a use-case for querying explicit container selectors?](https://github.com/w3c/csswg-drafts/issues/6176)
+- [Is it possible to apply containment inside @container?](https://github.com/w3c/csswg-drafts/issues/6177)
+- [How does @container resolve when no ancestor containers have been defined?](https://github.com/w3c/csswg-drafts/issues/6178)
 
 Implementations:
 
@@ -67,10 +74,10 @@ This Document:
   - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
   - [Combining scope with container queries](#combining-scope-with-container-queries)
   - [@-Rule or pseudo-class?](#-rule-or-pseudo-class)
-  - [Other questions to explore](#other-questions-to-explore)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 - [Changelog](#changelog)
+  - [2021.04.02](#20210402)
   - [2021.03.26](#20210326)
   - [2021.01.29](#20210129)
 
@@ -656,6 +663,10 @@ a container query that is specific to print media:
 
 ### Single-axis containment issues
 
+CSSWG issue:
+
+- [do we need size containment in a single dimension to enable container queries?](https://github.com/w3c/csswg-drafts/issues/1031)
+
 There are two known situations in CSS
 where changes on the block-axis
 can have an impact on the inline-axis layout:
@@ -727,6 +738,10 @@ but examples for how we might be able to
 solve each case as it arises.
 
 ### Implicit vs explicit containers
+
+CSSWG issue:
+
+- [Is there a use-case for querying explicit container selectors?](https://github.com/w3c/csswg-drafts/issues/6176)
 
 In conversations leading to this proposal,
 there has been some concern about the dangers
@@ -859,20 +874,12 @@ by any `@container` syntax.
 (David Baron's selector argument doesn't match
 the querying element, but the queried container)
 
-### Other questions to explore
-
-- Is it possible to apply containment within a container query?
-  In what cases might that lead to cyclic dependencies?
-- Will a default root fallback container feel like expected behavior,
-  or should we require explicit containment in order to match queries?
-- Are there special considerations required for a shadow-DOM `@container`
-  to resolve queries against contained host element?
-
 ## Stakeholder Feedback / Opposition
 
 - Chromium : Positive --
   Google was involved in developing this proposal
-- Gecko : No signals
+- Gecko : Positive --
+  Mozilla developed the original proposal this is based on
 - Webkit : No signals
 
 ## References & acknowledgements
@@ -916,6 +923,10 @@ Thanks also for valuable feedback and advice from:
 - Una Kravets
 
 ## Changelog
+
+### 2021.04.02
+
+- NOTE: Open & link CSSWG issues for further discussion
 
 ### 2021.03.26
 
