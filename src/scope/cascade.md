@@ -12,24 +12,136 @@ which represent different goals.
 1. Keep scoped styles **from escaping scope** --
    by expressing a scope of _ownership_
    through root & lower-boundary selectors.
-2. Keep global styles **from overriding scope** --
+2. Keep global styles **from overriding scoped styles** --
    by giving _proximity_ the power to override
    specificity in the cascade.
 
-Most CSS tooling (CSS modules, Vue scoped styles, etc)
+Popular CSS tools (CSS modules, Vue scoped styles, etc)
+and conventions (BEM, etc)
 have put their entire focus on the first goal,
-but previous CSS proposals have been designed to do both --
+while previous CSS proposals have been designed
+to link both goals under a single name --
 making scope much more "heavy-handed" in the Cascade.
 
-My thesis has been
-that giving _proximity_ too much power
-to override global scope
-would make this feature too limited in use-cases --
-and be a major departure from the tools
-authors already use.
-This document is an attempt to flesh out that argument.
+Both "specificity" and "proximity" are heuristics
+that represent different aspects of the same assumption:
+details are _likely_ to be more targeted than defaults.
+We know that's not universally true in either case,
+which is why we're now providing
+a more explicit `@layer` functionality.
 
-## Scope in existing tools
+Still, the heuristics are useful,
+and one of them needs to take precedence.
+
+## Context
+
+Nested scopes are highly likely.
+If proximity takes priority,
+then the specificity of a selector
+only matters in relation to other selectors
+at the same proximity.
+Adding a scope would fundamentally break
+the way selectors have cascaded for 20+ years.
+Global selectors would need to rely on explicit `@layer` rules
+if they are intended to have global impact.
+
+Meanwhile,
+many projects keep specificity
+relatively flat & low-weight.
+By default,
+authors prefer to avoid conflicts in the first place.
+If specificity takes priority,
+it can continue to be used in much the same way as before
+(with `@layers` to add more customization) --
+and proximity will begin to apply
+only in those situations where flat specificity
+and overlapping scopes allow a conflict.
+
+I see the latter option
+as a much smoother path forward.
+Proximity is defined by the DOM,
+and is largely invisible to a CSS author
+writing modular styles.
+Selector specificity
+is established in the CSS,
+and applied consistently
+no matter how the DOM is shaped.
+It provides authors with more control
+over the way a system is applied.
+
+I also think it's a better match
+to existing tools & conventions.
+
+### Lexical scope metaphors
+
+Many programming languages (including Sass & JS)
+have a concept of _lexical scope_,
+both at the document/module level,
+and within code structures.
+
+In those cases,
+scope primarily helps avoid
+naming conflicts.
+If a function, mixin, or variable name
+is allowed to "bleed" across scopes,
+it might interfere with another feature
+of the same name.
+
+Lexical scopes tend to be
+clearly defined and nested.
+The relationship between scopes
+is intentionally visible in the document,
+and there may even be tools to intentionally
+allow bleed as desired
+(see JS & Sass module imports/exports,
+and the `!global` flag for Sass variables).
+
+The same is generally true of
+Shadow-DOM "isolation context"
+where the scope is defined
+by a discrete DOM fragment.
+The shadow scope is always nested
+inside a host document scope,
+and the relationship is clear.
+
+Inline styles work in a similar way.
+They are applied directly to a single element,
+and are given priority
+over more "global" stylesheet declarations.
+That's a form of lexical scope,
+based on where the style is defined.
+
+In all these cases,
+the scopes have clearly defined parent/child relationships
+that are visible in the code.
+It makes sense for the clearly defined parent or child
+to consistently take precedence.
+
+But those structures & relationships
+are not at all clear
+in the many-to-many situation described
+by selectors.
+The relationship between two selectors
+can take any number of shapes --
+trading parent/child relationships
+or even describing the exact same element.
+
+None of that is clear by looking at the CSS alone,
+and it's one reason we have specificity --
+which we can control & define
+without reference to the DOM.
+
+CSS scopes will be primarily defined
+using CSS selectors.
+It will not necessarily be clear
+how all the scopes are expected
+to overlay and interact.
+The parent/child/unison relationships
+are likely to change in unpredictable ways --
+and author will need to rely on other tools
+that better express the _weight_ of a scoped rule.
+
+### Scope in existing tools
 
 The primary solution I've seen
 was invented (if I understand correctly)
@@ -128,7 +240,7 @@ override global styles of the same specificity,
 but it is easy to increase global specificity when desired
 to override scoped styles.
 
-## My existing proposal
+### My existing proposal
 
 My proposal would be able to replicate either/both outcomes --
 or provide their own desired specificity behavior --
@@ -171,7 +283,7 @@ would be able to override the first (zero-specificity-root) scope.
 - Global styles _may_ need additional specificity
   to override scoped styles
 
-## Migration path
+### Migration path
 
 All existing tools would be able to auto-generate
 `@scope` rules that match their current behavior
@@ -199,114 +311,9 @@ added to the specificity of individual selectors.
 Since that also matches the specificity behavior of nesting,
 I expect it to be an easy concept to learn & teach.
 
-## Use Cases
+## Use cases
 
-The current design of this feature
-is based on the premise that
-**scoped defaults should not override global specifics**,
-and that in-fact
-**different scopes have different purpose & priority**.
-There is no reason to assume
-all scoped styles with a _default_ link color
-should override all the global patterns
-with link color _variations_.
-
-In order to make scope higher-priority than specificity,
-we have to assume that:
-
-- namespaced styles (scoped so as not to apply too broadly)
-  _also/always_ represent more specific styling
-- specificity isn't the right solution for that
-
-I'm arguing that's not a fair assumption,
-and scope is more flexible/useful
-when it does not imply priority.
-
-### Button defaults & patterns
-
-For a simplified example,
-let's assume we have a global pattern
-for different button types:
-
-```css
-button {
-  padding: 0 0.5em;
-  background: blue;
-  color: white;
-}
-
-button.danger {
-  background: maroon;
-}
-```
-
-If we've scoped those globally,
-it's probably because we plan to use them
-across the entire site,
-in a variety of contexts.
-
-Now let's say we want to change the default
-in a specific scope:
-
-```css
-@scope (aside) {
-  button {
-    background: purple;
-  }
-}
-```
-
-It does make sense to me that the more scoped style
-overrides the default,
-with either equal or higher specificity.
-But I do not think it's obvious
-that this should _also_ override my
-global `button.danger` pattern
-in the `aside`.
-
-If scope overrides specificity,
-our only recourse here would be layers:
-
-```css
-@layer buttons.default {
-  button {
-    padding: 0 0.5em;
-    background: blue;
-    color: white;
-  }
-}
-
-@layer buttons.type {
-  .danger {
-    background: maroon;
-  }
-}
-
-@scope (aside) {
-  @layer buttons.default {
-    button {
-      background: purple;
-    }
-  }
-}
-```
-
-That's not a bad solution,
-and works in both cases if we want it,
-but I don't find it obvious
-that scope should imply priority over specificity
-in cases like this --
-and the current proposal would allow
-various other logics for defining priority:
-
-- scopes can be given different specificities
-  or layers to clarify their importance
-- scopes can be given similar specificity
-  when we want inner-takes-precedence
-
-### Inverted sidebar
-
-Fantasai raised this use-case the CSSWG telecon:
+Fantasai raised this use-case on the CSSWG telecon:
 
 > fantasai: Example: I have a sidebar in my page
 > and want it to have a different color.
@@ -339,31 +346,12 @@ Fantasai also says:
 > If you switch class to ID
 > it can completely destroy relationship between selectors.
 
-I'd argue _that's exactly the purpose of specificity_,
-and would be the _expected behavior_ we're used-to,
-and there's no reason for `@scope` to change any of that.
-
-If we had a dark-mode style
-and a light-mode style,
-I would expect them to get similar weight.
-In that case we clearly want the inner style to win.
-When the specificities differ,
-it is much less clear to me.
-If I create a highly-specific style to be applied globally,
-why would we assume
-that lower-specificity scoped styles should take precedence?
-I wouldn't want that.
-
-To me this is exactly the argument
-in favor of specificity winning over scope.
-**If the `link-list` pattern is supposed to have a special link styles,
-then that pattern should own all its contextual variations,
-and not get wiped out by generic styles
-just because they happen to be scoped.**
+I'd argue that's exactly the purpose of specificity as a heuristic,
+it's the _expected behavior_ for authors,
+and there's no reason for `@scope` to change that.
 
 In this case,
-the author needs to clarify their intentions,
-and the current proposal gives them lots of options:
+the author needs to clarify their intentions:
 
 - If we're talking about a low-priority link-in-list pattern...
   - That probably shouldn't have a high specificity
@@ -386,6 +374,170 @@ and the current proposal gives them lots of options:
 All of these solutions help to clarify what we meant,
 and what we intended.
 None of them are hacks.
+
+Let's take a closer look at the options.
+
+### Global & scoped themes
+
+Let's start with general theme styles,
+before we get the list-link pattern specifically.
+In the example, light mode is the global default theme,
+and dark-mode is a scoped "inversion" of the theme.
+
+If we base the inversion on a class (like `.invert`),
+proximity and specificity would give us the same priority result here.
+While that seems reasonable to me,
+I'll give the inversion a lower specificity,
+so we can see the potential conflict between them:
+
+```css
+html {
+  background: white;
+  color: black;
+}
+
+a:any-link { color: darkmagenta; }
+
+@scope (aside) {
+  :scope {
+    background: white;
+    color: black;
+  }
+}
+```
+
+This creates a broken state either way:
+
+- If proximity takes precedence,
+  we've removed all color-differentiation from our links.
+- If specificity takes precedence,
+  we'll get dark links on a black background.
+
+And either way,
+the issue is resolved
+by clarifying our intent for links
+in the inverted scope:
+
+```css
+html {
+  background: white;
+  color: black;
+}
+
+a:any-link { color: darkmagenta; }
+
+@scope (aside) {
+  :scope {
+    background: white;
+    color: black;
+  }
+
+  /* both higher specificity & closer proximity */
+  a:any-link { color: violet; }
+}
+```
+
+This is very similar
+to the way authors currently handle
+the overlap of styles,
+without scope:
+
+```scss
+html {
+  background: white;
+  color: black;
+}
+
+a:any-link { color: darkmagenta; }
+
+aside {
+  background: white;
+  color: black;
+
+  /* higher specificity */
+  & a:any-link { color: violet; }
+}
+```
+
+Specificity is already designed
+to give contextual styles more weight
+over global defaults.
+Adding proximity as an override to specificity
+would not solve the problem more easily.
+
+### Light & dark theme scopes
+
+Another option would be to define multiple scoped "themes" --
+such as light- and dark-mode --
+which can be nested indefinitely.
+This is a case where we clearly want
+the inner (more proximate) scope to win,
+but also a case where
+I would expect the theme selectors
+to provide equal specificity:
+
+```css
+@scope (.light) {
+  :scope {
+    background: white;
+    color: black;
+  }
+
+  a:any-link { color: purple }
+}
+
+@scope (.dark) {
+  :scope {
+    background: white;
+    color: black;
+  }
+
+  a:any-link { color: plum; }
+}
+```
+
+Since the specificities match,
+proximity becomes the deciding factor.
+For extra caution,
+we can also ensure these scopes never overlap,
+avoiding all conflicts between them:
+
+```css
+@scope (.light) to (.dark) { … }
+@scope (.dark) to (.light) { … }
+```
+
+### Themes and components
+
+Unlike DOM-isolation approaches (eg shadow-DOM),
+we can also end-up combining broad patterns
+(like themes)
+with more contained components
+(like a specialized link-list style).
+
+There's not necessarily a clean delineation here,
+but in some sense these scopes
+belong in different "layers" of a design system
+(as per the ITCSS convention or the `@layer` spec).
+
+For a smaller component like a list,
+it will generally be "inside" one theme or another.
+If both the theme and component are scoped,
+and both scopes apply,
+the more narrowly defined component
+is likely to be "more proximate" for items in the list.
+
+But there are use-cases where they overlap
+in unpredictable ways:
+
+- A tab component could be nested inside a light-theme,
+  but contain a dark-theme inside one of the tab contents.
+- A card component could be assigned a theme directly,
+  making both the theme & component "equal" in proximity.
+
+Authors will need tools
+to manage the priority of these relationships
+in a more consistent way.
 
 ## Conclusion
 
@@ -415,3 +567,4 @@ we already have specificity tools, and layering for that.
 But if we insist these goals always go together,
 we end up making it very hard
 in the cases where they don't.
+
