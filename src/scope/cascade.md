@@ -35,33 +35,23 @@ and one of them needs to take precedence.
 
 ## Context
 
-Nested scopes are highly likely.
+Proximity is defined by the DOM,
+and is largely invisible
+to a CSS author writing modular styles.
+Selectors that were previously designed
+to have higher or lower specificity,
+will suddenly cascade
+in unexpected & unreliable ways
+based on DOM structures.
+
 If proximity takes priority,
 then the specificity of a selector
 only matters in relation to other selectors
 at the same proximity.
-Adding a scope would fundamentally break
-the way selectors have cascaded for 20+ years.
 Global selectors would need to rely on explicit `@layer` rules
 if they are intended to have global impact.
 
 Meanwhile,
-many projects keep specificity
-relatively flat & low-weight.
-By default,
-authors prefer to avoid conflicts in the first place.
-If specificity takes priority,
-it can continue to be used in much the same way as before
-(with `@layers` to add more customization) --
-and proximity will begin to apply
-only in those situations where flat specificity
-and overlapping scopes allow a conflict.
-
-I see the latter option
-as a much smoother path forward.
-Proximity is defined by the DOM,
-and is largely invisible to a CSS author
-writing modular styles.
 Selector specificity
 is established in the CSS,
 and applied consistently
@@ -69,10 +59,29 @@ no matter how the DOM is shaped.
 It provides authors with more control
 over the way a system is applied.
 
-I also think it's a better match
-to existing tools & conventions.
+Many projects keep specificity
+intentionally flat & low-weight when possible,
+meaning source-order currently takes precedence
+in most conflicts.
+That works because
+authors prefer to avoid conflicts in the first place --
+something scope will help with.
 
-### Lexical scope metaphors
+If specificity takes priority,
+it can continue to be used in much the same way as before
+(with `@layers` to add more customization) --
+and proximity will begin to apply
+only in those situations where flat specificity
+and overlapping scopes allow a conflict.
+It provides a better fallback heuristic than source-order,
+without fundamentally changing the way specificity applies.
+
+I see the latter option
+as a much smoother path forward,
+and a better match
+with existing tools & conventions.
+
+### Lexical scope comparisons
 
 Many programming languages (including Sass & JS)
 have a concept of _lexical scope_,
@@ -80,19 +89,23 @@ both at the document/module level,
 and within code structures.
 
 In those cases,
-scope primarily helps avoid
+scope primarily helps resolve
 naming conflicts.
 If a function, mixin, or variable name
 is allowed to "bleed" across scopes,
 it might interfere with another feature
 of the same name.
 
+(This would be similar to CSS scope
+only resolving conflicts between selectors
+that have the same exact name)
+
 Lexical scopes tend to be
 clearly defined and nested.
 The relationship between scopes
-is intentionally visible in the document,
-and there may even be tools to intentionally
-allow bleed as desired
+is visible in the document,
+and there may even be tools to explicitly
+allow cross-scope references when needed
 (see JS & Sass module imports/exports,
 and the `!global` flag for Sass variables).
 
@@ -103,12 +116,15 @@ by a discrete DOM fragment.
 The shadow scope is always nested
 inside a host document scope,
 and the relationship is clear.
+Styles on either side
+have limited but clear ways
+to penetrate that boundary.
 
-Inline styles work in a similar way.
-They are applied directly to a single element,
-and are given priority
+Inline styles
+are also applied directly to a single element,
+and given priority
 over more "global" stylesheet declarations.
-That's a form of lexical scope,
+That can be seen as a form of lexical scope as well,
 based on where the style is defined.
 
 In all these cases,
@@ -120,26 +136,31 @@ to consistently take precedence.
 But those structures & relationships
 are not at all clear
 in the many-to-many situation described
-by selectors.
+by selectors,
+which will be used to establish CSS scope.
 The relationship between two selectors
 can take any number of shapes --
-trading parent/child relationships
-or even describing the exact same element.
+alternating parent/child relationships
+in unexpected ways,
+or sometimes describing the exact same element
+in unison.
 
 None of that is clear by looking at the CSS alone,
 and it's one reason we have specificity --
 which we can control & define
 without reference to the DOM.
 
-CSS scopes will be primarily defined
-using CSS selectors.
 It will not necessarily be clear
-how all the scopes are expected
-to overlay and interact.
+how all the scopes in a stylesheet
+are expected to overlay and interact.
 The parent/child/unison relationships
 are likely to change in unpredictable ways --
-and author will need to rely on other tools
+and authors will need to rely on other tools
 that better express the _weight_ of a scoped rule.
+
+We can either limit that to
+the new (high-level) `@layer` blocks,
+or allow them to use selector specificity as well.
 
 ### Scope in existing tools
 
