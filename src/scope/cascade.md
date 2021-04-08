@@ -562,30 +562,38 @@ in a more consistent way.
 
 ## Conclusion
 
-My argument is not that specificity conflicts never occur across scope,
-but that specificity & layers already provide appropriate solutions,
-and we don't need scope to override them by default.
-Instead scope adds the ability to:
+I was asked to show different use-cases
+for "high vs low powered proximity" in the cascade.
+Instead I've found:
 
-- Avoid selectors escaping their context, through lower boundaries
-- Ensure that similar-weight patterns respect proximity
+- use-cases where proximity is a useful heuristic
+- use-cases where proximity is NOT a useful heuristic
+- and use-cases where authors will need to provide more clarity
+  about how scopes merge/interact
+
+All of those use-cases would be solvable
+with either high-or-low powered proximity.
+So my argument is not that one or the other has "more" use-cases,
+but that the heuristic is not reliable enough
+to warrant so much power.
+
+Low-=powered proximity
+allows authors to balance proximity,
+specificity, and layers, in more controlled ways.
+
+Menawhile scope allows authors
+to avoid those conflicts in the first place --
+in ways that are easily integrated
+with current tooling & conventions.
 
 In my mind,
 the purpose of global scope is
 _explicitly to apply everywhere_,
 and the purpose of a narrower scope is
 _to constrain where some styles apply_.
-The argument for strong scope assumes that goal
-(constraint) _always aligns_ with a desire
-to write a "more specific" style,
-that should override the global,
-(even without a more specific selector).
+The argument for strong scope assumes that goal (constraint)
+_always aligns_ with
+a desire to write a "more detailed" styles
+that should override the global.
 
-I don't understand that assumption.
-
-While there are _some cases_ where we want both,
-we already have specificity tools, and layering for that.
-But if we insist these goals always go together,
-we end up making it very hard
-in the cases where they don't.
-
+I find that assumption unreliable.
