@@ -361,10 +361,11 @@ in the cascade.
 I don't think use-cases fall cleanly into those categories.
 Instead I've found:
 
-- use-cases where proximity is a useful heuristic
-- use-cases where proximity is NOT a useful heuristic
+- use-cases where proximity is a more useful heuristic
+- use-cases where specificity is a useful heuristic
 - and use-cases where authors will need to provide more clarity
   about how scopes merge/interact
+  (in which case specificity becomes a useful balancing factor)
 
 All of those use-cases would be solvable
 with either high-or-low powered proximity.
@@ -374,7 +375,7 @@ but that:
 - the proximity heuristic is no more reliable
   than the existing specificity heuristic.
 - only specificity relationships are clear in the CSS,
-  without reference to the DOM
+  without reference to the DOM structure
 - existing tools already provide scope as a useful tool,
   without overriding specificity
 
