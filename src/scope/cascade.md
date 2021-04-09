@@ -318,21 +318,72 @@ that scoped styles are given a slight bump in priority
 _when specificity is equal_.
 
 That would take the existing "most common" behavior,
-and give it more reliable consistency,
-without dramatically changing the implications.
-While we continue relying on specificity,
-we no longer rely on source-order.
+and give it more reliable nesting,
+without dramatically changing the interaction with global styles.
 
-For authors that are migrating by hand,
+It's also common in the current tools
+to generate non-overlapping scopes.
+That can be quickly reproduced
+with a naming-convention,
+or custom attribute,
+that is used to establish both scope roots,
+and lower-boundaries:
+
+```css
+@scope ([data-scope=media]) to ([data-scope]) {
+  /* never flow into another scope */
+}
+```
+
+Automated tools would be able to simplify their output,
+only generating attributes on the root of each scope.
+That simpler output is also more easy
+to reproduce by hand,
+and extend as needed.
+
+For most authors,
 classes and attributes make up the vast majority of selectors,
-and the most common results will be similar to Vue:
+and the most common results of a scope
+will be similar to Vue:
 a root specificity of `[0,1,0]`
-added to the specificity of individual selectors.
+added to the specificity of individual scoped selectors.
 
 Since that also matches the specificity behavior of nesting,
 I expect it to be an easy concept to learn & teach.
 
 ## Use cases
+
+I was asked to show different use-cases
+for "high vs low powered proximity" in the cascade --
+placing scope proximity "above" or "below" specificity
+in the cascade.
+
+I don't think use-cases fall cleanly into those categories.
+Instead I've found:
+
+- use-cases where proximity is a useful heuristic
+- use-cases where proximity is NOT a useful heuristic
+- and use-cases where authors will need to provide more clarity
+  about how scopes merge/interact
+
+All of those use-cases would be solvable
+with either high-or-low powered proximity.
+So my argument is not that one or the other has "more" use-cases,
+but that:
+
+- the proximity heuristic is no more reliable
+  than the existing specificity heuristic.
+- only specificity relationships are clear in the CSS,
+  without reference to the DOM
+- existing tools already provide scope as a useful tool,
+  without overriding specificity
+
+By allowing specificity to take precedence,
+scope can be integrated more smoothly in existing projects,
+and the relative weight of each selector
+remains clearly visible in the CSS.
+
+### Fantasai's example
 
 Fantasai raised this use-case on the CSSWG telecon:
 
@@ -356,53 +407,74 @@ and it is possible to re-create the scenario:
 </p>
 <script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
 
-But it took some work to make
-the specificity of a global link-in-a-list style to
+(It took some work to make
+the specificity of a global link-in-a-list style
 override the specificity of a "scoped" link-in-a-sidebar.
 Either my scoping selector has to be surprisingly weak,
 or my global style has to be fairly specific.
+But we can set that aside for now.)
+
+While this case demonstrates
+the potential for specificity to give a bad result,
+neither heuristic actually provides a satisfactory resolution.
+If we gave preference to proximity,
+we would lose the link-in-list pattern entirely.
+I'm not convinced that's an obvious improvement.
+
+Really what we want is
+for the author to clarify their intentions:
+
+- If the link-in-list styles should not be applied inside other scopes...
+  - We can scope the `link-list` class
+    with appropriate lower boundaries
+- If the link-in-list pattern is global,
+  but low-priority & disposable...
+  - It probably shouldn't have
+    such a high specificity in the first place
+  - Or it might belong in a lower "defaults" layer
+- If our sidebar really should override global patterns...
+  - We could clarify that
+    with more specificity on the scope
+  - Or put it in a "components" layer
+    above a "globals" layer
+- If both are equal in weight,
+  but we want proximity to select the better option...
+  - We can give them equal specificity scopes
+- If link-in-list should get custom styles for the overlapping case...
+  - We should define how that pattern adapts within the scope
+
+All of these solutions help to clarify what we meant,
+and how we intend these patterns to interact.
+None of them are hacks.
+Authors can use various combinations of scope, specificity, and layers
+to convey their intent.
+
+On the other hand,
+if we give proximity total priority
+over specificity,
+`@layer` becomes the _only tool available_
+for managing different intentions.
 
 Fantasai also says:
 
 > If you switch class to ID
 > it can completely destroy relationship between selectors.
 
-I'd argue that's exactly the purpose of specificity as a heuristic,
-it's the _expected behavior_ for authors,
-and there's no reason for `@scope` to change that.
+I'd argue that's the _expected behavior_ for authors --
+which they are very familiar with --
+and exactly the purpose of specificity as a heuristic.
+I don't see a good reason for `@scope` to change that,
+when we already have
+both `@layer` and `:where()`
+to help authors manage their specificity more explicitly.
 
-In this case,
-the author needs to clarify their intentions:
-
-- If we're talking about a low-priority link-in-list pattern...
-  - That probably shouldn't have a high specificity
-  - If it needs higher specificity for some reason,
-    it could go in a lower "defaults" layer
-- If our sidebar is special,
-  and really should override global patterns...
-  - We probably want to clarify that with more specificity
-  - Or put it in a "components" layer
-    above a "defaults" layer
-- If link-lists should get custom styles in any context,
-  we should define both variants of the pattern...
-  - Clearer selectors will likely result in equal specificity,
-    or even higher specificity in the more specific context
-  - We could use a contextually set custom property,
-    which would inherit from the more narrow context
-- If we want to ignore `link-list` colors inside a sidebar...
-  - Then we can scope the `link-list` class with a lower boundary
-
-All of these solutions help to clarify what we meant,
-and what we intended.
-None of them are hacks.
-
-Let's take a closer look at the options.
+We can dig into some of those cases
+with a bit more detail.
 
 ### Global & scoped themes
 
-Let's start with general theme styles,
-before we get the list-link pattern specifically.
-In the example, light mode is the global default theme,
+In the previous example,
+light mode is the global default theme,
 and dark-mode is a scoped "inversion" of the theme.
 
 If we base the inversion on a class (like `.invert`),
@@ -562,38 +634,29 @@ in a more consistent way.
 
 ## Conclusion
 
-I was asked to show different use-cases
-for "high vs low powered proximity" in the cascade.
-Instead I've found:
-
-- use-cases where proximity is a useful heuristic
-- use-cases where proximity is NOT a useful heuristic
-- and use-cases where authors will need to provide more clarity
-  about how scopes merge/interact
-
-All of those use-cases would be solvable
-with either high-or-low powered proximity.
-So my argument is not that one or the other has "more" use-cases,
-but that the heuristic is not reliable enough
-to warrant so much power.
-
-Low-=powered proximity
-allows authors to balance proximity,
-specificity, and layers, in more controlled ways.
-
-Menawhile scope allows authors
-to avoid those conflicts in the first place --
-in ways that are easily integrated
-with current tooling & conventions.
-
 In my mind,
-the purpose of global scope is
+the purpose of a global scope is
 _explicitly to apply everywhere_,
 and the purpose of a narrower scope is
 _to constrain where some styles apply_.
-The argument for strong scope assumes that goal (constraint)
-_always aligns_ with
-a desire to write a "more detailed" styles
-that should override the global.
 
-I find that assumption unreliable.
+The argument for strong scope
+assumes that the goal of scope (constraint)
+_always aligns_ with
+a secondary desire to write "higher priority" styles,
+which override any global patterns.
+
+I find that assumption entirely unreliable,
+and unfounded in CSS.
+There is no reason to assume that global styles
+are low-priority compared to scoped styles.
+
+Meanwhile
+low-powered scope
+allows authors
+to avoid those conflicts in the first place
+(through containment, where desired) --
+while balancing proximity, specificity, and layers,
+in ways that are obvious in the CSS,
+and integrate smoothly
+with current tools & conventions.
