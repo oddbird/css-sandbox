@@ -1,10 +1,7 @@
 'use strict';
 
 const typogr = require('typogr');
-const ghSlugger = require('github-slugger');
-const slugger = new ghSlugger();
-
-const ghSlug = s => slugger.slug(s);
+const ghSlug = require('github-slugger').slug;
 
 const mdown = require('markdown-it')({
   html: true,

@@ -1167,6 +1167,9 @@ such as:
 
 ### Where does scope fit in the cascade?
 
+For a more detailed exploration of this,
+see my notes on [scope in the cascade](../cascade/)
+
 #### The 2014 scope proposal
 
 The [original scope specification][initial-spec]

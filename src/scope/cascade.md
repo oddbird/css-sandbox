@@ -9,55 +9,81 @@ eleventyNavigation:
 There are two primary ways to think about "scope" in CSS,
 which represent different goals.
 
-1. Keep scoped styles **from escaping scope** --
-   by expressing a scope of _ownership_
-   through root & lower-boundary selectors.
-2. Keep global styles **from overriding scoped styles** --
-   by giving _proximity_ the power to override
-   specificity in the cascade.
+1. _Contain_ scoped styles so they have no global impact
+   (no styles get out)
+2. _Isolate_ scoped styles from any global influence
+   (no styles get in)
+
+The first can be managed through
+upper and lower _scope boundaries_,
+but the second ideally requires some understanding
+of the DOM nesting relationships
+between inner and outer scopes --
+what I am calling _proximity_.
+
+Given two scopes,
+and a target element that is inside both,
+the innermost scope has higher proximity:
+
+```html
+<main data-scope="outer">
+  <section data-scope="inner">
+    <a>target element inside both scopes</a>
+  </section>
+</main>
+```
 
 Popular CSS tools (CSS modules, Vue scoped styles, etc)
 and conventions (BEM, etc)
-have put their entire focus on the first goal,
-while previous CSS proposals have been designed
+have put their entire focus on the goal of _containment_,
+while previous CSS proposals
+(and existing Shadow-DOM context)
+have been designed
 to link both goals under a single name --
 making scope much more "heavy-handed" in the Cascade.
 
-Both "specificity" and "proximity" are heuristics
-that represent different aspects of the same assumption:
-details are _likely_ to be more targeted than defaults.
-We know that's not universally true in either case,
-which is why we're now providing
+My [Scope proposal](../explainer/)
+(following the lead of existing tools)
+puts a strong priority on containment.
+But I also recognize use-cases --
+like nested themes --
+where it is also useful to allow overlapping scopes,
+and give _proximity_ some weight in the cascade.
+
+## The Problem
+
+This idea of "proximity" weight is a heuristic
+that represents a similar assumption to "specificity":
+component details are _likely_ to be more targeted,
+and more important than global defaults.
+So we give more weight to more targeted selectors (specificity),
+and we may also give some weight to more nested scopes (proximity).
+
+But we know that neither heuristic is universally accurate.
+Sometimes high specificity is required for general styles,
+and similarly,
+generic scopes might be required for style-containment,
+without any desire for style-isolation.
+This is why we're also working on
 a more explicit `@layer` functionality.
 
-Still, the heuristics are useful,
-and one of them needs to take precedence.
+Both heuristics are useful,
+but not entirely reliable.
+The question is:
+should _scope proximity_ override _specificity_,
+or the other way around?
 
-## Context
+## Considerations
 
-Proximity is defined by the DOM,
+### The implications on author control
+
+Scope Proximity is controlled by the DOM tree,
 and is largely invisible
 to a CSS author writing modular styles.
-Selectors that were previously designed
-to have higher or lower specificity,
-will suddenly cascade
-in unexpected & unreliable ways
-based on DOM structures.
-
-If proximity takes priority,
-then the specificity of a selector
-only matters in relation to other selectors
-at the same proximity.
-Global selectors would need to rely on explicit `@layer` rules
-if they are intended to have global impact.
-
-Meanwhile,
 Selector specificity
-is established in the CSS,
+is established clearly in the CSS itself,
 and applied consistently
 no matter how the DOM is shaped.
-It provides authors with more control
-over the way a system is applied.
 
 Many projects keep specificity
 intentionally flat & low-weight when possible,
@@ -65,23 +91,48 @@ meaning source-order currently takes precedence
 in most conflicts.
 That works because
 authors prefer to avoid conflicts in the first place --
-something scope will help with.
+something scope containment will help with.
 
-If specificity takes priority,
+Authors also have existing tools & conventions
+(`:is()`, `:where()`, `[id]`, & BEM syntax)
+that can be used to manage specificity
+to some degree.
+The same is not true of proximity.
+
+**If proximity takes priority** ("strong scope"),
+then the specificity of a selector
+only matters in relation to other selectors
+at the same proximity.
+Selectors that were previously designed
+to have higher or lower specificity,
+will suddenly cascade
+in unexpected & unreliable ways
+based on DOM structures defined outside of CSS.
+Any high-priority global selectors
+would need to rely on explicit `@layer` rules
+in order to override more narrowly scoped styles.
+
+**If specificity takes priority** ("weak scope"),
 it can continue to be used in much the same way as before
-(with `@layers` to add more customization) --
+(with `@layers` adding more explicit customization) --
 and proximity will begin to apply
 only in those situations where flat specificity
 and overlapping scopes allow a conflict.
-It provides a better fallback heuristic than source-order,
-without fundamentally changing the way specificity applies.
+In my experience so far,
+it is common for similar scope-types,
+to use similar scoping selectors.
+
+Proximity would still provide
+a better fallback heuristic than source-order,
+without fundamentally changing the way
+specificity currently works.
 
 I see the latter option
 as a much smoother path forward,
 and a better match
 with existing tools & conventions.
 
-### Lexical scope comparisons
+### Comparisons to lexical scope
 
 Many programming languages (including Sass & JS)
 have a concept of _lexical scope_,
@@ -261,7 +312,7 @@ override global styles of the same specificity,
 but it is easy to increase global specificity when desired
 to override scoped styles.
 
-### My existing proposal
+### Migration path
 
 My proposal would be able to replicate either/both outcomes --
 or provide their own desired specificity behavior --
@@ -303,8 +354,6 @@ would be able to override the first (zero-specificity-root) scope.
 - Internal scope gets priority _when specificity is equal_
 - Global styles _may_ need additional specificity
   to override scoped styles
-
-### Migration path
 
 All existing tools would be able to auto-generate
 `@scope` rules that match their current behavior
@@ -357,32 +406,15 @@ I was asked to show different use-cases
 for "high vs low powered proximity" in the cascade --
 placing scope proximity "above" or "below" specificity
 in the cascade.
+I've tried to do that here with a few examples
+that show proximity is sometimes useful,
+and sometimes not.
 
-I don't think use-cases fall cleanly into those categories.
-Instead I've found:
-
-- use-cases where proximity is a more useful heuristic
-- use-cases where specificity is a useful heuristic
-- and use-cases where authors will need to provide more clarity
-  about how scopes merge/interact
-  (in which case specificity becomes a useful balancing factor)
-
-All of those use-cases would be solvable
-with either high-or-low powered proximity.
-So my argument is not that one or the other has "more" use-cases,
-but that:
-
-- the proximity heuristic is no more reliable
-  than the existing specificity heuristic.
-- only specificity relationships are clear in the CSS,
-  without reference to the DOM structure
-- existing tools already provide scope as a useful tool,
-  without overriding specificity
-
-By allowing specificity to take precedence,
-scope can be integrated more smoothly in existing projects,
-and the relative weight of each selector
-remains clearly visible in the CSS.
+But in either case,
+authors should be able to achieve all these desired outcomes
+with some combination of scope, specificity, and cascade layers.
+In my mind the more important goal is to
+_give authors explicit control over that choice_.
 
 ### Fantasai's example
 
@@ -635,6 +667,21 @@ in a more consistent way.
 
 ## Conclusion
 
+My argument is not that one or the other has "more" use-cases,
+but that:
+
+- the proximity heuristic is _no more reliable_
+  than the existing specificity heuristic.
+- only specificity relationships are clear in the CSS,
+  without reference to the DOM structure
+- existing tools already provide scope as a useful tool,
+  without overriding specificity
+
+By allowing specificity to take precedence,
+scope can be integrated more smoothly in existing projects,
+and the relative weight of each selector
+remains clearly visible in the CSS.
+
 In my mind,
 the purpose of a global scope is
 _explicitly to apply everywhere_,
@@ -645,7 +692,7 @@ The argument for strong scope
 assumes that the goal of scope (constraint)
 _always aligns_ with
 a secondary desire to write "higher priority" styles,
-which override any global patterns.
+which override any more global patterns.
 
 I find that assumption entirely unreliable,
 and unfounded in CSS.

@@ -7,7 +7,8 @@ eleventyNavigation:
   parent: home
 ---
 
-- [My Explainer & Proposal](https://github.com/oddbird/css-sandbox/blob/main/src/scope/explainer.md)
+- [Explainer & Proposal](explainer/)
+  ([on GitHub](https://github.com/oddbird/css-sandbox/blob/main/src/scope/explainer.md))
 - [CSSWG issue thread](https://github.com/w3c/csswg-drafts/issues/5809)
 - [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/593)
 
