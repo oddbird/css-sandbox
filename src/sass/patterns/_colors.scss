@@ -3,7 +3,9 @@
 html {
   // palette
   --contrast-light: snow;
+  --contrast-light-ish: mistyrose;
   --contrast-dark: #{color.mix(darkslategray, black, 25%)};
+  --contrast-dark-ish:#{color.mix(darkslategray, black, 40%)};
   --neutral-light: lightslategray;
   --neutral-dark: slategray;
   --prime-light: powderblue;
@@ -13,6 +15,7 @@ html {
 
   // theme
   --bg: var(--contrast-light);
+  --callout: var(--contrast-light-ish);
   --text: var(--contrast-dark);
   --neutral: var(--neutral-dark);
   --action: var(--prime-dark);
@@ -21,6 +24,7 @@ html {
 
   @media (prefers-color-scheme: dark) {
     --bg: var(--contrast-dark);
+    --callout: var(--contrast-dark-ish);
     --text: var(--contrast-light);
     --neutral: var(--neutral-light);
     --action: var(--prime-light);
