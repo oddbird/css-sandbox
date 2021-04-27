@@ -40,6 +40,14 @@ Implementations:
   (This is a draft prototype and may not match the final design.
   I use syntax in this document that is not yet supported in the prototype.)
 
+Polyfills:
+
+- [CQFill](https://github.com/jsxtools/cqfill)
+  by **Jonathant Neal** --
+  still a very early prototype/proof-of-concept,
+  requiring both pre-processor compilation (available for PostCSS)
+  and run-time JS (using ResizeObserver).
+
 Demos & Articles:
 
 - [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Container_Queries)
