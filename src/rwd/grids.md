@@ -22,6 +22,15 @@ but they come with several limitations.
 This is a collection of potential improvements,
 linked to Github issues where appropriate.
 
+## Auto-flow issues
+
+Even when auto-flow is sparse,
+most elements backfill.
+The logic here is very unclear to authors.
+[See a demo on codepen](https://codepen.io/miriamsuzanne/pen/QWdPvQV).
+It would be useful to control that
+with some more clarity.
+
 ## Responsive track spanning
 
 Some of the most common grid issues
@@ -54,8 +63,6 @@ All of these issues are addressed together,
 with an initial prototype,
 by
 [indefinite spans (#388)](https://github.com/w3c/csswg-drafts/issues/388).
-
-I'm very excited about this area of exploration.
 
 ## Styling grid abstractions
 
@@ -91,20 +98,10 @@ are explored in the issue thread for
 
 Jen Simmons has
 proposed an `@region` rule,
-with named areas:
-
-```css
-@region #grid foobar {
-  grid: 3 / 1 / 4 / 2;
-}
-foobar {
-  background: yellow;
-}
-```
-
-That seems over-complicated
-for the use-case of styling tracks/areas in the abstract,
-but she [expands on it to solve some related issues](https://speakerdeck.com/jensimmons/proposal-to-csswg-sept-2016?slide=47).
+with named areas that feel over-complicated
+for this narrow use-case,
+but she [expands on it to solve other issues](https://speakerdeck.com/jensimmons/proposal-to-csswg-sept-2016?slide=47),
+more aligned with "regions" generally.
 
 ==@@@ link to other region-like issues==
 
@@ -128,31 +125,31 @@ But it does raise a few questions for me:
 
 ==@@@ Flesh out the rest of these==
 
-- Default Grid Columns, Rows, and Areas #4002
-- Add a flex/grid-clear property #3974
-- Auto-placement aligning to a named line #796 (✅ css-grid-3)
-- 'auto' keyword should work with name grid lines/areas #3243
-- Flow multiple elements together into same grid area #1183
-- Allow auto-placement to use areas #4457
+- [Default Grid Columns, Rows, and Areas (#4002)](https://github.com/w3c/csswg-drafts/issues/4002)
+- [Add a flex/grid-clear property (#3974)](https://github.com/w3c/csswg-drafts/issues/3974)
+- [Auto-placement aligning to a named line (#796) (✅ css-grid-3)](https://github.com/w3c/csswg-drafts/issues/796)
+- ['auto' keyword should work with name grid lines/areas (#3243)](https://github.com/w3c/csswg-drafts/issues/3243)
+- [Flow multiple elements together into same grid area (#1183)](https://github.com/w3c/csswg-drafts/issues/1183)
+- [Allow auto-placement to use areas (#4457)](https://github.com/w3c/csswg-drafts/issues/4457)
 - [Grid area as element (#4416)](https://github.com/w3c/csswg-drafts/issues/4416)
-- Automatically span rows and columns based on content size #1373
+- [Automatically span rows and columns based on content size (#1373)](https://github.com/w3c/csswg-drafts/issues/1373)
 
 ## Defining Grids
 
-- Overlapping cells in grid-template-areas syntax #2808
-- Aspect ratio units needed #1173
-- Repeating named grid areas #3242
-- Specify an optional sequence of track sizes #3328
-- Set adjusted-to-fit repeated track sizes #3767
+- [Overlapping cells in grid-template-areas syntax (#2808)](https://github.com/w3c/csswg-drafts/issues/2808)
+- [Aspect ratio units needed (#1173)](https://github.com/w3c/csswg-drafts/issues/1173)
+- [Repeating named grid areas (#3242)](https://github.com/w3c/csswg-drafts/issues/3242)
+- [Specify an optional sequence of track sizes (#3328)](https://github.com/w3c/csswg-drafts/issues/3328)
+- [Set adjusted-to-fit repeated track sizes (#3767)](https://github.com/w3c/csswg-drafts/issues/3767)
 
 ## Sub-grid improvements
 
-- Ability to name grids and reference them from subgrids #1375
+- [Ability to name grids and reference them from subgrids (#1375)](https://github.com/w3c/csswg-drafts/issues/1375)
 
 ## Improving grid gaps
 
-- Collapse grid-gap when item is hidden. #5813
-- Control size of individual gutters independently #1659
+- [Collapse grid-gap when item is hidden. (#5813)](https://github.com/w3c/csswg-drafts/issues/5813)
+- [Control size of individual gutters independently (#1659)](https://github.com/w3c/csswg-drafts/issues/1659)
 
 ## Notes
 

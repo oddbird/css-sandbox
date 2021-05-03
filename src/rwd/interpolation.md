@@ -22,10 +22,17 @@ to responsive type.
 
 ## Resources
 
-- Scott: [Typetura Docs](https://docs.typetura.com/)
-- CSSWG: [Split CSS event bindings from application](https://github.com/w3c/csswg-drafts/issues/4343)
-- [Intrinsic Typography](https://docs.google.com/document/d/1ls7TyGRh7YwkzAb2xOGmSK69d-BThHi0fJ44YdjO2zw/edit#heading=h.jne3slr8ak1x)
-- [Query Interpolation Proposal](https://gist.github.com/scottkellum/0c29c4722394c72d311c5045a30398e5)
+From Scott:
+- [Typetura Docs](https://docs.typetura.com/)
+- [Intrinsic Typography, CSS Tricks Article](https://css-tricks.com/intrinsic-typography-is-the-future-of-styling-text-on-the-web/)
+- [Query Interpolation proposal](https://gist.github.com/scottkellum/0c29c4722394c72d311c5045a30398e5)
+
+CSSWG issues:
+- [Interpolate values between breakpoints](https://github.com/w3c/csswg-drafts/issues/6245)
+- [Split CSS event bindings from application](https://github.com/w3c/csswg-drafts/issues/4343)
+- [Higher level CSS interpolation module](https://github.com/w3c/csswg-drafts/issues/5617)
+- [Need method to interpolate variable font settings](https://github.com/w3c/csswg-drafts/issues/5635)
+- [Native interpolation function in CSS](https://github.com/w3c/csswg-drafts/issues/581)
 
 ==TODO: Look into this more...==
 

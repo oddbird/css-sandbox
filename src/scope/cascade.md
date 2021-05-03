@@ -433,9 +433,9 @@ Fantasai raised this use-case on the CSSWG telecon:
 I implemented this in codepen,
 and it is possible to re-create the scenario:
 
-<p class="codepen" data-height="363" data-theme-id="39098" data-default-tab="css,result" data-user="mirisuzanne" data-slug-hash="1235d3af7fd584d4f9471b90735a38ec" style="height: 363px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="1235d3af7fd584d4f9471b90735a38ec">
-  <span>See the Pen <a href="https://codepen.io/mirisuzanne/pen/1235d3af7fd584d4f9471b90735a38ec">
-  1235d3af7fd584d4f9471b90735a38ec</a> by Miriam Suzanne (<a href="https://codepen.io/mirisuzanne">@mirisuzanne</a>)
+<p class="codepen" data-height="363" data-theme-id="39098" data-default-tab="css,result" data-user="miriamsuzanne" data-slug-hash="1235d3af7fd584d4f9471b90735a38ec" style="height: 363px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" data-pen-title="1235d3af7fd584d4f9471b90735a38ec">
+  <span>See the Pen <a href="https://codepen.io/miriamsuzanne/pen/1235d3af7fd584d4f9471b90735a38ec">
+  1235d3af7fd584d4f9471b90735a38ec</a> by Miriam Suzanne (<a href="https://codepen.io/miriamsuzanne">@miriamsuzanne</a>)
   on <a href="https://codepen.io">CodePen</a>.</span>
 </p>
 <script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>

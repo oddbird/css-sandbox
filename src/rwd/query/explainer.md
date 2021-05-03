@@ -871,8 +871,10 @@ I think the @-rule block provides several advantages:
   based on the same query.
   These can be grouped in an @-rule.
 
-The nesting syntax might help resolve the latter,
-since these would likely have the same meaning:
+The issue of making multiple changes in a single query
+could also be resolved with a selector syntax
+once CSS Nesting has been implemented.
+These would likely have the same meaning:
 
 ```css
 @container (inline-size < 40em) {
@@ -884,9 +886,11 @@ since these would likely have the same meaning:
 }
 ```
 
-There's even a potential advantage here,
-for specifying which part of a complex selector
-should resolve the query:
+There's even a potential advantage here
+for the selector syntax,
+as it allows authors to query a container
+at a different point in the selector
+(not just the targeted element).
 
 ```css
 .card:container(inline-size < 40em) {
@@ -896,8 +900,6 @@ should resolve the query:
 
 That's not easily represented
 by any `@container` syntax.
-(David Baron's selector argument doesn't match
-the querying element, but the queried container)
 
 ## Stakeholder Feedback / Opposition
 

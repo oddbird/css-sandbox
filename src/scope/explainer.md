@@ -1305,7 +1305,7 @@ for [use in the light DOM][isolation],
 and proposal would continue to be distinct --
 covering a significantly different set of use-cases.
 
-[survey]: https://twitter.com/mirisuzanne/status/1351247559738621952
+[survey]: https://twitter.com/TerribleMia/status/1351247559738621952
 [isolation]: https://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharinghttps://docs.google.com/document/d/1hhjmuQE6BTTnAyKP3spDr8sU6lpXArh8LDfihZh78hw/edit?usp=sharing
 [nicole-scope]: https://docs.google.com/presentation/d/1Ki-IUCEWU-mNlS-019QVV9I9JsytvafQJHTxpBNfYvI/edit?usp=sharing
 

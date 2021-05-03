@@ -121,7 +121,7 @@ can flip the impacted axis
 It's interesting that browsers
 are already inconsistent about rendering that last demo.
 They also disagree on simpler
-[percentage calculations](https://codepen.io/mirisuzanne/pen/9f46dc0b9e57f0f2e0cd46b6b5898d67?editors=1100)
+[percentage calculations](https://codepen.io/miriamsuzanne/pen/9f46dc0b9e57f0f2e0cd46b6b5898d67?editors=1100)
 when "in a particular axis,
 the containing block’s size depends on the box’s size"
 [[Box Sizing 3](https://www.w3.org/TR/css-sizing-3/#sizing-values)].
