@@ -21,9 +21,8 @@ date: Last Modified
       </time>
     {% endif %}
 
-    <h1>{{ title | mdInline | safe }}</h1>
-
     {% if not raw_md %}
+      <h1>{{ title | mdInline | safe }}</h1>
       {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
         <details class="toc-details">
           <summary class="toc-summary">Table of Contents</summary>
@@ -32,7 +31,6 @@ date: Last Modified
       {% endif %}
     {% endif %}
   </header>
-
 
   <main>
     {{ content | typogr | safe }}

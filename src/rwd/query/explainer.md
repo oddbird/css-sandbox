@@ -22,7 +22,8 @@ More specific issues for discussion:
 
 See also the [github project for css-contain-3](https://github.com/w3c/csswg-drafts/projects/18).
 
-- [:root/body viewport propagation and containment](https://github.com/w3c/csswg-drafts/issues/5913)
+- [:root/body viewport propagation and containment](https://github.com/w3c/csswg-drafts/issues/5913) --
+  Resolved: no propagation when containment is applied to body or root
 - ["container width" and "container height" units](https://github.com/w3c/csswg-drafts/issues/5888)
 - [`srcset` and `sizes` interaction with container queries](https://github.com/w3c/csswg-drafts/issues/5889)
 - [CQ vs shadow boundaries](https://github.com/w3c/csswg-drafts/issues/5984)
@@ -31,7 +32,8 @@ See also the [github project for css-contain-3](https://github.com/w3c/csswg-dra
 - [What is the migration path for Container Queries?](https://github.com/w3c/csswg-drafts/issues/6175)
 - [Is there a use-case for querying explicit container selectors?](https://github.com/w3c/csswg-drafts/issues/6176)
 - [Is it possible to apply containment inside @container?](https://github.com/w3c/csswg-drafts/issues/6177)
-- [How does @container resolve when no ancestor containers have been defined?](https://github.com/w3c/csswg-drafts/issues/6178)
+- [How does @container resolve when no ancestor containers have been defined?](https://github.com/w3c/csswg-drafts/issues/6178) --
+  Resolved: container queries are not applied
 
 Implementations:
 
@@ -54,6 +56,10 @@ Demos & Articles:
   by **Rachel Andrew**
 - [Container Queries: a Quick Start Guide](https://www.oddbird.net/2021/04/05/containerqueries/)
   by **David Herron**
+- [A Primer On CSS Container Queries](https://www.smashingmagazine.com/2021/05/complete-guide-css-container-queries/)
+  by **Stephanie Eckles**
+- [Next Gen CSS: `@container`](https://css-tricks.com/next-gen-css-container/)
+  by **Una Kravets**
 - [Container Queries are actually coming](https://piccalil.li/blog/container-queries-are-actually-coming)
   by **Andy Bell**
 - [Say Hello To CSS Container Queries](https://ishadeed.com/article/say-hello-to-css-container-queries/)
@@ -284,24 +290,24 @@ we instead need to define the _containment context_
 for each element.
 
 I propose that any element with
-layout and size containment on a given axis
+appropriate containment on a given axis
 generates a new _containment context_ in that axis,
 which descendants can query against:
 
 ```css
 .two-axis-container {
   /* establishes a new containment context on both axis */
-  contain: layout size;
+  contain: layout size style;
 }
 
 .inline-container {
   /* establishes a new containment context on the inline axis */
-  contain: layout inline-size;
+  contain: layout inline-size style;
 }
 
 .block-container {
   /* establishes a new containment context on the block axis */
-  contain: layout block-size;
+  contain: layout block-size style;
 }
 ```
 
@@ -310,9 +316,7 @@ queries on the cross-axis will not resolve
 against that query context.
 
 When no containment context is established,
-there should be a fallback akin to the
-_Initial Containing Block_
-which queries resolve against.
+[container queries are not applied](https://github.com/w3c/csswg-drafts/issues/6178).
 
 ### Container queries (`@container`)
 
@@ -340,9 +344,6 @@ any `.media-object` whose
 _containment context_
 (nearest ancestor with containment applied)
 is greater-than `45em`.
-When no containment context is established,
-the _Initial Containing Block_ can be used
-to resolve the query.
 
 Unlike media-queries,
 each element that is targeted by a conditional group rule
@@ -950,6 +951,13 @@ Thanks also for valuable feedback and advice from:
 - Una Kravets
 
 ## Changelog
+
+### 2021.05.11
+
+- NOTE: Link to recent articles
+- CHANGE: [CSSWG resolved not to use root containment as a fallback][6178]
+
+[6178]: https://github.com/w3c/csswg-drafts/issues/6178
 
 ### 2021.04.02
 
