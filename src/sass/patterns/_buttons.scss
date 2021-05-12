@@ -1,0 +1,27 @@
+button {
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  border: thin solid var(--neutral);
+  border-radius: 0.25em;
+  font: inherit;
+  font-size: 0.75rem;
+  font-style: italic;
+  padding: 0.125em 0.5em;
+
+  &:hover,
+  &:focus {
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--bg);
+  }
+
+  &:active {
+    background: var(--focus);
+    border-color: var(--focus);
+  }
+
+  &::after {
+    content: ' [' var(--mode) ']';
+  }
+}
