@@ -1,3 +1,7 @@
+:focus-visible {
+  outline-offset: 0.25em;
+}
+
 // headings
 
 h1 {
@@ -42,6 +46,7 @@ mark {
 }
 
 code {
+  background: var(--callout);
   font-family: var(--code-fonts);
   font-size: 0.8em;
 }
@@ -70,4 +75,19 @@ pre[class*="language-"] {
 // summary
 summary {
   cursor: pointer;
+}
+
+// tables
+table {
+  border-collapse: collapse;
+  display: block;
+  max-width: 100%;
+  width: max-content;
+  overflow: auto;
+}
+
+td, th {
+  border: thin solid var(--neutral);
+  padding: 0 0.5em;
+  text-align: left;
 }

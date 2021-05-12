@@ -17,23 +17,7 @@ Please leave any feedback on the CSSWG issues for this proposal:
 - [Fleshing out @container queries with single-axis containment](https://github.com/w3c/csswg-drafts/issues/5796)
 - [Single-axis containment](https://github.com/w3c/csswg-drafts/issues/1031)
 - [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
-
-More specific issues for discussion:
-
-See also the [github project for css-contain-3](https://github.com/w3c/csswg-drafts/projects/18).
-
-- [:root/body viewport propagation and containment](https://github.com/w3c/csswg-drafts/issues/5913) --
-  Resolved: no propagation when containment is applied to body or root
-- ["container width" and "container height" units](https://github.com/w3c/csswg-drafts/issues/5888)
-- [`srcset` and `sizes` interaction with container queries](https://github.com/w3c/csswg-drafts/issues/5889)
-- [CQ vs shadow boundaries](https://github.com/w3c/csswg-drafts/issues/5984)
-- [What container features can be queried?](https://github.com/w3c/csswg-drafts/issues/5989)
-- [Should there be a new syntax for establishing queryable containers?](https://github.com/w3c/csswg-drafts/issues/6174)
-- [What is the migration path for Container Queries?](https://github.com/w3c/csswg-drafts/issues/6175)
-- [Is there a use-case for querying explicit container selectors?](https://github.com/w3c/csswg-drafts/issues/6176)
-- [Is it possible to apply containment inside @container?](https://github.com/w3c/csswg-drafts/issues/6177)
-- [How does @container resolve when no ancestor containers have been defined?](https://github.com/w3c/csswg-drafts/issues/6178) --
-  Resolved: container queries are not applied
+- [Github Container Queries project board](https://github.com/w3c/csswg-drafts/projects/18)
 
 Implementations:
 
@@ -42,42 +26,15 @@ Implementations:
   (This is a draft prototype and may not match the final design.
   I use syntax in this document that is not yet supported in the prototype.)
 
-Polyfills:
-
-- [CQFill](https://github.com/jsxtools/cqfill)
-  by **Jonathant Neal** --
-  still a very early prototype/proof-of-concept,
-  requiring both pre-processor compilation (available for PostCSS)
-  and run-time JS (using ResizeObserver).
-
-Demos & Articles:
-
-- [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Container_Queries)
-  by **Rachel Andrew**
-- [Container Queries: a Quick Start Guide](https://www.oddbird.net/2021/04/05/containerqueries/)
-  by **David Herron**
-- [A Primer On CSS Container Queries](https://www.smashingmagazine.com/2021/05/complete-guide-css-container-queries/)
-  by **Stephanie Eckles**
-- [Next Gen CSS: `@container`](https://css-tricks.com/next-gen-css-container/)
-  by **Una Kravets**
-- [Container Queries are actually coming](https://piccalil.li/blog/container-queries-are-actually-coming)
-  by **Andy Bell**
-- [Say Hello To CSS Container Queries](https://ishadeed.com/article/say-hello-to-css-container-queries/)
-  by **Ahmad Shadeed** \
-  ([Annotated on CSS Tricks](https://css-tricks.com/say-hello-to-css-container-queries/)
-   by **Robin Rendle**)
-- [CSS Container Queries: A First Look + Demo](https://www.bram.us/2021/03/28/css-container-queries-a-first-look-and-demo/)
-  by **Bramus Van Damme**
-- [Awesome-Container-Queries](https://github.com/sturobson/Awesome-Container-Queries)
-  by **Stuart Robson**
-- [My collection of codepen demos](https://codepen.io/collection/XQrgJo)
-
 This Document:
 
 - [On github](https://github.com/oddbird/css-sandbox/blob/main/src/rwd/query/explainer.md)
 - [On css.OddBird.net](https://css.oddbird.net/rwd/query/explainer/)
 - Typos or other
   [issues can be reported in github](https://github.com/oddbird/css-sandbox/issues)
+
+See the [resources page](/query/resources/)
+for links to articles and demos.
 
 ## Table of contents
 
@@ -100,6 +57,7 @@ This Document:
   - [Components with internal containers](#components-with-internal-containers)
   - [Component in a responsive grid track](#component-in-a-responsive-grid-track)
   - [Combining media & container queries](#combining-media--container-queries)
+  - [Migration path](#migration-path)
 - [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
   - [Single-axis containment issues](#single-axis-containment-issues)
   - [Implicit vs explicit containers](#implicit-vs-explicit-containers)
@@ -108,6 +66,8 @@ This Document:
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
 - [Changelog](#changelog)
+  - [2021.05.12](#20210512)
+  - [2021.05.11](#20210511)
   - [2021.04.02](#20210402)
   - [2021.03.26](#20210326)
   - [2021.01.29](#20210129)
@@ -685,6 +645,75 @@ a container query that is specific to print media:
 }
 ```
 
+### Migration path
+
+See [the CSSWG issue](https://github.com/w3c/csswg-drafts/issues/6175)
+for more details.
+
+While at-rules provide their own test for positive support,
+there is currently no way to test for lack of at-rule support.
+
+```css
+@container (<query>) {
+  /* progressive enhancements */
+}
+
+/* query negative support for the related new property/value */
+@supports not <what-goes-here?> {
+  @media (...) { /* fallback media-queries */ }
+}
+```
+
+In order to provide a reliable migration path,
+we need two things:
+
+- A syntax for testing support of a particular container query
+- Browsers that don't understand the new syntax treat it as unsupported
+
+For the new syntax, we're proposing:
+
+```css
+@supports container(<query>) {
+  /* <guery> is supported on containers */
+}
+
+@supports not container(<query>) {
+  /* <guery> is not supported on containers */
+  /* (testing support of the specific query) */
+  /* OR @supports container() syntax is not supported */
+  /* (testing support of container-queries broadly) */
+}
+```
+
+For example:
+
+```css
+/* test for general CQ support */
+@supports container(min-width: 1em) { ... }
+
+/* test for range syntax */
+@supports container(width > 1em) { ... }
+```
+
+Currently, browsers handle unknown `@supports` syntax inconsistently.
+For the positive test, they all resolve to `false` (not supported),
+but for the negation of that same test, they disagree:
+
+| Code             | Firefox | Chromium | WebKit |
+| ---------------- | ------- | -------- | ------ |
+| `not foo()`      | true    | false    | false  |
+| `not foo(bar)`   | true    | true     | false  |
+| `not (foo())`    | true    | false    | true   |
+| `not (foo(bar))` | true    | true     | true   |
+
+The ideal result here is `true` (`not false`).
+While we wait for browsers to fix this inconsistency, though,
+Authors can wrap the `container()` syntax in parenthesis:
+
+```css
+@supports not (container(<query>)) { ... }
+```
+
 ## Detailed design discussion & alternatives
 
 ### Single-axis containment issues
@@ -951,6 +980,11 @@ Thanks also for valuable feedback and advice from:
 - Una Kravets
 
 ## Changelog
+
+### 2021.05.12
+
+- NOTE: Move resources & issues to external links
+- UPDATE: Add section on migration path
 
 ### 2021.05.11
 

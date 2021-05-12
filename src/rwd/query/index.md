@@ -1,27 +1,10 @@
 ---
 title: Container Queries
-manual_toc: true
 eleventyNavigation:
   key: container-queries
   title: Container Queries
   parent: rwd
 ---
-
-- [My Explainer & Proposal](https://github.com/oddbird/css-sandbox/blob/main/src/rwd/query/explainer.md)
-- [CSSWG issue thread](https://github.com/w3c/csswg-drafts/issues/5796)
-- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/592)
-
-## Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Summary](#summary)
-- [Status](#status)
-- [Resources](#resources)
-- [Constraints](#constraints)
-  - [Size & Layout Containment](#size--layout-containment)
-  - [Interleaving Layout & Style](#interleaving-layout--style)
-  - [@-Rule or Selector? [👍 @-rule]](#-rule-or-selector---rule)
-  - [Should we build this into `@media`? [❌]](#should-we-build-this-into-media-)
 
 ## Summary
 

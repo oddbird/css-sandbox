@@ -1,19 +1,6 @@
 @use 'sass:color';
 
-html {
-  // palette
-  --contrast-light: snow;
-  --contrast-light-ish: mistyrose;
-  --contrast-dark: #{color.mix(darkslategray, black, 25%)};
-  --contrast-dark-ish:#{color.mix(darkslategray, black, 40%)};
-  --neutral-light: lightslategray;
-  --neutral-dark: slategray;
-  --prime-light: powderblue;
-  --prime-dark: teal;
-  --accent-light: hotpink;
-  --accent-dark: mediumvioletred;
-
-  // theme
+@mixin light-mode {
   --bg: var(--contrast-light);
   --callout: var(--contrast-light-ish);
   --text: var(--contrast-dark);
@@ -21,17 +8,49 @@ html {
   --action: var(--prime-dark);
   --focus: var(--accent-dark);
   --mark: var(--accent-light);
+}
+
+@mixin dark-mode {
+  --bg: var(--contrast-dark);
+  --callout: var(--contrast-dark-ish);
+  --text: var(--contrast-light);
+  --neutral: var(--neutral-light);
+  --action: var(--prime-light);
+  --focus: var(--accent-light);
+  --mark: var(--accent-dark);
+}
+
+html {
+  --mode: 'auto';
+
+  // palette
+  --contrast-light: snow;
+  --contrast-light-ish: mistyrose;
+  --contrast-dark: #{color.mix(darkslategray, black, 25%)};
+  --contrast-dark-ish:#{color.mix(darkslategray, black, 50%)};
+  --neutral-light: lightslategray;
+  --neutral-dark: slategray;
+  --prime-light: powderblue;
+  --prime-dark: teal;
+  --accent-light: hotpink;
+  --accent-dark: mediumvioletred;
+
+  @include light-mode;
 
   @media (prefers-color-scheme: dark) {
-    --bg: var(--contrast-dark);
-    --callout: var(--contrast-dark-ish);
-    --text: var(--contrast-light);
-    --neutral: var(--neutral-light);
-    --action: var(--prime-light);
-    --focus: var(--accent-light);
-    --mark: var(--accent-dark);
+    @include dark-mode;
   }
 
   background: var(--bg);
   color: var(--text);
+}
+
+[data-mode='light'] {
+  @include light-mode;
+  --mode: 'light';
+}
+
+[data-mode='dark'] {
+  @include dark-mode;
+  --mode: 'dark';
 }

@@ -3,16 +3,19 @@ date: Last Modified
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-mode="auto">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ title }}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{{ '/css/style.css' | url }}" />
-  <link href="themes/prism-ghcolors.css" rel="stylesheet" />
 </head>
 <body>
+  <div class="controls">
+    <button data-toggle="mode">colors</button>
+  </div>
+
   <header>
     {% include "nav.njk" %}
     {% if not (page.url == '/') %}
@@ -39,5 +42,53 @@ date: Last Modified
   <footer>
     {% include "footer.njk" %}
   </footer>
+
+  <script>
+    var modeRoot = document.querySelector('[data-mode]');
+    var modeBtn = document.querySelector('[data-toggle="mode"]');
+
+    if (modeBtn && modeRoot) {
+      var darkPref = window.matchMedia( "(prefers-color-scheme: dark)" ).matches;
+      var localMode = window.localStorage.getItem('mode');
+
+      var lightMap = {
+        'auto': 'dark',
+        'dark': 'light',
+        'light': 'auto',
+      };
+
+      var darkMap = {
+        'auto': 'light',
+        'light': 'dark',
+        'dark': 'auto',
+      };
+
+      var stateMap = darkPref ? darkMap : lightMap;
+
+      var isValidMode = function(mode) {
+        return mode && stateMap[mode];
+      }
+
+      var getMode = function() {
+        return modeRoot.getAttribute('data-mode');
+      }
+
+      var setMode = function(to) {
+        var setTo = to || stateMap[getMode()];
+        if (setTo === 'auto') {
+          window.localStorage.removeItem('mode');
+        } else {
+          window.localStorage.setItem('mode', setTo);
+        }
+        modeRoot.setAttribute('data-mode', setTo);
+      };
+
+      if (isValidMode(localMode) && getMode() !== localMode) {
+        setMode(localMode);
+      }
+
+      modeBtn.addEventListener('click', function() { setMode(); });
+    }
+  </script>
 </body>
 </html>
