@@ -134,6 +134,20 @@ But it does raise a few questions for me:
 - [Grid area as element (#4416)](https://github.com/w3c/csswg-drafts/issues/4416)
 - [Automatically span rows and columns based on content size (#1373)](https://github.com/w3c/csswg-drafts/issues/1373)
 
+### Regions & fragmentation
+
+There's a real interesting
+[Working Draft of CSS Overflow](https://www.w3.org/TR/css-overflow-4/)
+that includes [fragmentation](https://www.w3.org/TR/css-overflow-4/#fragmentation)
+as an overflow value.
+That could be combined with various layout modules,
+to create a very flexible approach to CSS Regions.
+
+The spec authors are
+David Baron & Florian Rivoal.
+It might be good to check with them
+about the status of the spec.
+
 ## Defining Grids
 
 - [Overlapping cells in grid-template-areas syntax (#2808)](https://github.com/w3c/csswg-drafts/issues/2808)
@@ -153,5 +167,10 @@ But it does raise a few questions for me:
 
 ## Notes
 
+enhancements to level 1:
 - Fit/fill require all columns to be identical
 - There is no way to span "extra" gutters adjacent to a space
+- interplay between auto/explicit placement
+  - need ability to say `more-sparse` fill
+  - cell margins/spacing (leaving cells empty)
+- can we have inconsistent gaps?
