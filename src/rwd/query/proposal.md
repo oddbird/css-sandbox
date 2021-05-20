@@ -1,5 +1,9 @@
 ---
-title: New Containment Syntax & Units
+title: Explicit Container Syntax
+eleventyNavigation:
+  key: query-syntax
+  title: Explicit Syntax
+  parent: container-queries
 ---
 
 The overall approach documented in my initial
@@ -37,19 +41,42 @@ and the names I'm currently using for them:
   Any element targeted by a selector
   inside of a _container query_.
   The element queries the _containment context_
-  established by its _nearest contained ancestor_.
-- **Nearest Contained Ancestor**:
-  A _querying element_
-  will resolve a given _container query_
-  based on the current _containment context_ --
-  which is established by its nearest ancestor
-  that is a _query container_.
+  established by its _nearest ancestor container_.
+- **Nearest Ancestor Container**:
+  The specific _query container_ that is
+  generating the current _containment context_
+  for a given _querying element_.
 
-As the spec develops,
-I'm more convinced
-that we'll need some new/better terms here.
+The word "container" is already used
+quite often in CSS, but never on its own.
+Still, there are potential confusions with the term --
+especially if we want a new `container` property
+in addition to the existing `contain` property.
+So I
+[asked twitter](https://twitter.com/TerribleMia/status/1395440175128342528)
+to help brainstorm additional terms:
 
-## Observable containment
+- People often say "element queries"
+  but "element" already has a much too generic meaning
+- component?
+- module?
+- context?
+- structure?
+- viewbox?
+- enclosure?
+- compartment?
+- Parent?
+
+Despite the issues,
+I'll continue using `container` for now --
+since it's the name
+most people have used for this feature
+since ~2010. 😂
+
+But `context` stands out to me
+as a reasonable alternative.
+
+## Why add new syntax?
 
 See [CSSWG-drafts issue #6174][6174]
 for public discussion of this issue.
@@ -73,7 +100,7 @@ Since the new syntax will need to set containment values,
 currently defined by the `contain` property,
 we should attempt to build on top of that existing property.
 
-### Adding new values to `contain`
+### Extending the `contain` property
 
 If all query features required containment,
 we might think of them as shorthand values
@@ -83,7 +110,7 @@ something like `inline-query`
 could apply values of `layout`, `inline-size`, and `style`:
 
 ```css
-.container {
+main {
   contain: inline-query;
 }
 ```
@@ -91,7 +118,7 @@ could apply values of `layout`, `inline-size`, and `style`:
 Another variant of this might involve a function syntax:
 
 ```css
-.container {
+main {
   contain: query(inline-size);
 }
 ```
@@ -140,8 +167,8 @@ custom-designed for establishing
 query containers:
 
 ```css
-.container {
-  query: inline-size;
+main {
+  container: inline-size;
 }
 ```
 
@@ -166,12 +193,164 @@ Cons:
 a new property seems to me
 like the best path forward.**
 
-## Query features
+## Proposed syntax for establishing containers
 
+We'll probably want to bikeshed some of the details
+and specific terms,
+but this is an initial attempt.
+As a fallback option,
+try substituting `context` for `container`
+in all these examples.
 
+I'm proposing two longhand properties,
+`container-name` and `container-type`:
 
-### Dimensional queries
+```css
+.selector {
+  /* container-name: <ident> | none; */
+  container-name: page;
 
+  /* container-type: <types>+ | none; */
+  container-type: inline-size style;
+}
+```
 
+With a `container` shorthand
+that accepts an optional name,
+and one or more types:
+
+```css
+.selector {
+  /* container: [<ident>? <types>+] | none; */
+  container: widget inline-size style;
+}
+```
+
+### Observable dimensions
+
+In order to query the dimensions of a container,
+we would provide at least two values,
+and potentially more.
+These would all apply
+the necessary layout, size, and style containment:
+
+- `size`
+  (contains `layout`, `size`, and `style`)
+- `inline-size`
+  (contains `layout`, `inline-size`, and `style`)
+- `block-size`?
+  (contains `layout`, `block-size`, and `style`)
+- `width`?
+  (contains `layout`, `width`, and `style`)
+- `height`?
+  (contains `layout`, `height`, and `style`)
+
+If block-only containment is not possible,
+that will also rule out `width`/`height` as values.
+
+```css
+main {
+  container: size;
+}
+
+@container (inline-size >= 30em) { /* … */ }
+@container (min-aspect-ratio: 8/5) { /* … */ }
+```
+
+It would not make much sense
+to apply multiple dimension values at once.
+
+### Observable styles
+
+We may be able to expose/query
+the computed values of other properties
+(especially custom properties)
+on the container.
+We likely only need a single value
+to expose that sort of query:
+
+```css
+main {
+  container: style;
+}
+
+@container (--colors == dark) { /* … */ }
+@container (font-size >= 2rem) { /* … */ }
+```
+
+It's not clear to me
+what containment (if any)
+would be required for this to work.
+
+### Observable state
+
+There has also been discussion
+about querying the "state" of the container:
+
+- Is it "stuck" (using position sticky)?
+- Is it snapped-into-place (using scroll-snap)?
+- Is it currently in the viewport?
+
+Different states might require
+establishing different types of containment,
+which might mean they need individual keywords
+in order to make them observable?
+This likely needs to be explored more.
+
+From the other end,
+I expect we might want to designate
+state-queries with a functional syntax:
+
+```css
+@container state(stuck) { /* … */ }
+```
+
+It might also make sense to
+
+### Named containers?
+
+While I suggested [removing selectors][selectors]
+from the `@container` syntax,
+having multiple container-types
+makes it more likely that there will be reasons
+to query specific containers.
+
+But a new syntax here
+also opens up the possibility of creating
+_named_ containers
+in a more flexible way:
+
+```css
+main, section {
+  container-type: inline-size;
+  cotainer-name: layout;
+}
+
+.my-component {
+  container-type: style;
+  container-name: component;
+}
+
+@container layout and (inline-size >= 30em ) { /* … */ }
+@container component and (font-size >= 2rem) { /* … */ }
+```
+
+You could also query the name of the container,
+without any qualifiers.
+I'm not sure if that would have
+any real use-cases:
+
+```css
+@container my-component { /* … */ }
+```
+
+Multiple different containers
+could share the same identifier --
+and descendants would query the nearest ancestor
+with that identifier.
+
+[selectors]: https://css.oddbird.net/rwd/query/explainer/#implicit-vs-explicit-containers
 
 ## Container-relative units
+
+==TBD==
