@@ -186,8 +186,7 @@ Pros:
 
 Cons:
 
-- Multiple properties that have the same underlying behavior
-  could be confusing?
+- More properties trigger containment behavior
 
 **At this point,
 a new property seems to me
@@ -195,19 +194,61 @@ like the best path forward.**
 
 ## Proposed syntax for establishing containers
 
-We'll probably want to bikeshed some of the details
-and specific terms,
-but this is an initial attempt.
-As a fallback option,
-try substituting `context` for `container`
-in all these examples.
+I'm sure we'll bikeshed
+some of the details,
+but here's an initial attempt,
+which is [also posted to the CSSWG issue][syntax-issue].
 
-I'm proposing two longhand properties,
+[syntax-issue]: https://github.com/w3c/csswg-drafts/issues/6174#issuecomment-846313720
+
+I'm proposing a new `container` property:
+
+```css
+.selector {
+  container: inline-size;
+}
+```
+
+This property would:
+- Explicitly establish the element as a container
+- Establish the types of queries allowed on the container
+  (e.g. `inline-size`)
+- Apply the minimum required containment
+  to make those query types possible
+  (e.g. `layout`, `inline-size`, and `style`)
+
+Different [container types][ctype]
+(dimensions, states, styles)
+are explored below.
+
+This also presents an opportunity for adding
+[named containers][cname]
+using a custom-identifier
+(also explored below).
+
+[cname]: https://css.oddbird.net/rwd/query/proposal/#named-containers
+
+If we do support both name & types,
+the `container` property would act as a shorthand:
+
+```css
+.selector {
+  /* container: [<custom-ident>? <types>+] | none; */
+  container: my-widget inline-size style;
+}
+
+/* @container <container-query-list> { <stylesheet> } */
+@container my-widget (inline-size >= 30em) { /* … */ }
+```
+
+If we do have both a "name" and a list of "types",
+we would likely also want longhand properties for each.
+Those could be called
 `container-name` and `container-type`:
 
 ```css
 .selector {
-  /* container-name: <ident> | none; */
+  /* container-name: <custom-ident> | none; */
   container-name: page;
 
   /* container-type: <types>+ | none; */
@@ -215,18 +256,73 @@ I'm proposing two longhand properties,
 }
 ```
 
-With a `container` shorthand
-that accepts an optional name,
-and one or more types:
+### Container name
+
+While I suggested [removing selectors][selectors]
+from the `@container` syntax,
+having multiple container-types
+makes it more likely that there will be reasons
+to query different containers in each case.
+
+The new syntax here
+also opens up the possibility of creating
+more flexible & repeatable
+_named_ containers --
+not limited to selector-matching:
 
 ```css
-.selector {
-  /* container: [<ident>? <types>+] | none; */
-  container: widget inline-size style;
+main, section {
+  container-type: inline-size;
+  cotainer-name: layout;
 }
+
+.my-component {
+  container-type: style;
+  container-name: component;
+}
+
+@container layout (inline-size >= 30em ) { /* … */ }
+@container component (font-size >= 2rem) { /* … */ }
+
+/* name is optional */
+@container (inline-size >= 30em ) { /* … */ }
 ```
 
-### Observable dimensions
+These queries would resolve as follows:
+
+- If no container name is specified,
+  the query condition resolves against the _nearest ancestor container_
+- Otherwise,
+  find the nearest ancestor container _with the specified name_
+  - If no ancestor container matches the specified name,
+    the query condition is `false`
+  - Otherwise, if a container is found with the proper name,
+    the query condition is resolved against that element
+
+You could also query the name of the container,
+without any qualifiers.
+I'm not sure if that would have
+any real use-cases:
+
+```css
+@container my-component { /* … */ }
+```
+
+Multiple different containers
+could share the same identifier --
+and descendants would query the nearest ancestor
+with that identifier.
+
+[selectors]: https://css.oddbird.net/rwd/query/explainer/#implicit-vs-explicit-containers
+
+### Container types
+
+This proposal identifies
+three broad groups of `container-type`
+that an author might want to
+observe and query...
+
+#### Observable dimensions
 
 In order to query the dimensions of a container,
 we would provide at least two values,
@@ -234,16 +330,16 @@ and potentially more.
 These would all apply
 the necessary layout, size, and style containment:
 
-- `size`
-  (contains `layout`, `size`, and `style`)
-- `inline-size`
-  (contains `layout`, `inline-size`, and `style`)
-- `block-size`?
-  (contains `layout`, `block-size`, and `style`)
-- `width`?
-  (contains `layout`, `width`, and `style`)
-- `height`?
-  (contains `layout`, `height`, and `style`)
+- `size` --
+  contains `layout`, `size`, and `style`
+- `inline-size` (or simply `inline`?) --
+  contains `layout`, `inline-size`, and `style`
+- `block-size`? (or simply `block`?) --
+  contains `layout`, `block-size`, and `style`
+- `width`? --
+  contains `layout`, `width`, and `style`
+- `height`? --
+  contains `layout`, `height`, and `style`
 
 If block-only containment is not possible,
 that will also rule out `width`/`height` as values.
@@ -260,7 +356,7 @@ main {
 It would not make much sense
 to apply multiple dimension values at once.
 
-### Observable styles
+#### Observable styles
 
 We may be able to expose/query
 the computed values of other properties
@@ -282,7 +378,7 @@ It's not clear to me
 what containment (if any)
 would be required for this to work.
 
-### Observable state
+#### Observable state
 
 There has also been discussion
 about querying the "state" of the container:
@@ -291,11 +387,22 @@ about querying the "state" of the container:
 - Is it snapped-into-place (using scroll-snap)?
 - Is it currently in the viewport?
 
-Different states might require
-establishing different types of containment,
-which might mean they need individual keywords
-in order to make them observable?
-This likely needs to be explored more.
+If all "state" queries
+require similar containment,
+we could use a single keyword for these as well:
+
+```css
+main {
+  container: state;
+}
+```
+
+But it seems likely that
+different states might require
+establishing different types of containment --
+in which case each state might need
+to be listed individually.
+This likely needs more exploration.
 
 From the other end,
 I expect we might want to designate
@@ -305,51 +412,15 @@ state-queries with a functional syntax:
 @container state(stuck) { /* … */ }
 ```
 
-It might also make sense to
-
-### Named containers?
-
-While I suggested [removing selectors][selectors]
-from the `@container` syntax,
-having multiple container-types
-makes it more likely that there will be reasons
-to query specific containers.
-
-But a new syntax here
-also opens up the possibility of creating
-_named_ containers
-in a more flexible way:
+In which case we could consider
+using a similar functional syntax
+for exposing individual states:
 
 ```css
-main, section {
-  container-type: inline-size;
-  cotainer-name: layout;
+main {
+  container: state(stuck);
 }
-
-.my-component {
-  container-type: style;
-  container-name: component;
-}
-
-@container layout and (inline-size >= 30em ) { /* … */ }
-@container component and (font-size >= 2rem) { /* … */ }
 ```
-
-You could also query the name of the container,
-without any qualifiers.
-I'm not sure if that would have
-any real use-cases:
-
-```css
-@container my-component { /* … */ }
-```
-
-Multiple different containers
-could share the same identifier --
-and descendants would query the nearest ancestor
-with that identifier.
-
-[selectors]: https://css.oddbird.net/rwd/query/explainer/#implicit-vs-explicit-containers
 
 ## Container-relative units
 
