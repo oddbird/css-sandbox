@@ -182,3 +182,100 @@ based around a new HTML element or elements.
 That work is also happening in the OpenUI CG.
 
 - Research PR: https://github.com/openui/open-ui/pull/350
+
+### Spicy Sections
+
+Based on that research,
+and some discussion of
+"[Design Affordance Control](https://bkardell.com/blog/DesignAffordanceControls.html)" --
+Brian Kardell built a web component
+[`spicy-section`](https://spicy-sections.glitch.me/just-demos.html).
+
+In a native implementation,
+we could imagine improving the syntax,
+but this gives us an opportunity
+to explore the approach.
+Specific names always need to go through
+a process of bike-shedding.
+
+The element itself doesn't do anything
+until you add an `affordance` to it.
+Most directly, you can do that with an HTML attribute:
+
+```html
+<spicy-section affordance="tab-bar">
+  ...
+</spicy-section>
+```
+
+In HTML, an `affordance`-like attribute makes sense
+for changing which collapse/tab/normal affordances we see.
+But when we port that to CSS --
+an `affordance` property --
+it feels strange.
+
+The current demo uses a property
+with inline media-queries:
+
+```css
+spicy-section {
+  --const-mq-affordances:
+    [screen and (max-width: 40em) ] collapse |
+    [screen and (min-width: 60em) ] tab-bar
+  ;
+}
+```
+
+We could break that out into:
+
+```css
+@media screen and (max-width: 40em) {
+  spicy-section { affordance: collapse; }
+}
+
+@media screen and (min-width: 60em) {
+  spicy-section { affordance: tab-bar; }
+}
+```
+
+That looks pretty good to me...
+Except that,
+as far as I know,
+we don't have a lot of properties
+that only apply to one single element type.
+Maybe if we count `content` on generated elements?
+
+That makes me wonder
+if we've designed a lower-level concept
+which could be applied to existing
+block sectioning elements --
+`div`, `section`, `main`, `article`, etc.
+Why not allow the new attribute & property
+on any of them?
+
+This is still higher-level
+than the totally generic
+CSS Toggles described above.
+In addition to setting up toggles for you,
+it provides show/hide functionality,
+the ability to generate a tab bar, etc.
+
+But it seems like
+that is mostly be handled
+through an attribute & property.
+The goal of a new element
+would be to set a specific affordance
+out-of-the-box,
+and we're not really doing that.
+The element is only acting as a target
+for the new attribute & CSS property --
+which apply all the affordances.
+
+So we could also imagine
+that any new element would instead
+provide a specific preset affordance?
+Something like a `<tabs>` or `<accordion>` element,
+that defaults to a specific affordance?
+Is that useful?
+Do people ever want
+the same affordance at all screen sizes?
