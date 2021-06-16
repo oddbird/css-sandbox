@@ -31,7 +31,8 @@ low-level tools to address more generic
 ## Resources
 
 - CSS toggle states
-  [draft spec](http://tabatkins.github.io/specs/css-toggle-states/)
+  [draft spec](https://tabatkins.github.io/css-toggle/)
+- Google notes on [a11y](https://docs.google.com/document/d/1g_XBu4Qi7E_oR-i75KkdHzo47GJ6Sy6h7R7aDIn-10E/edit?ts=60ca6841#)
 - Declarative show/hide
   [github repo](https://github.com/flackr/declarative-show-hide) &
   [google doc](https://docs.google.com/document/d/1HcQ75iRhO-dT7EHB6JrjmMATa9XlSCYZKWrXbzakexQ/edit?resourcekey=0-kYHpL3r3jY3Q8wtTaOa6aA#)
@@ -279,3 +280,50 @@ that defaults to a specific affordance?
 Is that useful?
 Do people ever want
 the same affordance at all screen sizes?
+
+### Spicy questions
+
+Lets assume all the toggle/a11y logic & behavior
+can be handled in CSS Toggles.
+
+
+
+## Meeting notes
+
+Prior art for CSS impacting tab order
+- Overflow adds to tab order
+- Linked radio buttons allow arrow-key navigation anywhere
+- scroll-snap is based on page position, not order
+- Grid/flex order _should_ (maybe we can add a flag)
+
+Need to manage a11y roles
+- handle as much as possible at the CSS Toggle level
+- what roles are needed?
+  (see https://deploy-preview-350--open-ui.netlify.app/components/tabs.research.parts#parts-and-terminology)
+- does _checkbox-like_ vs _radio-like_ imply all we need?
+- hard to infer what toggles are being used on what targets
+  - may be hard to do in toggles alone, but could be done by an element
+  - use `content-visibility` (currently `on`/`off`/`auto`), add a toggle value?
+
+```css
+.tab { toggle-states: --foo; }
+.card { content-visibility: toggle(--foo); }
+.card:checked(--foo) { /* additional CSS */ }
+```
+
+With that, CSS alone can infer:
+- radio group vs individual check keyboard behavior
+- link between toggle-trigger & toggle-target _visibility_
+
+Maintaining state:
+- By default, states are "sticky",
+  but JS can be used to "unset" a toggle if needed.
+- There is no spec for maintaining form state across nav,
+  can do the same for toggles
+
+Path forward:
+- try and handle all a11y concerns in CSS Toggles
+- add HTML sugar on top of that
+  - is it an element, or an attribute, or...?
+  - can you change shadow-DOM affordances in CSS (with queries)?
+
