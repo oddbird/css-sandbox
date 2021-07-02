@@ -1,4 +1,4 @@
-const nav = require("@11ty/eleventy-navigation");
+const nav = require('@11ty/eleventy-navigation');
 const hljs = require('@11ty/eleventy-plugin-syntaxhighlight');
 const toc = require('eleventy-plugin-toc');
 const yaml = require('js-yaml');
@@ -10,9 +10,9 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(nav);
   eleventyConfig.addPlugin(toc);
 
-  eleventyConfig.addWatchTarget("./src/sass/");
-  eleventyConfig.addPassthroughCopy("./src/css");
-  eleventyConfig.addPassthroughCopy("./src/favicon.svg");
+  eleventyConfig.addWatchTarget('./src/sass/');
+  eleventyConfig.addPassthroughCopy('./src/css');
+  eleventyConfig.addPassthroughCopy('./src/favicon.svg');
 
   // filters
   eleventyConfig.addFilter('amp', type.amp);
@@ -34,8 +34,8 @@ module.exports = function (eleventyConfig) {
   return {
     markdownTemplateEngine: 'njk',
     dir: {
-      input: "src",
-      output: "public",
+      input: 'src',
+      output: 'public',
       layouts: '_layouts',
     },
   };
