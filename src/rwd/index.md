@@ -6,10 +6,6 @@ eleventyNavigation:
   parent: home
 ---
 
-{% import 'alert.njk' as alert %}
-
-{{ alert.alert("WARNING: Testing an alert", "/", "go here") }}
-
 Currently `@media` queries give us a way to adjust a design
 based on device features, user-preferences, and viewport size.
 But modern web development relies heavily on modular

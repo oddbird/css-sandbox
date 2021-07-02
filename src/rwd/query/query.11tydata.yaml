@@ -1,0 +1,4 @@
+warn: |
+  While there is a working prototype,
+  there are still some major unresolved issues
+  around [single-axis containment](/rwd/query/contain/).

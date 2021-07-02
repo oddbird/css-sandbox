@@ -1,9 +1,12 @@
-[data-layout='alert'] {
+[data-alert] {
   background: var(--callout);
-  border: medium solid var(--accent-dark);
+  border: medium solid var(--neutral);
   color: var(--text);
   font-family: var(--system-fonts);
-  font-weight: bold;
-  margin-bottom: 1em;
-  padding: 1em 0.5em;
+  margin: 1em 0;
+  padding: 1em;
+}
+
+[data-alert='warn'] {
+  border-color: var(--mark);
 }

@@ -1,9 +1,18 @@
 
-{% macro alert(description, link, linktext) %}
+{% macro note(description) %}
 
-  <aside data-layout="alert">
-    {{ description }}
-    <a href="{{ link }}"> {{ linktext }} </a>
+  <aside data-alert="note">
+    <strong>Note:</strong>
+    {{ description | mdInline | safe }}
+  </aside>
+
+{% endmacro %}
+
+{% macro warn(description) %}
+
+  <aside data-alert="warn">
+    <strong>Warning:</strong>
+    {{ description | mdInline | safe }}
   </aside>
 
 {% endmacro %}

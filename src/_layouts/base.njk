@@ -36,6 +36,10 @@ date: Last Modified
   </header>
 
   <main>
+    {% import "alert.njk" as alert %}
+    {{ alert.note(note) if note else none }}
+    {{ alert.warn(warn) if warn else none }}
+
     {{ content | typogr | safe }}
   </main>
 
