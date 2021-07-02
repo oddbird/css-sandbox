@@ -1,0 +1,36 @@
+{% import "utility.njk" as utility %}
+
+{% macro codepen(
+  id,
+  title,
+  edit=true,
+  user='miriamsuzanne',
+  tab='result',
+  height=500,
+  theme='39098',
+  preview=none,
+  attrs=none
+) %}
+{%- set base_attrs = {
+  'class': 'codepen',
+  'data-editable': edit,
+  'data-height': height,
+  'data-theme-id': theme,
+  'data-user': user,
+  'data-slug-hash': id,
+  'data-default-tab': tab,
+  'data-embed-version': "2",
+  "data-preview": preview
+} -%}
+{%- set attrs = base_attrs | merge(attrs) if attrs else base_attrs -%}
+<p {{ utility.show_attrs(attrs) }}>See the Pen {{ utility.link_if(
+  content=title,
+  url=('http://codepen.io/' + user + '/pen/' + id)
+) }} by {{ utility.link_if(
+  content='@' + user,
+  url='http://codepen.io/' + user
+) }} on {{ utility.link_if(
+  content='CodePen',
+  url='http://codepen.io'
+) }}.</p><script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+{% endmacro %}

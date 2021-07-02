@@ -15,8 +15,8 @@ body {
     --controls: end;
     grid-template:
       '. header  control' auto
-      '.  main   .' 1fr
-      '.  footer .' auto
+      '. main    .' 1fr
+      '. footer  .' auto
       / minmax(auto, 1fr) minmax(0, 70ch) minmax(auto, 1fr)
     ;
   }

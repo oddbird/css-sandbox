@@ -1,0 +1,34 @@
+{% macro attr_if(
+  attr,
+  value=none
+) %}
+  {%- if (value and (value | string | lower == 'true')) or (value == '') -%}
+    {{ attr }}
+  {%- elif value -%}
+    {{ attr }}="{{ value }}"
+  {%- endif -%}
+{% endmacro %}
+
+{% macro show_attrs(
+  attrs
+) %}
+  {%- for attr, value in attrs %} {{ attr_if(attr, value) }}{%- endfor -%}
+{% endmacro %}
+
+{% macro link_if(
+  content,
+  url=none,
+  class=none,
+  attrs={}
+) -%}
+  {%- set content = content if (content != none) else caller() -%}
+  {%- if url -%}
+  <a href="{{ url }}" {{ attr_if('class', class) }} {{ show_attrs(attrs) }}>{{
+    content | safe
+  }}</a>
+  {%- else -%}
+  <span {{ attr_if('class', class) }} {{ show_attrs(attrs) }}>{{
+    content | safe
+  }}</span>
+  {%- endif -%}
+{%- endmacro %}

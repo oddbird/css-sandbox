@@ -5,6 +5,7 @@ eleventyNavigation:
   title: Containment
   parent: container-queries
 ---
+{% import "embed.njk" as embed %}
 
 Layout and Size containment are supported
 in all major evergreen browsers:
@@ -73,219 +74,57 @@ But that may still be challenging...
 Single-axis containment only works
 if we can ensure that changes in the cross-axis
 have no impact on the contained axis.
-There are several places where CSS makes that difficult:
+There are several places where CSS makes that difficult.
 
-### Scrollbars
+We have potential solutions to most of the individual issue here.
+But the overarching concern is that all these solutions
+need to be applied on _arbitrary ancestors of the contained element_,
+making their impact expensive for browser engines,
+and unpredictable for authors.
 
-When a parent element has `auto` scrolling,
-extra cross-axis size can cause scrollbars
-to appear on the contained-axis.
-This is only an issue when all three are true:
+{% import "alert.njk" as alert %}
+{{ alert.warn('The current Chrome prototype ignores these issues
+by making layout stateful in some cases,
+which is not a viable cross-browser solution.') }}
 
-- Scrollbars are part of the layout flow (they are not overlaid)
-- Overflow on the cross-axis is set to `auto` on _any ancestor_
-- The contained size is impacted by the size of that ancestor
+### Cross-axis overflow and classic scrollbars
 
-This could be solved by
-forcing in-flow `auto` scrollbars to be always-visible
-when there are nested single-axis containers.
+(requires classic scrollbars enabled by the operating system)
 
-### Percentage Padding
+{{ embed.codepen('yLbNgMx', 'demo') }}
 
-Block-axis percentage padding & margins
-are resolved relative to the inline available size.
-That would cause issues when:
+If any ancestor has overflow on the container's block axis, then additional block-size of the contents can trigger a scrollbar on the cross-axis. Classic scrollbars for block-scrolling take up space on the inline-axis, leaving less space for the container.
 
-- Containment is on the block-axis
-- Any ancestor has inline-size determined by contents
-  (float+auto, min-content, max-content, etc)
-- Any intermediate ancestor has:
-  - box-sizing of border-box
-  - height determined by the outer ancestor
-  - % padding on the block-axis
-    (so inner-height decreases as outer-width increases)
-- The container block-size is impacted
-  by the inner-size of that ancestor
+This is likely to a very common scenario, impacting the majority of sites that uses inline-size containment, since the viewport itself uses auto-scrollbars.
 
-See
-[contain-y comment](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-379463428))
-and related
-[codepen demo](https://codepen.io/anon/pen/aYQLvV?editors=1100).
+This could be resolved by applying `overflow-gutter: stable` to the nearest ancestor with `overflow: auto` on the container's block axis. However, `overflow-gutter` is currently limited to a single axis (block-scrolling), and might need to handle inline-scrolling as well, in case the scroller has a writing mode orthogonal to the container.
 
-That issue is most likely to occur
-when containing the block-axis,
-but nested writing modes
-can flip the impacted axis
-([contain-x with writing modes](https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-722980450)).
+## %-Padding percentages in Orthogonal Writing Modes
 
-It's interesting that browsers
-are already inconsistent about rendering that last demo.
-They also disagree on simpler
-[percentage calculations](https://codepen.io/miriamsuzanne/pen/9f46dc0b9e57f0f2e0cd46b6b5898d67?editors=1100)
-when "in a particular axis,
-the containing block’s size depends on the box’s size"
-[[Box Sizing 3](https://www.w3.org/TR/css-sizing-3/#sizing-values)].
+{{ embed.codepen('PomqWVE', 'demo') }}
 
-The sizing/layout specs all have
-module-specific caveats for handling those cases.
-This seems to me like it could be solved
-with one more caveat?
-Not solved as in _perfect layout_,
-but at least _consistent & implementable_,
-without infinite loops.
+When padding is applied to the block axis in percentages, those values resolve against the inline-size of the parent. By restricting single-axis containment to the inline axis, we eliminate the majority of these issues. However, it's still possible to apply orthogonal writing modes to any arbitrary ancestor with block-padding that would respond to the (now cross-axis) block size of the container.
 
-I have trouble imagining actual use-cases
-that would require this to behave well.
+- This applies to any ancestor with percentage-based block padding orthogonal to the container
+- It doesn't matter what elements switch the writing modes, so long as the container & padding are orthogonal
 
-### ✅ Option: Containment with edge-cases
+This could be resolved by "zeroing out" any percentage-padding applied to any ancestor on the containers block-axis.
 
-If 1D containment is needed,
-we would need to make some hard decisions
-about how the cases above _fail consistently_
-while maintaining containment.
-This isn't ideal,
-but may also be a worthwhile tradeoff for authors.
-It would take some more discussion, but something like:
+## Auto-sized BFCs effected by floats
 
-1. For the sake of determining auto scrollbars on ancestors,
-  the container contributes an infinite cross-axis size
-  (always trigger the scrollbar).
-  This is probably the more common edge-case,
-  but I also think auto-scrollbars _might often_ imply
-  an element has containable size on the cross-axis --
-  so authors could avoid this by using 2D size containment in those cases?
-2. For the sake of resolving percentage-padding on the contained axis,
-  always resolve to `auto`.
-  Maybe there's a better solution here,
-  but I think this is the existing first-pass behavior
-  in many cases where an element has unknown size --
-  so it's a starting-point.
+{{ embed.codepen('mdmJRxW', 'demo') }}
 
-This may not be a complete list of issues/solutions,
-but the point is that it shouldn't _block_
-an attempt at moving forward.
-A prototype would help us expose/address additional issues.
+The auto-sized Block Formatting Context (created by `overflow:hidden`) finds space for itself among various floated elements. However, as the contents expand vertically, the BFC has to contend with additional floated elements, and resizes. Note that:
 
-### ❌ Option: No containment ("pinky promise")
+- The float/s can be "siblings" or even "cousins" of the BFC
+- The BFC can be the container, or _any ancestor_ of the container
 
-_According to browser engineers, this approach won't be possible._
+This could be resolved by adding `clear: both` to the BFC.
 
-Anders proposed this as a solution.
-I don't know how feasible it is to implement,
-but I like it in theory. What if:
+## Aspect ratios (and Orthogonal Writing Modes?)
 
-- We evaluate the CQ against the size the container _would have_
-  if `contain:size` was specified.
-  - A CQ then implies a _promise_ of containment from the author,
-    at least for the axes present in the CQ expression.
-  - Layout proceeds without size containment.
-    The actual result of the layout has no effect on CQ evaluation.
-  - In other words, if the author breaks their promise,
-    the CQ will still evaluate as if they hadn't.
-    (The CQs won't be evaluated again).
-- For the problematic "ancestral scrollbar" case,
-  we'll automatically evaluate the CQ twice
-  (since we're doing layout twice),
-  so the second pass would have the CQ evaluate
-  against the scrollbar-aware size.
-  - However, if that second pass changes CQ evaluation
-    such that the scrollbar wouldn’t be needed after all
-    (e.g. by setting things to `display:none`
-    when the container is below a certain width),
-    then the scrollbar remains.
+{{ embed.codepen('abWOJYJ', 'demo') }}
 
-There is some danger that this makes it too easy
-for authors to stumble into "promise-breaking" behavior,
-where the container query reports a size
-significantly different from the final layout dimensions.
-But the advantages might be enough to offset that concern.
-It might be worth testing in a prototype.
+Since aspect-ratio implementations are inconsistent, and may have existing recursion issues (see #6419), I'm not confident that I know what issues here are specific to inline containment. Still it seems like something to keep an eye on - especially when orthogonal writing modes come into play.
 
-#### Would it make layout "stateful"?
-
-See [Florian's comment on the CSSWG thread][state]
-
-[state]: https://github.com/w3c/csswg-drafts/issues/1031#issuecomment-737054969
-
-#### How would this interact with floats?
-
-Eric Portis asked:
-
-> Are queries in the block direction,
-> or on floated elements,
-> all going to evaluate against 0, then?
-> I do worry this’ll be confusing…
-
-I think the answer is _yes_,
-but I'm not sure containment improves this.
-None of the options fully support a query against
-elements that take their size from children.
-The question is how we respond to that case:
-
-- Size containment would enforce
-  that authors _always add an explicit size_,
-  or the element cannot be queried.
-- Pinky promise approach would allow the query
-  but only return a size when it is explicitly set.
-
-In either case,
-we'll need to teach the concept
-that queries rely on external sizing to be accurate.
-
-Rune Lillesveen pushed that a bit further,
-asking about containers _inside_ floats:
-
-> I was thinking about the case
-> where you have an auto-width block
-> inside a float
-> and other content that contributes to min/max widths.
-> What's the width that a CQ on `#auto` evaluates against
-> and when does that happen?
-> Will that width possibly change multiple times during layout?:
-
-```html
-<!doctype html>
-<style>
-  #float { float: left }
-  #auto { height: 200px; background: blue }
-</style>
-<div id="float">
-  <div>YYYYYYYYYYYYY</div>
-  <div id="auto"></div>
-  XXXXXXXXXXXXXXXXXXXXX
-</div>
-```
-
-To me this looks like the same basic problem,
-unless there is something special about the timing issues?
-
-#### How does it scale when nested?
-
-From Eric again:
-
-> How does “pretend it didn’t happen” scale
-> when you have nested containers & queries?
-> Do you pretend for each nested container in turn,
-> (so you have to run layout the-max-nested-depth times, I think?),
-> or do you pretend every queried container has contain set,
-> all the way up the chain,
-> once (so you’re “only” running layout twice,
-> once for real and once for query resolving purposes?)
-
-This is a question for someone
-with more knowledge of browser rendering & layout internals.
-
-According to Rune:
-
-> This sounds like what would have happened
-> if we fully finished layout for each container,
-> re-evaluated container queries,
-> then went back to style recalc,
-> then layout for a container at the next level, etc.
-> instead of calling style recalc from layout
-> and continue in the same layout pass.
-
-I think this reflects
-some of their thinking about how to
-"interleave style and layout" --
-needs follow-up...
+I expect this could be resolved in by removing the impact of the preferred aspect ratio. Authors who want to maintain a strict aspect ratio can still do that by applying size containment and defining overflow behavior.
