@@ -2,8 +2,6 @@
 date: Last Modified
 ---
 
-{% from "alert.njk" import alert %}
-
 <!DOCTYPE html>
 <html lang="en" data-mode="auto">
 <head>
@@ -19,7 +17,6 @@ date: Last Modified
   </div>
 
   <header>
-   {{ alert("WARNING: Testing an alert", "/", "go here") }}
     {% include "nav.njk" %}
     {% if not (page.url == '/') %}
       <time datetime="{{ page.date.toISOString() }}">
