@@ -99,7 +99,7 @@ This is likely to a very common scenario, impacting the majority of sites that u
 
 This could be resolved by applying `overflow-gutter: stable` to the nearest ancestor with `overflow: auto` on the container's block axis. However, `overflow-gutter` is currently limited to a single axis (block-scrolling), and might need to handle inline-scrolling as well, in case the scroller has a writing mode orthogonal to the container.
 
-## %-Padding percentages in Orthogonal Writing Modes
+### %-Padding percentages in Orthogonal Writing Modes
 
 {{ embed.codepen('PomqWVE', 'demo') }}
 
@@ -110,7 +110,7 @@ When padding is applied to the block axis in percentages, those values resolve a
 
 This could be resolved by "zeroing out" any percentage-padding applied to any ancestor on the containers block-axis.
 
-## Auto-sized BFCs effected by floats
+### Auto-sized BFCs effected by floats
 
 {{ embed.codepen('mdmJRxW', 'demo') }}
 
@@ -121,7 +121,7 @@ The auto-sized Block Formatting Context (created by `overflow:hidden`) finds spa
 
 This could be resolved by adding `clear: both` to the BFC.
 
-## Aspect ratios (and Orthogonal Writing Modes?)
+### Aspect ratios (and Orthogonal Writing Modes?)
 
 {{ embed.codepen('abWOJYJ', 'demo') }}
 
