@@ -34,7 +34,7 @@ This Document:
 - Typos or other
   [issues can be reported in github](https://github.com/oddbird/css-sandbox/issues)
 
-See the [resources page](/query/resources/)
+See the [resources page](../resources/)
 for links to articles and demos.
 
 ## Table of contents
