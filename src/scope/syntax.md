@@ -88,7 +88,7 @@ our potential fifth case:
 
 For that, we would need:
 
-## Potential `:in-scope()` selector:
+## Potential `:in-scope()` selector
 
 If useful,
 we could add a selector to handle donut scope
@@ -155,7 +155,7 @@ as it allows the features to be used separately.
 If we provided both the `@scope` rule and `:in-scope()` selector,
 that combination would match all 5 criteria.
 
-## Meaningful `:scope` when nesting CSS:
+## Meaningful `:scope` when nesting CSS
 
 A totally different (non-combinable) idea
 is to give the existing `:scope` selector
