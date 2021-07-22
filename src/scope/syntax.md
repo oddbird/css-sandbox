@@ -19,6 +19,7 @@ It seems to me that an at-rule is required for that third point.
 Adding a new cascade feature to a normal selector
 would feel surprising to me.
 As such, the alternate selector-based proposals
+(both originally proposed by Lea Verou)
 have generally set aside
 any concern for "scope proximity" in the cascade,
 and focus entirely on the other points.
