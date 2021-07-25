@@ -10,10 +10,13 @@ There have been several different proposals
 for how to handle scope or scope-like syntax.
 Here are some of the considerations to pay attention to:
 
-- Can you limit selections to a "donut" of scope, with a **lower boundary**?
+- Can you limit selections to a ["donut" of scope, with a **lower boundary**][donut]?
 - Can you wrap **multiple selectors** in a shared scope?
-- Can you apply **scope proximity** to the cascade?
+- Can you apply [**scope proximity** to the cascade][proximity]?
 - Does it integrate well with the proposed **css nesting** syntax?
+
+[donut]: ../explainer/#the-lower-boundary-or-ownership-problem-aka-donut-scope
+[proximity]: ../explainer/#scope-proximity
 
 It seems to me that an at-rule is required for that third point.
 Adding a new cascade feature to a normal selector
@@ -94,11 +97,6 @@ For that, we would need:
 If useful,
 we could add a selector to handle donut scope
 without applying cascade proximity behavior.
-This would:
-
-- ✅ **lower boundaries** using a pseudo-selector
-- ✅ donut-selection **separately** from scope proximity
-
 The selector would need to accept both a root & lower-boundaries --
 which we can do with a slash-delimited syntax:
 
@@ -108,9 +106,12 @@ img:in-scope(.media / .content) {
 }
 ```
 
-Also:
+This would allow authors to:
 
-- ✅ **css nesting** can be used in various ways
+- ✅ define **lower boundaries**
+  (using the function argument in the pseudo-class)
+- ✅ apply this donut-selection **separately** from scope proximity
+- ✅ integrate with **css nesting** in various ways, such as...
 
 To establish the scope root:
 
