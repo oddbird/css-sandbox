@@ -1,38 +1,10 @@
 ---
 title: Scope & Encapsulation
-manual_toc: true
 eleventyNavigation:
   key: scope
   title: Scope & Encapsulation
   parent: home
 ---
-
-- [Explainer & Proposal](explainer/)
-  ([on GitHub](https://github.com/oddbird/css-sandbox/blob/main/src/scope/explainer.md))
-- [CSSWG issue thread](https://github.com/w3c/csswg-drafts/issues/5809)
-- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/593)
-
-## Table of contents
-
-- [Table of contents](#table-of-contents)
-- [Summary](#summary)
-- [Existing specs that mention scope](#existing-specs-that-mention-scope)
-  - [CSS Selectors - Level 4](#css-selectors---level-4)
-  - [CSS Scoping - Level 1](#css-scoping---level-1)
-  - [CSS Cascade - Level 4](#css-cascade---level-4)
-- [Prior art](#prior-art)
-  - [Naming conventions (BEM)](#naming-conventions-bem)
-  - [JS tools & frameworks](#js-tools--frameworks)
-  - [CSSWG draft issues](#csswg-draft-issues)
-  - [Yu Han's notes & proposal](#yu-hans-notes--proposal)
-- [Questions](#questions)
-  - [Does this really help with name conflicts?](#does-this-really-help-with-name-conflicts)
-  - [How does scope relate to nesting?](#how-does-scope-relate-to-nesting)
-  - [Where does scope fit in the cascade?](#where-does-scope-fit-in-the-cascade)
-    - [Option 1: No impact on cascade](#option-1-no-impact-on-cascade)
-    - [Option 2: The scoping selector](#option-2-the-scoping-selector)
-    - [Option 3: Make Proximity Meaningful](#option-3-make-proximity-meaningful)
-    - [Option 4: Importance-relative layering](#option-4-importance-relative-layering)
 
 ## Summary
 
@@ -66,6 +38,15 @@ that would require a much lighter touch.
 I've been mainly interested in those low-isolation problems,
 but this document contains notes on both.
 
+## My notes & proposals for scope
+
+{{ collections.all | eleventyNavigation('scope') | eleventyNavigationToHtml | typogr | safe }}
+
+See also:
+
+- [Scoping Level 2 Specification](https://drafts.csswg.org/css-scoping-2/)
+  [work in progress]
+
 ## Existing specs that mention scope
 
 ### [CSS Selectors - Level 4](https://www.w3.org/TR/selectors-4/)
@@ -76,7 +57,7 @@ but this document contains notes on both.
   > When a selector is scoped, it matches an element
   > only if the element is a descendant of the scoping root.
   > (The rest of the selector can match unrestricted;
-  > ==it’s only the final matched elements that must be within the scope==.)
+  > it’s only the final matched elements that must be within the scope.)
 
 - [Reference Element](https://www.w3.org/TR/selectors-4/#the-scope-pseudo)
   (`:scope`) pseudo-class
