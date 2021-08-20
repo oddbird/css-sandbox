@@ -1,5 +1,10 @@
 # Cascade Layers Explainer
 
+NOTE: This explainer may be out of date,
+since work is now happening
+on the official specification:
+[CSS Cascade & Inheritance Module level 5](https://drafts.csswg.org/css-cascade-5/).
+
 ## Authors
 
 - Miriam Suzanne

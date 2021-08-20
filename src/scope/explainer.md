@@ -1,5 +1,10 @@
 # Scope Proposal & Explainer
 
+NOTE: This explainer may be out of date,
+since work is now happening
+on the official specification:
+[CSS Scoping Module level 2](https://drafts.csswg.org/css-scoping-2/).
+
 ## Authors
 
 - Miriam Suzanne

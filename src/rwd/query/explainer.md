@@ -1,5 +1,10 @@
 # Container Query Proposal & Explainer
 
+NOTE: This explainer may be out of date,
+since work is now happening
+on the official specification:
+[CSS Containment Module level 3](https://drafts.csswg.org/css-contain-3/).
+
 ## Authors
 
 - Miriam Suzanne
