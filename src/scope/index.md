@@ -17,26 +17,21 @@ and they can quickly become confused.
 That has lead to a wide array of proposals
 that are sometimes working towards different goals.
 
-In the meantime,
-the CSSWG conversation has been stalled --
-in part to see how Shadow-DOM changes things.
-
 Looking at the state of things now,
 my sense is that
 both shadow-DOM
 and the abandoned "scope" specification
-were focused around strong isolation use-cases --
-which Shadow-DOM has now partly addressed:
-
-- Declarative Shadow-DOM would help make that more widely usable
-- People want better ways to style across the shadow-boundary
-- There may also be use-cases for similar "isolated scope" in light DOM
+were focused around strong isolation.
+Shadow-DOM in particular creates persistent DOM-defined boundaries,
+that impact all style rules.
 
 Meanwhile,
 there are many use-cases for "scope"
-that would require a much lighter touch.
+that would require a much lighter touch --
+more similar to the approach of CSS-in-JS scoping tools.
 I've been mainly interested in those low-isolation problems,
-but this document contains notes on both.
+and my proposal is focused that way,
+though this document contains notes on both.
 
 ## My notes & proposals for scope
 

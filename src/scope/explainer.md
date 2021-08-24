@@ -84,7 +84,7 @@ but they divide roughly into two approaches:
 1. Total isolation of a component DOM subtree/fragment from the host page,
    so that no selectors get in or out
    unless explicitly requested.
-2. Lighter-touch component namespacing,
+2. Lighter-touch, style-driven namespacing,
    and prioritization of "proximity"
    when resolving the cascade.
 
@@ -358,7 +358,8 @@ but adding a lower boundary:
 I think that's a good place to start.
 In my mind, the first ("from") clause should be required,
 and may not need explicit labeling.
-It would accept a single (complex) selector:
+It would accept a single (complex) selector
+(or selector list?):
 
 ```css
 @scope (.media-block) {
@@ -401,7 +402,7 @@ between the scope root and selector target_:
 ```
 
 This approach keeps scoping confined to CSS
-(no need for an HTML attribute),
+(no need for a new HTML attribute),
 flexible
 (scopes can overlap as needed),
 and low-impact
@@ -456,7 +457,7 @@ For example, adding an explicit combinator:
 }
 ```
 
-Or adding contextual information outside the scope:
+Or matching based on additional context outside the scope:
 
 ```css
 @scope (.media) {
@@ -552,6 +553,9 @@ It's not clear to me how many use-cases
 would want donut-selection
 while opting out from scope proximity.
 
+I explore this idea more
+as part of my [syntax comparison](/scope/syntax/).
+
 ### Scope in the cascade
 
 The `@scope` rule has a double-impact
@@ -582,7 +586,7 @@ img:in(#media / .content) { /* donut selector */ }
 ```
 
 Based on feedback so far,
-I lean towards applying the scope/donut root specificity
+I lean towards applying the scope-root specificity
 to the overall specificity of each selector.
 All the examples above
 would get a specificity of `[1, 0, 1]`.
@@ -1173,7 +1177,7 @@ such as:
 ### Where does scope fit in the cascade?
 
 For a more detailed exploration of this,
-see my notes on [scope in the cascade](../cascade/)
+see my notes on [scope in the cascade](/scope/cascade/)
 
 #### The 2014 scope proposal
 
@@ -1483,6 +1487,10 @@ thanks for valuable feedback and advice from:
 - Yu Han
 
 ## Change log
+
+### 2021.08.24
+
+- LINK to [syntax comparison](/scope/syntax/)
 
 ### 2021.02.03
 
