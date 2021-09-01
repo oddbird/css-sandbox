@@ -24,6 +24,7 @@ to responsive type.
 
 From Scott:
 - [Typetura Docs](https://docs.typetura.com/)
+  & [Demos](http://demos.Typetura.com)
 - [Intrinsic Typography, CSS Tricks Article](https://css-tricks.com/intrinsic-typography-is-the-future-of-styling-text-on-the-web/)
 - [Query Interpolation proposal](https://gist.github.com/scottkellum/0c29c4722394c72d311c5045a30398e5)
 
@@ -37,6 +38,20 @@ CSSWG issues:
 ==TODO: Look into this more...==
 
 ## Thoughts
+
+A few notes from my conversations with Scott:
+
+- The most common use-case
+  is that each property has a start-value and end-value
+  aligned to particular container sizes,
+  and an easing curve to interpolate.
+  This is more like a transition than a keyframe animation.
+- While it's rare for a single property
+  to have additional/intermediate "stops" defined,
+  it is useful to define multiple properties in the same place,
+  even with different start/end points.
+  A keyframe animation with multiple stops
+  makes that possible in Typetura.
 
 ### Overlap with Scroll Animations
 
