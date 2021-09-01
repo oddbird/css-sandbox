@@ -17,21 +17,17 @@ and they can quickly become confused.
 That has lead to a wide array of proposals
 that are sometimes working towards different goals.
 
-Looking at the state of things now,
-my sense is that
-both shadow-DOM
+Both shadow-DOM
 and the abandoned "scope" specification
 were focused around strong isolation.
 Shadow-DOM in particular creates persistent DOM-defined boundaries,
 that impact all style rules.
 
 Meanwhile,
-there are many use-cases for "scope"
-that would require a much lighter touch --
-more similar to the approach of CSS-in-JS scoping tools.
-I've been mainly interested in those low-isolation problems,
-and my proposal is focused that way,
-though this document contains notes on both.
+most of the user-land "scope" tools for CSS
+have a much lighter touch.
+I've been mainly interested in those low-isolation,
+namespacing problems.
 
 ## My notes & proposals for scope
 
