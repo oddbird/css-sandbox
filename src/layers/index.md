@@ -23,3 +23,28 @@ This was proposed to the CSSWG at the end of 2019,
 and was approved to move into the Cascade 5 specification.
 
 {{ collections.all | eleventyNavigation('layers') | eleventyNavigationToHtml | typogr | safe }}
+
+## Browser Implementations
+
+- **Firefox**:
+  - [Tracking issue](https://bugzilla.mozilla.org/show_bug.cgi?id=1699215)
+  - In Firefox Nightly,
+    go to `about:config`
+    and toggle the
+    `layout.css.cascade-layers.enabled`
+    feature flag.
+- **Blink** (Chrome/Edge):
+  - [Tracking issue](https://crbug.com/1095765)
+  - In Chrome Canary,
+    this currently requires a
+    [run-time flag](https://www.chromium.org/developers/how-tos/run-chromium-with-flags)
+    (`--enable-blink-features=CSSCascadeLayers`)
+    while opening the browser from the command line.
+- **Webkit** (Safari):
+  - [Tracking issue](https://bugs.webkit.org/show_bug.cgi?id=220779)
+
+## Web Platform Tests
+
+- [basic `@layer` support](http://wpt.live/css/css-cascade/layer-basic.html)
+- [layering with `@import`](http://wpt.live/css/css-cascade/layer-import.html)
+- [layering `@keyframes`](http://wpt.live/css/css-cascade/layer-keyframes-override.html)
