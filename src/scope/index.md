@@ -35,7 +35,7 @@ namespacing problems.
 
 See also:
 
-- [Scoping Level 2 Specification](https://drafts.csswg.org/css-scoping-2/)
+- [CSS Cascade & Inheritance Module level 6](https://drafts.csswg.org/css-cascade-6/#scoped-styles)
   [work in progress]
 
 ## Existing specs that mention scope
