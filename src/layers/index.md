@@ -45,6 +45,10 @@ and was approved to move into the Cascade 5 specification.
 
 ## Web Platform Tests
 
-- [basic `@layer` support](http://wpt.live/css/css-cascade/layer-basic.html)
-- [layering with `@import`](http://wpt.live/css/css-cascade/layer-import.html)
-- [layering `@keyframes`](http://wpt.live/css/css-cascade/layer-keyframes-override.html)
+See http://wpt.live/css/css-cascade/.
+Cascade Layer tests all begin with the `layer-` prefix.
+
+## Articles
+
+- [The Future of CSS: Cascade Layers (CSS @layer)](https://www.bram.us/2021/09/15/the-future-of-css-cascade-layers-css-at-layer/)
+  by **Bramus Van Damme**
