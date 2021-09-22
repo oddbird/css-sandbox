@@ -41,5 +41,8 @@
   },
   "browserslist": [
     "last 2 versions"
-  ]
+  ],
+  "devDependencies": {
+    "@11ty/eleventy-plugin-rss": "^1.1.1"
+  }
 }

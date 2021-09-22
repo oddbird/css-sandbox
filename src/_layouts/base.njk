@@ -43,6 +43,25 @@ date: Last Modified
     {{ content | typogr | safe }}
   </main>
 
+  {% if changes %}
+    <aside id="changelog-feed" class="changelog">
+      <h2>Log of Major Changes</h2>
+      <ul>
+        {% for change in changes %}
+          <li class="change-item">
+            <time datetime="{{ change.time }}">
+              {{ change.time.toLocaleString('en-US', {'dateStyle': 'short', 'timeStyle': 'short'}) }}
+            </time> »
+            {{ change.log }}
+          </li>
+        {% endfor %}
+      </ul>
+      <p>
+        <a href="/feed.xml">Subscribe to site changes</a>
+      </p>
+    </aside>
+  {% endif %}
+
   <footer>
     {% include "footer.njk" %}
   </footer>

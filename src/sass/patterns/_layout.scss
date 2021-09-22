@@ -5,6 +5,7 @@ body {
     '. control .' auto
     '. header  .' auto
     '. main    .' 1fr
+    '. aside  .' auto
     '. footer  .' auto
     / minmax(0, 1fr) minmax(0, 70ch) minmax(0, 1fr)
   ;
@@ -16,6 +17,7 @@ body {
     grid-template:
       '. header  control' auto
       '. main    .' 1fr
+      '. aside  .' auto
       '. footer  .' auto
       / minmax(auto, 1fr) minmax(0, 70ch) minmax(auto, 1fr)
     ;
@@ -53,6 +55,15 @@ header {
 // main
 main {
   grid-area: main;
+}
+
+// aside
+.changelog {
+  grid-area: aside;
+}
+
+.change-item time {
+  text-transform: lowercase;
 }
 
 // footer

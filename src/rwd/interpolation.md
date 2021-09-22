@@ -4,6 +4,9 @@ eleventyNavigation:
   key: interpolation
   title: Interpolated Values
   parent: rwd
+changes:
+  - time: 2021-09-22T00:35:28-04:00
+    log: Brief notes on @timeline and interpolation function
 ---
 
 Breakpoints only get you so far.
@@ -66,3 +69,28 @@ but that direction _feels right_ to me --
 building on current animation/transition syntax,
 to make it work with inputs other than "time"
 (like scrolling, or container-width).
+
+I think there's potential here for a
+shared `@timeline` at-rule
+that could be used for:
+
+- scroll timelines
+- container-size timelines
+- media-size timelines
+
+(I also think this can all be done
+without the `selector()` function,
+but I need to look into it more.)
+
+### Interpolation Function
+
+The CSSWG resolved at one point
+to add an interpolation function --
+though the syntax/details are TBD.
+
+That would require:
+
+- an easing function
+- a percentage that represents current interpolated position
+  (potentially provided by a timeline)
+- a list of values to interpolate
