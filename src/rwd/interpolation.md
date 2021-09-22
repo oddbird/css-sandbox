@@ -4,6 +4,7 @@ eleventyNavigation:
   key: interpolation
   title: Interpolated Values
   parent: rwd
+created: 2020-11-13
 changes:
   - time: 2021-09-22T00:35:28-04:00
     log: Brief notes on @timeline and interpolation function

@@ -21,8 +21,12 @@
     <content type="html">{% if change.latest -%}
       {{ post.templateContent | htmlToAbsoluteUrls(absolutePostUrl) }}
     {%- else -%}
-      <p>This page has more recent changes available.</p>
-      <p>See the <a href="{{ absolutePostUrl }}#changelog-feed">full changelog for details</a>.</p>
+      <p>This page has more recent changes available. For more details, see:</p>
+      <ul>
+        <li>The <a href="{{ absolutePostUrl }}#changelog-feed">current status on css.oddbird.net</a></li>
+        <li>The <a href="{{ absolutePostUrl }}#changelog-feed">log of major changes</a></li>
+        <li>The <a href="{{ [github.history, page.inputPath] | join }}">github commit history</a></li>
+      </ul>
     {%- endif %}</content>
   </entry>
   {%- endfor %}

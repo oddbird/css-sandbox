@@ -46,10 +46,17 @@ module.exports = function (eleventyConfig) {
               post,
               date: change.time,
               log: change.log,
-              latest: i === 0
+              latest: i === 0,
             });
           });
       }
+
+      changes.push({
+        post,
+        date: post.data.created || post.date,
+        log: 'New page added',
+        latest: post.data.changes ? false : true,
+      });
     });
 
     return changes.sort((a, b) => b.date - a.date);
