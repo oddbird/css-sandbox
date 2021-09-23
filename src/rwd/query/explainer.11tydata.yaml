@@ -1,5 +1,9 @@
 title: Container Query Proposal & Explainer
 raw_md: true
+created: 2020-12-17
+changes:
+  - time: 2021-08-20
+    log: Work has moved to CSS Containment Module level 3
 eleventyNavigation:
   key: query-explainer
   title: Proposal & Explainer

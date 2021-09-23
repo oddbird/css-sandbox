@@ -5,3 +5,8 @@ note: |
   [Cascade & Inheritance Level 5 specification](https://drafts.csswg.org/css-cascade-5/)
   for the most up-to-date information
   about Cascade Layers.
+status:
+  type: warn
+  text: |
+    Work on this feature has moved to a
+    [Working Draft specification](https://drafts.csswg.org/css-cascade-5/)

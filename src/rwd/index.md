@@ -1,5 +1,9 @@
 ---
 title: Responsive Components
+created: 2020-11-09
+changes:
+  - time: 2021-07-02
+    log: Warning about unresolved issues in the prototype
 eleventyNavigation:
   key: rwd
   title: Responsive Components

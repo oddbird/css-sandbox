@@ -2,10 +2,11 @@ body {
   display: grid;
   grid-gap: 1em;
   grid-template:
+    'status status status' auto
     '. control .' auto
     '. header  .' auto
     '. main    .' 1fr
-    '. aside  .' auto
+    '. changes  .' auto
     '. footer  .' auto
     / minmax(0, 1fr) minmax(0, 70ch) minmax(0, 1fr)
   ;
@@ -15,9 +16,10 @@ body {
   @media (min-width: 50em) {
     --controls: end;
     grid-template:
+      'status status status' auto
       '. header  control' auto
       '. main    .' 1fr
-      '. aside  .' auto
+      '. changes  .' auto
       '. footer  .' auto
       / minmax(auto, 1fr) minmax(0, 70ch) minmax(auto, 1fr)
     ;
@@ -31,6 +33,28 @@ footer {
 }
 
 // header
+
+[data-status] {
+  background: var(--callout);
+  color: var(--text);
+  display: grid;
+  font-style: italic;
+  grid-area: status;
+  grid-template-columns: minmax(0, 1fr) [content-start] minmax(0, 70ch) [content-end] minmax(0, 1fr);
+  padding: 0.5em 0;
+
+  > * {
+    grid-column: content;
+    font-size: 0.8rem;
+  }
+
+  > :first-child {
+    margin-top: 0;
+  }
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
 
 .controls {
   justify-self: var(--controls, start);
@@ -57,9 +81,9 @@ main {
   grid-area: main;
 }
 
-// aside
+// changes
 .changelog {
-  grid-area: aside;
+  grid-area: changes;
 }
 
 .change-item time {

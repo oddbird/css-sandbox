@@ -10,3 +10,8 @@
 [data-alert='warn'] {
   border-color: var(--mark);
 }
+
+[data-status='warn'] {
+  --focus: white;
+  background-color: var(--mark);
+}

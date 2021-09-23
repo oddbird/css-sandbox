@@ -1,5 +1,9 @@
 ---
 title: Switch Function
+created: 2020-11-09
+changes:
+  - time: 2021-03-15
+    log: Use cases & related conditional functions
 eleventyNavigation:
   key: switch-function
   title: Switch Function

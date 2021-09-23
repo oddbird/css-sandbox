@@ -1,3 +1,8 @@
+status:
+  type: warn
+  text: |
+    Work on this feature has moved to an
+    [Editor's Draft specification](https://drafts.csswg.org/css-contain-3/)
 warn: |
   While there is a working prototype,
   there are still some major unresolved issues

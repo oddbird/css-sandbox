@@ -1,5 +1,9 @@
 ---
 title: Container Query Resources
+created: 2021-05-12
+changes:
+  - time: 2021-09-23T10:50:59-04:00
+    log: Articles about container query units
 eleventyNavigation:
   key: containment
   title: Articles & Demos
@@ -44,6 +48,13 @@ but hopefully we can handle the most common use-cases.
   by **Bramus Van Damme**
 - [Awesome-Container-Queries](https://github.com/sturobson/Awesome-Container-Queries)
   by **Stuart Robson**
+
+On Query Units:
+
+- [CSS Container Query Units](https://ishadeed.com/article/container-query-units/)
+  by **Ahmad Shadeed**
+- [Container Units Should Be Pretty Handy](https://css-tricks.com/container-units-should-be-pretty-handy/)
+  by **Chris Coyier**
 
 ## Demos:
 

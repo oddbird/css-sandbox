@@ -1,5 +1,9 @@
 ---
 title: Containment
+created: 2020-11-14
+changes:
+  - time: 2021-07-05
+    log: Known single-axis containment bugs
 eleventyNavigation:
   key: containment
   title: Containment

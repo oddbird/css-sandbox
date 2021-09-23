@@ -1,5 +1,9 @@
 ---
 title: Potential Grid Improvements
+created: 2020-11-10
+changes:
+  - time: 2021-05-19
+    log: Link to overflow fragmentation proposal
 eleventyNavigation:
   key: grids
   title: Potential Grid Improvements

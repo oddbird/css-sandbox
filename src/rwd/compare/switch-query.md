@@ -1,5 +1,9 @@
 ---
 title: Comparing Switch & Container
+created: 2020-11-14
+changes:
+  - time: 2021-03-16
+    log: Flesh out the comparison details
 eleventyNavigation:
   key: switch-container
   title: Comparing Switch & Container

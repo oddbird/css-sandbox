@@ -1,5 +1,9 @@
 title: Scope Proposal & Explainer
 raw_md: true
+created: 2020-12-15
+changes:
+  - time: 2021-08-24
+    log: Link to syntax comparison
 eleventyNavigation:
   key: scope-explainer
   title: Proposal & Explainer

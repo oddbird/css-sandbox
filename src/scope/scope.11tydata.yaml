@@ -1,2 +1,7 @@
 tags:
   - scoped styles
+status:
+  type: warn
+  text: |
+    Work on this feature has moved to an
+    [Editor's Draft specification](https://drafts.csswg.org/css-cascade-6/)

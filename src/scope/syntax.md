@@ -1,5 +1,9 @@
 ---
 title: Scope Syntax Comparisons
+created: 2021-07-22
+changes:
+  - time: 2021-07-25
+    log: Clarifications
 eleventyNavigation:
   key: scope-syntax
   title: Syntax Comparisons

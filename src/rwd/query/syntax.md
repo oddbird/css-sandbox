@@ -1,5 +1,9 @@
 ---
 title: Explicit Container Syntax
+created: 2020-11-14
+changes:
+  - time: 2021-05-21
+    log: Revised proposal
 eleventyNavigation:
   key: query-syntax
   title: Explicit Syntax

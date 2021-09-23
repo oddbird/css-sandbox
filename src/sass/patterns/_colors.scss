@@ -27,13 +27,13 @@ html {
   --contrast-light: snow;
   --contrast-light-ish: mistyrose;
   --contrast-dark: #{color.mix(darkslategray, black, 25%)};
-  --contrast-dark-ish:#{color.mix(darkslategray, black, 50%)};
+  --contrast-dark-ish: #{color.mix(darkslategray, black, 50%)};
   --neutral-light: lightslategray;
   --neutral-dark: slategray;
   --prime-light: powderblue;
   --prime-dark: teal;
   --accent-light: hotpink;
-  --accent-dark: mediumvioletred;
+  --accent-dark: #{color.mix(mediumvioletred, black, 75%)};
 
   @include light-mode;
 

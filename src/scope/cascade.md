@@ -1,5 +1,9 @@
 ---
 title: Scope in the Cascade
+created: 2021-03-15
+changes:
+  - time: 2021-04-09
+    log: Clarify conclusions
 eleventyNavigation:
   key: scope-cascade
   title: In the Cascade

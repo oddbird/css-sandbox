@@ -1,6 +1,9 @@
 ---
 title: Declarative Toggles
 created: 2021-05-28
+changes:
+  - time: 2021-06-16
+    log: Updated links and meeting notes
 eleventyNavigation:
   key: toggles
   title: Declarative Toggles

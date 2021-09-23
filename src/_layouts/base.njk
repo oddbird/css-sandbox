@@ -12,6 +12,10 @@ date: Last Modified
   <link rel="stylesheet" href="{{ '/css/style.css' | url }}" />
 </head>
 <body>
+  <aside data-status="{{ status.type }}">
+    {{ status.text | md | safe }}
+  </aside>
+
   <div class="controls">
     <button data-toggle="mode">colors</button>
   </div>
@@ -20,7 +24,8 @@ date: Last Modified
     {% include "nav.njk" %}
     {% if not (page.url == '/') %}
       <time datetime="{{ page.date.toISOString() }}">
-        Updated {{ page.date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
+        {% set latest = changes[0].time or page.date %}
+        Updated {{ latest.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
       </time>
     {% endif %}
 
@@ -43,7 +48,7 @@ date: Last Modified
     {{ content | typogr | safe }}
   </main>
 
-  {% if changes %}
+  {% if changes and not raw_md %}
     <aside id="changelog-feed" class="changelog">
       <h2>Log of Major Changes</h2>
       <ul>
@@ -57,7 +62,7 @@ date: Last Modified
         {% endfor %}
       </ul>
       <p>
-        <a href="/feed.xml">Subscribe to site changes</a>
+        <a href="/feed.xml">Subscribe to changes feed</a>
       </p>
     </aside>
   {% endif %}
