@@ -8,6 +8,8 @@ created: 2020-11-13
 changes:
   - time: 2021-09-22T00:35:28-04:00
     log: Brief notes on @timeline and interpolation function
+  - time: 2021-09-23T00:11:02-04:00
+    log: Link to fantasai/mia proposal for interpolation & timelines
 ---
 
 Breakpoints only get you so far.
@@ -24,6 +26,28 @@ applying animation/transition concepts
 like "easing" and "keyframes"
 to responsive type.
 
+## Proposal
+
+Fantasai and I worked on a proposal to address & unify 
+a number of related use-cases around interpolation & timelines:
+
+Timelines can be defined in relation to:
+- how far a scroll-container has scrolled
+- how long an element is "in-view" while being scrolled
+- media and container-query features that have a range value
+
+Some timelines can be used to control animations
+(aka scroll-linked animations),
+but we also propose some form of interpolation function
+(currently called `mix()`)
+that can apply a timeline and easing function
+to a single propery.
+
+There's more to the proposal.
+Check it out:
+
+https://wiki.csswg.org/ideas/timelines
+
 ## Resources
 
 From Scott:
@@ -39,9 +63,7 @@ CSSWG issues:
 - [Need method to interpolate variable font settings](https://github.com/w3c/csswg-drafts/issues/5635)
 - [Native interpolation function in CSS](https://github.com/w3c/csswg-drafts/issues/581)
 
-==TODO: Look into this more...==
-
-## Thoughts
+## Notes
 
 A few notes from my conversations with Scott:
 
