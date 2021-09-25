@@ -6,4 +6,5 @@ status:
 warn: |
   While there is a working prototype,
   there are still some major unresolved issues
-  around [single-axis containment](/rwd/query/contain/).
+  around [single-axis containment](/rwd/query/contain/),
+  and [the syntax keeps changing](/rwd/query/syntax/)

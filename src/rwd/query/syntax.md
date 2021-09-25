@@ -4,6 +4,8 @@ created: 2020-11-14
 changes:
   - time: 2021-05-21
     log: Revised proposal
+  - time: 2021-09-24T18:41:09-06:00
+    log: Need a more flexible shorthand type/name syntax
 eleventyNavigation:
   key: query-syntax
   title: Explicit Syntax
@@ -75,357 +77,138 @@ Despite the issues,
 I'll continue using `container` for now --
 since it's the name
 most people have used for this feature
-since ~2010. 😂
+since ~2010.
 
 But `context` stands out to me
 as a reasonable alternative.
 
-## Why add new syntax?
+## Proposed syntax for containers
 
-See [CSSWG-drafts issue #6174][6174]
-for public discussion of this issue.
+I'm proposing a new set of `container` properties:
 
-[6174]: https://github.com/w3c/csswg-drafts/issues/6174
+- `container-type`: the type of container needed
+- `container-name`: custom name(s) for the container
+- `container`: a shorthand syntax
 
-There are several reasons to consider new syntax
-for establishing observable containers:
-
-- Dimensional queries will require containment
-  of `layout`, `size` (1d or 2d), and `style`
-  (but not `paint`).
-  Ideally authors won't have to apply each individually.
-- Different [query features](https://github.com/w3c/csswg-drafts/issues/5989)
-  will require different types of containment
-  (or even no containment at all).
-- Authors might apply containment for other reasons,
-  and not want to trigger a new containment context for queries.
-
-Since the new syntax will need to set containment values,
-currently defined by the `contain` property,
-we should attempt to build on top of that existing property.
-
-### Extending the `contain` property
-
-If all query features required containment,
-we might think of them as shorthand values
-added to the the `contain` property.
-Much like the `strict` value,
-something like `inline-query`
-could apply values of `layout`, `inline-size`, and `style`:
-
-```css
-main {
-  contain: inline-query;
-}
-```
-
-Another variant of this might involve a function syntax:
-
-```css
-main {
-  contain: query(inline-size);
-}
-```
-
-Pros:
-
-- we're not implicitly setting `contain` values
-  based on some entirely separate property.
-
-Cons:
-
-- The difference between normal contain values
-  (`inline-size`) and their query-alternates (`inline-query`)
-  may be confusing in the same property
-- If we allow queries that don't require containment values,
-  this seems like the wrong place to specify them
-- We'd expect the individual values to _add up_
-  and have the same impact as the shorthand --
-  which breaks our goal of making the behavior explicit.
-
-### Adding a new property
-
-There is already existing precedent
-for other properties to "imply" containment.
-[Content-visibility][]
-doesn't change the computed value of `contain`,
-but it does change the used/applied value --
-triggering containment behavior.
-We also have features like
-[block formatting context][bfc]
-that are triggered by
-any number of different properties & combinations --
-while also now having an explicit `display` value.
-
-[Content-visibility]: https://drafts.csswg.org/css-contain-2/#content-visibility
-[bfc]: https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context
-
-From that perspective,
-we can think of `contain`
-as the explicit hook into
-containment minutia --
-but "containment" itself as a more generic behavior
-that can be triggered in various ways.
-Then we could add an explicit new property
-custom-designed for establishing
-query containers:
-
-```css
-main {
-  container: inline-size;
-}
-```
-
-Pros:
-
-- We don't need to differentiate between
-  nearly-identical values with different behavior
-  in the same property.
-- We don't have to "desugar" the shorthand value
-  into the same behavior as a set of longhand values.
-- We're not constrained by the concept of "containment"
-  when adding new query features.
-- We can teach a single container-query specific syntax,
-  and handle containment as an implementation detail.
-
-Cons:
-
-- More properties trigger containment behavior
-
-**At this point,
-a new property seems to me
-like the best path forward.**
-
-## Proposed syntax for establishing containers
-
-I'm sure we'll bikeshed
-some of the details,
-but here's an initial attempt,
-which is [also posted to the CSSWG issue][syntax-issue].
-
-[syntax-issue]: https://github.com/w3c/csswg-drafts/issues/6174#issuecomment-846313720
-
-I'm proposing a new `container` property:
-
-```css
-.selector {
-  container: inline-size;
-}
-```
-
-This property would:
+These properties would:
 - Explicitly establish the element as a container
 - Establish the types of queries allowed on the container
   (e.g. `inline-size`)
-- Apply the minimum required containment
+  so that the browser can
+  apply the minimum containment (if any) required
   to make those query types possible
-  (e.g. `layout`, `inline-size`, and `style`)
-
-Different [container types][ctype]
-(dimensions, states, styles)
-are explored below.
-
-This also presents an opportunity for adding
-[named containers][cname]
-using a custom-identifier
-(also explored below).
-
-[cname]: https://css.oddbird.net/rwd/query/proposal/#named-containers
-
-If we do support both name & types,
-the `container` property would act as a shorthand:
-
-```css
-.selector {
-  /* container: [<custom-ident>? <types>+] | none; */
-  container: my-widget inline-size style;
-}
-
-/* @container <container-query-list> { <stylesheet> } */
-@container my-widget (inline-size >= 30em) { /* … */ }
-```
-
-If we do have both a "name" and a list of "types",
-we would likely also want longhand properties for each.
-Those could be called
-`container-name` and `container-type`:
-
-```css
-.selector {
-  /* container-name: <custom-ident> | none; */
-  container-name: page;
-
-  /* container-type: <types>+ | none; */
-  container-type: inline-size style;
-}
-```
-
-### Container name
-
-While I suggested [removing selectors][selectors]
-from the `@container` syntax,
-having multiple container-types
-makes it more likely that there will be reasons
-to query different containers in each case.
-
-The new syntax here
-also opens up the possibility of creating
-more flexible & repeatable
-_named_ containers --
-not limited to selector-matching:
-
-```css
-main, section {
-  container-type: inline-size;
-  cotainer-name: layout;
-}
-
-.my-component {
-  container-type: style;
-  container-name: component;
-}
-
-@container layout (inline-size >= 30em ) { /* … */ }
-@container component (font-size >= 2rem) { /* … */ }
-
-/* name is optional */
-@container (inline-size >= 30em ) { /* … */ }
-```
-
-These queries would resolve as follows:
-
-- If no container name is specified,
-  the query condition resolves against the _nearest ancestor container_
-- Otherwise,
-  find the nearest ancestor container _with the specified name_
-  - If no ancestor container matches the specified name,
-    the query condition is `false`
-  - Otherwise, if a container is found with the proper name,
-    the query condition is resolved against that element
-
-You could also query the name of the container,
-without any qualifiers.
-I'm not sure if that would have
-any real use-cases:
-
-```css
-@container my-component { /* … */ }
-```
-
-Multiple different containers
-could share the same identifier --
-and descendants would query the nearest ancestor
-with that identifier.
-
-[selectors]: https://css.oddbird.net/rwd/query/explainer/#implicit-vs-explicit-containers
+- Give the container a name,
+  which can be referenced in queries.
 
 ### Container types
 
-This proposal identifies
-three broad groups of `container-type`
-that an author might want to
-observe and query...
+Right now we're focused on two query types:
 
-#### Observable dimensions
+- [`size` queries](https://drafts.csswg.org/css-contain-3/#size-container)
+  (with `block-size` or `inline-size` options)
+- [`style` queries](https://drafts.csswg.org/css-contain-3/#style-container)
 
-In order to query the dimensions of a container,
-we would provide at least two values,
-and potentially more.
-These would all apply
-the necessary layout, size, and style containment:
+We've also discussed
+[state queries](https://github.com/w3c/csswg-drafts/issues/6402),
+there is still debate about
+using `@container` or some form of selector syntax
+for those use-cases.
+I expect that will be pushed
+to the next level of the specification.
 
-- `size` --
-  contains `layout`, `size`, and `style`
-- `inline-size` (or simply `inline`?) --
-  contains `layout`, `inline-size`, and `style`
-- `block-size`? (or simply `block`?) --
-  contains `layout`, `block-size`, and `style`
-- `width`? --
-  contains `layout`, `width`, and `style`
-- `height`? --
-  contains `layout`, `height`, and `style`
+### Container names
 
-If block-only containment is not possible,
-that will also rule out `width`/`height` as values.
+By default the `@container` rule will try to use
+the nearest available container,
+but nested containers of different types could get in the way.
+Naming containers will allow authors
+to ensure they are querying the intended containers.
+
+(This syntax is still a work in progress.
+See the [shorthand](#container-shorthand) section for details)
 
 ```css
-main {
-  container: size;
+main, section {
+ container: inline-size / layout-system;
 }
 
-@container (inline-size >= 30em) { /* … */ }
-@container (min-aspect-ratio: 8/5) { /* … */ }
-```
-
-It would not make much sense
-to apply multiple dimension values at once.
-
-#### Observable styles
-
-We may be able to expose/query
-the computed values of other properties
-(especially custom properties)
-on the container.
-We likely only need a single value
-to expose that sort of query:
-
-```css
-main {
-  container: style;
+.my-component {
+ container: style / framework;
 }
 
-@container (--colors == dark) { /* … */ }
-@container (font-size >= 2rem) { /* … */ }
+@container layout-system (inline-size >= 30em ) { /* … */ }
+@container framework (font-size >= 2rem) { /* … */ }
 ```
 
-It's not clear to me
-what containment (if any)
-would be required for this to work.
+For queries that require a named ancestor,
+but do not require any form of containment,
+it might be enough to set a query name without setting a type.
 
-#### Observable state
+## Container shorthand & query syntax
 
-There has also been discussion
-about querying the "state" of the container:
+See [issue #6393](https://github.com/w3c/csswg-drafts/issues/6393#issuecomment-926965198)
 
-- Is it "stuck" (using position sticky)?
-- Is it snapped-into-place (using scroll-snap)?
-- Is it currently in the viewport?
+Name and type need a combined syntax in the shorthand property,
+and also in the `@container` rule.
+It would be great to have one shared syntax across both locations.
 
-If all "state" queries
-require similar containment,
-we could use a single keyword for these as well:
+Our current (prototyped) shorthand property syntax
+relies on consistent order,
+and the `/` divider (eg `types / names`).
+But that was based on the assumption that a type is always required,
+and I don't think that's a reliable assumption.
+Type is clearly not required for the query syntax,
+and style queries could make it optional for the container as well.
+
+Still, the ordered approach is a valid option.
+In order to make that work with both sides optional,
+the delimiter needs to be used for all names,
+even when no type is given.
+Either using punctuation or a keyword:
 
 ```css
-main {
-  container: state;
-}
+/* using the current `/` divider */
+@container inline-size / my-name ( width > 30em ) { … }
+@container inline-size ( width > 30em ) { … }
+@container / my-name ( width > 30em ) { … }
+
+/* using a single keyword, still ordered */
+@container inline-size as my-name ( width > 30em ) { … }
+@container inline-size ( width > 30em ) { … }
+@container as my-name ( width > 30em ) { … }
 ```
 
-But it seems likely that
-different states might require
-establishing different types of containment --
-in which case each state might need
-to be listed individually.
-This likely needs more exploration.
-
-From the other end,
-I expect we might want to designate
-state-queries with a functional syntax:
+But I'd love a more flexible approach.
+We could make order irrelevant
+by adding a second keyword (`'for' <types> || 'as' <names>`):
 
 ```css
-@container state(stuck) { /* … */ }
+@container for inline-size as my-name ( width > 30em ) { … }
+@container as my-name for inline-size ( width > 30em ) { … }
+@container for inline-size ( width > 30em ) { … }
+@container as my-name ( width > 30em ) { … }
 ```
 
-In which case we could consider
-using a similar functional syntax
-for exposing individual states:
+But the more I stare at this,
+the more tempted I am to just use dashed-idents for names,
+and allow the two values to mingle completely:
 
 ```css
-main {
-  container: state(stuck);
-}
+@container inline-size --my-name ( width > 30em ) { … }
+@container --my-name inline-size ( width > 30em ) { … }
+@container inline-size ( width > 30em ) { … }
+@container --my-name ( width > 30em ) { … }
 ```
 
-## Container-relative units
+That might also allow us to express and/or combinations
+(maybe with the `/` divider
+between container-selection
+and query logic -- if that division needs more clarity):
 
-==TBD==
+```css
+@container inline-size and --my-name / ( width > 30em ) { … }
+@container (--my-name or --other-name) / ( width > 30em ) { … }
+```
+
+We could consider adding parenthesis around any of these options,
+if it helps.
