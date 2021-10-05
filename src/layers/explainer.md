@@ -1,10 +1,5 @@
 # Cascade Layers Explainer
 
-NOTE: This explainer may be out of date,
-since work is now happening
-on the official specification:
-[CSS Cascade & Inheritance Module level 5](https://drafts.csswg.org/css-cascade-5/).
-
 ## Authors
 
 - Miriam Suzanne
@@ -22,27 +17,11 @@ Please leave any feedback on the CSSWG issues for this proposal,
 or open new issues when appropriate:
 
 - [Cascade 5, Editor's Draft](https://drafts.csswg.org/css-cascade-5/)
-- [Cascade 5 label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
-- [Cascade 5 + "layer"](https://github.com/w3c/csswg-drafts/issues?q=is%3Aopen+label%3Acss-cascade-5+layer)
+- [Cascade 5, Working Draft](https://www.w3.org/TR/css-cascade-5/)
+- [Cascade-5 Github label](https://github.com/w3c/csswg-drafts/labels/css-cascade-5)
 - [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/597)
 
-Specific issues for discussion:
-
-- [Layers terminology bikeshed][5840]
-- [What is the appropriate syntax for appending to nested layers?][5791]
-- [Cascade layers need an import syntax][5681]
-- [Provide a syntax for re-using cascade layers across encapsulation context?][5854]
-- [Provide an attribute for assigning `<link>` or `<style>` elements to cascade layers][5853]
-- [Does nested `@layer` syntax work for declaring layer order?][5849]
-
-[5840]: https://github.com/w3c/csswg-drafts/issues/5840
-[5791]: https://github.com/w3c/csswg-drafts/issues/5791
-[5681]: https://github.com/w3c/csswg-drafts/issues/5681
-[5854]: https://github.com/w3c/csswg-drafts/issues/5854
-[5853]: https://github.com/w3c/csswg-drafts/issues/5853
-[5849]: https://github.com/w3c/csswg-drafts/issues/5849
-
-Browser implementations:
+Browser issues:
 
 - [Mozilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1699214)
 - [Webkit](https://bugs.webkit.org/show_bug.cgi?id=220779)
@@ -341,8 +320,7 @@ to reference layer names in a more global layer-scope:
 }
 ```
 
-See issue #5791:
-[What is the appropriate syntax for appending to nested layers?][5791]
+See issue [#5791](https://github.com/w3c/csswg-drafts/issues/5791)
 
 ## Layers in the cascade
 

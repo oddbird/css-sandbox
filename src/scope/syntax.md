@@ -1,12 +1,14 @@
 ---
-title: Scope Syntax Comparisons
+title: Scope Syntax Options
 created: 2021-07-22
 changes:
   - time: 2021-07-25
     log: Clarifications
+  - time: 2021-10-05T12:37:15-06:00
+    log: Add possible selector notation & proximity combinator
 eleventyNavigation:
   key: scope-syntax
-  title: Syntax Comparisons
+  title: Syntax Options
   parent: scope
 ---
 
@@ -161,6 +163,117 @@ as it allows the features to be used separately.
 If we provided both the `@scope` rule and `:in-scope()` selector,
 that combination would match all 5 criteria.
 
+## Selector Scope Syntax
+
+Rather than using a pseudo-element,
+which needs to be applied to each individual subject,
+we might be able to come up with a new selector syntax
+for describing the upper & lower boundaries of a scope.
+For example:
+
+```css
+(.media / .content) img { ... }
+```
+
+This sort of syntax could be combined with nesting,
+in order to scope multiple subjects:
+
+```css
+(.media / .content) {
+  & img { ... }
+  & .content { ... }
+}
+```
+
+That could potentially handle:
+
+- ✅ **lower boundaries** in parenthesis
+- ✅ **scope proximity** based on scope roots
+- ❌ ... but not **separately** from cascade proximity
+- ✅ **css nesting** works like any other selector
+- ✅ **multiple selectors** allowed through nesting
+
+This raises some questions about
+how to represent nested scopes,
+and the `:scope` pseudo-class.
+
+If we allow nesting
+(and I think we should),
+then
+I would expect the nested syntax should de-sugar
+much like other selectors:
+
+```css
+/* nested */
+(body / aside) {
+  & section {
+    & (.media / .content) {
+      & img { ... }
+    }
+  }
+}
+
+/* de-sugared */
+(body / aside) section (.media / .content) img { ... }
+```
+
+In which case,
+each additional scope notation
+should like update the meaning of `:scope`
+for all selectors following.
+That could be slightly confusing,
+since it might represent different elements
+at different points in the selector.
+
+In this example,
+the first `:scope` matches a `body` element
+being used as scope-root,
+while the second `:scope` matches a scope-root `.media`:
+
+```css
+(body / aside) :scope (.media / .content) :scope img { ... }
+```
+
+Since a scope is a fragment of a document,
+I would expect the inner scopes
+to be limited by the outer scope --
+so the resulting subject element
+is a `body .media img` that is in the
+intersection of the two scopes.
+
+## Proximity Combinator
+
+Since many authors expect proximity
+to be taken into account
+when comparing descendant selectors,
+it might make sense to provide a new
+descendant-like combinator with that behavior.
+For the sake of comparison,
+we can use `>>` as the syntax for now:
+
+```css
+.light-mode >> a { color: rebeccapurple; }
+.dark-mode >> a { color: plum; }
+```
+
+That would behave the same
+as existing descendant selectors,
+except when specificity is equal --
+in which case proximity weighting would be applied,
+before source-order.
+
+This would not be a full solution for scope,
+since it does not include:
+
+- ❌ **lower boundaries**
+
+However, it could still be useful:
+
+- ✅ **scope proximity** is applied
+- ✅ ... **separately** from cascade proximity
+- ✅ **css nesting** works like any other combinator
+- ✅ **multiple selectors** allowed through nesting
+
 ## Meaningful `:scope` when nesting CSS
 
 A totally different (non-combinable) idea
@@ -212,7 +325,7 @@ this would require several layers of nesting:
 }
 ```
 
-I don't think any of this is viable,
+❌ I don't think any of this is viable,
 because it requires giving `:scope`
 a nested meaning that cannot be expressed
 outside the nesting context.

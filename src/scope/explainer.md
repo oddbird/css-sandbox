@@ -1079,6 +1079,25 @@ would have the same meaning:
 }
 ```
 
+However,
+the goal of nesting is
+to clean up document structure,
+and make it more readable --
+primarily a syntax issue.
+Scope has a much more complicated set of goals,
+around limited selector-matching
+and namespacing.
+There is also a clear difference
+between the meaning of `&`
+(which represents an entire selector list)
+and `:scope`
+(which represents a specific scoping element in the DOM).
+
+While it might be a mistake to make one rely on the other --
+they clearly have some overlap.
+Both help to describe the relationship
+between parent & child selectors.
+
 ### Can scope rules be nested in other scope rules?
 
 I can imagine use-cases for nesting scope rules,

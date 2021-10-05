@@ -4,6 +4,8 @@ created: 2021-03-15
 changes:
   - time: 2021-04-09
     log: Clarify conclusions
+  - time: 2021-10-05T11:57:41-06:00
+    log: Merge in cascade options
 eleventyNavigation:
   key: scope-cascade
   title: In the Cascade
@@ -76,6 +78,98 @@ but not entirely reliable.
 The question is:
 should _scope proximity_ override _specificity_,
 or the other way around?
+
+The original scope specification
+had scope override specificity in the cascade.
+Un-scoped styles are treated as-though scoped to the document-root:
+
+> For normal declarations the inner scope's declarations override,
+> but for ''!important'' rules outer scope's override.
+
+But I think we should un-couple scope from specificity/importance.
+That behavior can be more easily controlled using cascade layers.
+
+There are several options
+(some of which could be combined):
+
+### No impact on cascade
+
+The goal of scope is to narrow down the list of selectable elements,
+not necessarily to represent their importance relative to global styles.
+We could define scope akin to media-queries,
+with no impact on cascading -- only on filtering.
+
+Both specificity & layers can be used in-conjunction with scope
+to control weighting when desired.
+
+### The scoping selector
+
+The specificity of the scope-selector itself
+could be applied to the specificity of each nested selector, so that:
+
+```css
+@scope [data-component=tabs] {
+  /* `[data-component=tabs] .tab-item`: 0,2,0 */
+  .tab-item { /* ... */ }
+}
+
+@scope #tabs {
+  /* `#tabs .tab-item`: 1,1,0 */
+  .tab-item { /* ... */ }
+}
+```
+
+### Make Proximity Meaningful
+
+There is a CSS-issue that current scope solutions solve around proximity --
+concepts of “inner” and “outer” --
+which might belong in the cascade:
+
+https://twitter.com/keithjgrant/status/1123676335484952576
+
+My instinct would be to add _proximity_
+below specificity in the cascade,
+but above source-order.
+That would allow scopes to be re-arranged safely,
+without any impact on existing specificity rules.
+
+(This could be combined with either of the above options)
+
+### Importance-relative layering
+
+Both the initial scope specification,
+and the current Shadow-DOM encapsulation-context approach
+put the scope-proximity above/before specificity in the cascade,
+and relative to importance.
+Specificity is not considered unless there is a tie
+at the scope/importance level...
+
+Shadow encapsulation is designed
+to treat normal styles as the "default"
+which an outer page can easily override.
+This matches the behavior we would expect from
+browser-defined components:
+
+- normal: outer page wins
+- important: inner context wins
+
+Scope was designed in the reverse,
+so that inner context would override outer context
+unless marked as important.
+This matches the expectation that
+proximity should take priority when describing components:
+
+- normal: inner scoped component wins
+- important: outer page can take over
+
+❌ I don't like this interplay of
+importance with scope,
+or the priority of scope _over and above_ specificity.
+This approach is trying to infer too much
+about the styles based on their scope.
+I would hand this power off to [Cascade Layers](/layers/),
+and allow scope to have much lower weight in the cascade --
+untangled from importance.
 
 ## Considerations
 
