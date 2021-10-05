@@ -4,6 +4,8 @@ created: 2020-11-10
 changes:
   - time: 2021-05-19
     log: Link to overflow fragmentation proposal
+  - time: 2021-10-05T13:09:35-06:00
+    log: Link to gap-styling proposal & grid-area discussion
 eleventyNavigation:
   key: grids
   title: Potential Grid Improvements
@@ -68,6 +70,8 @@ with an initial prototype,
 by
 [indefinite spans (#388)](https://github.com/w3c/csswg-drafts/issues/388).
 
+==TODO: write up proposal, and file on CSSWG==
+
 ## Styling grid abstractions
 
 There have been many requests to style
@@ -84,6 +88,14 @@ This approach would ideally be generic,
 applying to grid, flexbox, and multi-column layouts.
 (This was discussed by the Working Group in May 2020,
 with a request for more "white-boarding" of options)
+
+I worked with fantasai last week
+to flesh out
+a proposal for styling gaps,
+by expanding on the `column-rule` property
+currently supported on multicolumn layouts:
+
+Proposal: https://wiki.csswg.org/ideas/gutter-styling
 
 ### Grid cells, tracks, and areas
 
@@ -107,8 +119,6 @@ for this narrow use-case,
 but she [expands on it to solve other issues](https://speakerdeck.com/jensimmons/proposal-to-csswg-sept-2016?slide=47),
 more aligned with "regions" generally.
 
-==@@@ link to other region-like issues==
-
 For the simpler use-case of decorative styling
 on cells/tracks/areas,
 I like Tab Atkins proposal
@@ -124,6 +134,13 @@ of a `::grid-area()` pseudo-element:
 But it does raise a few questions for me:
 - How do overlapping area styles "stack" on a z-index?
 - Do we really need to define the area in the pseudo-element function?
+
+Fantasai and I
+[put together a proposal](https://github.com/w3c/csswg-drafts/issues/499#issuecomment-926122734)
+based on the pseudo-element above,
+and the CSSWG resolved to
+have Jen Simmons & Rachel Andrew
+write up a draft specification.
 
 ## Managing grid flow and areas
 

@@ -2,9 +2,9 @@
 title: Scope & Encapsulation
 created: 2020-11-10
 changes:
-  - time: 2021-11-09
+  - time: 2021-09-11
     log: Scope spec draft moved to Cascade-6
-  - time: 2021-10-05T11:47:07-06:00
+  - time: 2021-10-05T13:05:27-06:00
     log: Move prior art and questions, replace with resources
 eleventyNavigation:
   key: scope
