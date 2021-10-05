@@ -34,6 +34,8 @@ what we covered in that time.
 - ➡️ Responsive Tables
 - ➡️ Additive Cascade
 - ➡️ Text-decoration triage
+- ➡️ URL modifiers (preload, lazyload, cross-origin)
+- ➡️ Sibling and index counters
 
 ## Implementor notes
 
