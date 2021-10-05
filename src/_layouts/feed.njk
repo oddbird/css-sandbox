@@ -18,16 +18,19 @@
     <link href="{{ absolutePostUrl }}"/>
     <updated>{{ change.date | dateToRfc3339 }}</updated>
     <id>{{ absolutePostUrl }}</id>
-    <content type="html">{% if change.latest -%}
-      {{ post.templateContent | htmlToAbsoluteUrls(absolutePostUrl) }}
-    {%- else -%}
-      <p>This page has more recent changes available. For more details, see:</p>
-      <ul>
-        <li>The <a href="{{ absolutePostUrl }}#changelog-feed">current status on css.oddbird.net</a></li>
-        <li>The <a href="{{ absolutePostUrl }}#changelog-feed">log of major changes</a></li>
-        <li>The <a href="{{ [github.history, page.inputPath] | join }}">github commit history</a></li>
-      </ul>
-    {%- endif %}</content>
+    <content type="html">{%- set feedContent -%}
+      {%- if change.latest -%}
+        {{ post.templateContent }}
+      {%- else -%}
+        <p>This page has more recent changes available. For more details, see:</p>
+        <ul>
+          <li>The <a href="{{ absolutePostUrl }}#changelog-feed">current status on css.oddbird.net</a></li>
+          <li>The <a href="{{ absolutePostUrl }}#changelog-feed">log of major changes</a></li>
+          <li>The <a href="{{ [github.history, page.inputPath] | join }}">github commit history</a></li>
+        </ul>
+      {%- endif -%}
+    {%- endset -%}
+    {{ feedContent | htmlToAbsoluteUrls(absolutePostUrl) | safe }}</content>
   </entry>
   {%- endfor %}
 </feed>
