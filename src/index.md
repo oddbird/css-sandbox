@@ -32,14 +32,3 @@ an ever-changing reflection of my own personal thoughts.
 ## My Notes (So Far)
 
 {{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | typogr | safe }}
-
-## External Proposals
-
-Some of my notes & proposals
-(written in collaboration with fantasai)
-are documented on the [CSSWG Wiki](https://wiki.csswg.org/ideas):
-
-- [Margin Collapse Controls](https://wiki.csswg.org/ideas/margin-collapsing)
-- [Timelines and Interpolation](https://wiki.csswg.org/ideas/timelines)
-- [Column and Row Gaps and Rules](https://wiki.csswg.org/ideas/gutter-styling)
-- [Logical (Flow-relative) Syntax](https://wiki.csswg.org/ideas/logical-syntax)

@@ -6,6 +6,8 @@ changes:
     log: Article and tests for Cascade Layers
   - time: 2021-10-05T11:36:34-06:00
     log: Include full resource list
+  - time: 2021-10-05T16:12:53-06:00
+    log: Update Chrome feature flag
 eleventyNavigation:
   key: layers
   title: Cascade Layers
@@ -56,8 +58,7 @@ and avoid specificity or source-order conflicts across concerns.
 - [Webkit Layers](https://bugs.webkit.org/show_bug.cgi?id=220779)
   (`Develop`/`Experimental Features` » `CSS Cascade Layers`)
 - [Chromium Layers](https://crbug.com/1095765)
-  ([run-time flag](https://www.chromium.org/developers/how-tos/run-chromium-with-flags)
-  » `--enable-blink-features=CSSCascadeLayers`)
+  (`chrome://flags/` » `Enable CSS Cascade Layers`)
 
 ## Talks & Podcasts
 

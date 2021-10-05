@@ -15,7 +15,7 @@
   {% set absolutePostUrl %}{{ post.url | url | absoluteUrl(feed.url) }}{% endset %}
   <entry>
     <title>{{ post.data.title }} | {{ change.log }}</title>
-    <link href="{{ absolutePostUrl }}"/>
+    <link href="{{ absolutePostUrl }}?v={{ change.date | dateToRfc3339 | slug }}"/>
     <updated>{{ change.date | dateToRfc3339 }}</updated>
     <id>{{ absolutePostUrl }}</id>
     <content type="html">{%- set feedContent -%}
