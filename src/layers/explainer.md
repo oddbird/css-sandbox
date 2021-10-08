@@ -291,11 +291,11 @@ from the top-level `default` layer:
 
 The resulting layers & layer-order are:
 
-1. _unlayered_
-2. default
-3. framework
-4. framework.default
-5. framework.theme
+1. default
+2. framework.default
+4. framework.theme
+5. framework _unlayered_
+6. _unlayered_
 
 As a shorthand,
 nested layers can also be described
@@ -390,7 +390,7 @@ This follows the same logic used for layering
 normal and important origins,
 so that the `!important` flag maintains
 the same semantic purpose in both settings.
-Un-layered styles rank highest in the normal origin,
+unlayered styles rank highest in the normal origin,
 and lowest in the `!important` origin.
 
 For example, the following CSS:
@@ -418,10 +418,10 @@ Results in the following layer orders
    2. Important base layer
    3. Important patterns layer
    4. Important components layer
-   5. Important *un-layered* styles
+   5. Important *unlayered* styles
 2. *Animations*
 3. Normal **Author** Origin
-   1. *un-layered* styles
+   1. *unlayered* styles
    2. components layer
    3. patterns layer
    4. base layer
@@ -542,7 +542,7 @@ to establish targeted defaults:
   }
 }
 
-/* un-layered rules override the default layer */
+/* unlayered rules override the default layer */
 .no-invalid {
   border-color: slategray;
 }
@@ -715,7 +715,7 @@ they should always override the original legacy code.
 But this case presents an issue:
 
 In the normal author origin,
-un-layered styles will always take precedence over layered styles.
+unlayered styles will always take precedence over layered styles.
 Legacy code would need to be given an explicit layer.
 That can be done in a manageable way, by using the layer import syntax.
 
@@ -917,6 +917,11 @@ Many thanks for valuable feedback and advice from:
 - Theresa O’Connor
 
 ## Changelog
+
+### 2021-10-08
+
+- CHANGE By default, unlayered styles take priority
+  ([issue #6284](https://github.com/w3c/csswg-drafts/issues/6284#issuecomment-937262197))
 
 ### 2021.01.29
 
