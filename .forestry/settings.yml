@@ -3,7 +3,22 @@ new_page_extension: md
 auto_deploy: false
 admin_path: 
 webhook_url: 
-sections: 
+sections:
+- type: directory
+  path: "./src/scope"
+  label: Scope
+  create: all
+  match: "**/*"
+- type: directory
+  path: "./src/layers"
+  label: Cascade Layers
+  create: all
+  match: "**/*"
+- type: directory
+  path: "./src/rwd"
+  label: Responsive Web Design
+  create: all
+  match: "**/*"
 upload_dir: uploads
 public_path: "/uploads"
 front_matter_path: ''
