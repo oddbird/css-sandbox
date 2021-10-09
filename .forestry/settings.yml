@@ -10,14 +10,20 @@ sections:
   create: all
   match: "**/*"
 - type: directory
-  path: "./src/layers"
-  label: Cascade Layers
-  create: all
-  match: "**/*"
-- type: directory
   path: "./src/rwd"
   label: Responsive Web Design
   create: all
+  match: "**/*"
+- type: heading
+  label: Cascade Layers
+- type: directory
+  path: "./src/layers"
+  label: Layers Folder
+  create: all
+  match: "**/*"
+- type: document
+  path: "./src/layers/explainer.md"
+  label: Layers Explainer
   match: "**/*"
 upload_dir: uploads
 public_path: "/uploads"
