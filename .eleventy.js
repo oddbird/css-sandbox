@@ -3,8 +3,25 @@ const hljs = require('@11ty/eleventy-plugin-syntaxhighlight');
 const pluginRss = require("@11ty/eleventy-plugin-rss");
 const toc = require('eleventy-plugin-toc');
 const yaml = require('js-yaml');
+const _ = require('lodash');
 
 const type = require('./filters/type');
+
+const getChangelog = (collection) => {
+  return _.flatMap(
+    _.filter(collection, 'data.changes'),
+    (page) => {
+      const pageData = _.get(page, 'data.changes');
+      return pageData.map((change) => {
+        const date = new Date(change.time);
+        change.date = date.toLocaleDateString('en-US');
+        change.url = page.url;
+        change.source = page.data.title;
+        return change;
+      })
+    }
+  ).sort((a, b) => b.time - a.time);
+};
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(hljs);
@@ -21,6 +38,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('typogr', type.set);
   eleventyConfig.addFilter('md', type.render);
   eleventyConfig.addFilter('mdInline', type.inline);
+
+  eleventyConfig.addFilter('getChangelog', getChangelog);
 
   // config
   eleventyConfig.setLibrary('md', type.mdown);

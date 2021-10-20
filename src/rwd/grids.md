@@ -6,6 +6,8 @@ changes:
     log: Link to overflow fragmentation proposal
   - time: 2021-10-05T13:09:35-06:00
     log: Link to gap-styling proposal & grid-area discussion
+  - time: 2021-10-20T13:07:53-06:00
+    log: Link Rachel Andrew on multicol & page fragments
 eleventyNavigation:
   key: grids
   title: Potential Grid Improvements
@@ -164,10 +166,22 @@ as an overflow value.
 That could be combined with various layout modules,
 to create a very flexible approach to CSS Regions.
 
-The spec authors are
-David Baron & Florian Rivoal.
-It might be good to check with them
-about the status of the spec.
+Rachel Andrew has also
+[talked about this need](https://rachelandrew.co.uk/archives/2020/04/07/making-things-better/)
+specifically in relation to `multicol` layout --
+and points out that fragmented overflow
+already exists for "paged media"
+(print, ebooks, etc).
+
+> **In a paged context you can take content
+> and flow it through as many pages
+> as are needed to contain it.**
+> But if you think about
+> creating web site or application with defined screens,
+> how different is that to paged media?
+> Perhaps not very.
+
+I agree.
 
 ## Defining Grids
 

@@ -35,6 +35,24 @@ h3, h4 {
   }
 }
 
+// quotes
+
+blockquote {
+  border-inline-start: 0.5em solid var(--mark);
+  font-style: italic;
+  margin-inline: 0;
+  padding-inline: 0.5em;
+
+  @media (min-width: 50em) {
+    margin-inline: -1.5em;
+    padding-inline: 1em;
+  }
+
+  em, i {
+    font-style: normal;
+  }
+}
+
 // markers & code
 
 code,

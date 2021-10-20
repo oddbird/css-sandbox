@@ -48,7 +48,7 @@ date: Last Modified
     {{ content | typogr | safe }}
   </main>
 
-  {% if changes and not raw_md %}
+  {% if changes and not (raw_md or is_log) %}
     <aside id="changelog-feed" class="changelog">
       <h2>Log of Major Changes</h2>
       <ul>
