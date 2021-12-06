@@ -29,7 +29,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(toc);
   eleventyConfig.addPlugin(pluginRss);
 
-  eleventyConfig.addWatchTarget('./src/sass/');
+  eleventyConfig.addWatchTarget('./src/styles/');
   eleventyConfig.addPassthroughCopy('./src/css');
   eleventyConfig.addPassthroughCopy('./src/favicon.svg');
 
