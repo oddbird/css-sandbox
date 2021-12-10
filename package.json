@@ -1,7 +1,7 @@
 {
-  "name": "11ty-sass-skeleton",
+  "name": "OddBird CSS Sandbox",
   "version": "1.1.0",
-  "description": "A public scratch-pad for Miriam to think about CSS",
+  "description": "A public scratch-pad for OddBird to work on CSS & Sass",
   "main": "index.html",
   "scripts": {
     "watch:sass": "sass  --no-source-map --watch src/styles:public/css",
@@ -14,9 +14,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/5t3ph/11ty-sass-skeleton.git"
+    "url": "https://github.com/oddbird/css-sandbox"
   },
-  "author": "5t3ph",
+  "author": "OddBird",
   "license": "ISC",
   "dependencies": {
     "@11ty/eleventy": "^0.12.1",
