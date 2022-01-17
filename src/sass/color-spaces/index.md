@@ -75,7 +75,8 @@ Ideally, these tools will be:
 
 ## Terms
 
-The term _color space_ can be a bit fuzzy:
+The differences between a model, space, gamut, and format
+can become quite blurry:
 
 - A _color model_ is a way of describing colors
   and their relationships mathematically.
@@ -92,6 +93,15 @@ The term _color space_ can be a bit fuzzy:
   are the most intuitive for authors,
   and provide the best interpolation.
 
+The current CSS specification
+uses the term "_color space_" in reference to both:
+
+- The generic format of color gamut,
+  e.g. `sRGB` or `xyz`
+- A specific cubic or cylindrical format
+  to use for interpolation,
+  e.g. `hsl` (in the `sRGB` gamut) or `oklch` (in `xyz`)
+
 Sass currently:
 
 - Supports a number of different formats,
@@ -100,7 +110,7 @@ Sass currently:
 - Outputs the shortest possible format representing a given color,
   no matter what format was initially used to describe it.
 
-The CIE color models act as a central standard
+The CIE color models (especially `XYZ`) act as a central standard
 describing the full range of human-visible color.
 Other color models are defined relative to this standard,
 in order to make meaningful translation possible.
