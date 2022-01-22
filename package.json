@@ -19,10 +19,10 @@
   "author": "OddBird",
   "license": "ISC",
   "dependencies": {
-    "@11ty/eleventy": "^0.12.1",
+    "@11ty/eleventy": "^1.0.0",
     "@11ty/eleventy-navigation": "^0.1.6",
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.4",
-    "autoprefixer": "^9.8.6",
+    "autoprefixer": "^10.4.2",
     "cross-env": "^7.0.2",
     "cssnano": "^5.0.12",
     "cssremedy": "0.1.0-beta.2",
