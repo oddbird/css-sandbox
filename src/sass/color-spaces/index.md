@@ -4,6 +4,8 @@ created: 2021-12-06
 changes:
   - time: 2022-01-11T14:57:36-07:00
     log: More detail, with rough Sass suggestions
+  - time: 2022-01-24T16:01:45-07:00
+    log: Document css-color-4 functions and browser support
 eleventyNavigation:
   key: sass-color-spaces
   title: Sass Color Spaces
@@ -85,6 +87,9 @@ can become quite blurry:
 - The combination of a color model and format
   can be visualized as a (generally 3D) _color space_,
   like a _cube_ or _cylinder_.
+  Formats like `rgb`/`hsl` or `lab`/`lch`
+  that describe the same gamut in a different shape
+  are called _transformations_ of that base gamut.
 - Different _color formats_
   sometimes describe the same _color gamut_
   but with those colors mapped differently as a _color space_.
@@ -101,6 +106,10 @@ uses the term "_color space_" in reference to both:
 - A specific cubic or cylindrical format
   to use for interpolation,
   e.g. `hsl` (in the `sRGB` gamut) or `oklch` (in `xyz`)
+
+There is also a CSS media query feature
+that uses the term _color-gamut_
+with a list of accepted rgb color gamuts.
 
 Sass currently:
 
@@ -195,7 +204,9 @@ by clamping individual RGB channels --
 which can cause dramatic hue-shift.
 Any solution here needs to be backwards-compatible
 
-## CSS color spaces & the `color()` function
+## CSS color spaces
+
+### The `color()` function
 
 The CSS specification allows for loading custom color spaces,
 but there are also a number of provided spaces --
@@ -222,7 +233,73 @@ using the `color()` function:
 color( <color-space> <coordinates>{3} [ / <alpha> ]? )
 ```
 
-==Has this changed with the introduction of `okLCH` et al?==
+(where `<coordinates>` include percentages for RGB spaces,
+but only numbers/`none` in XYZ spaces)
+
+Less used formats (like CMYK) are allowed,
+but require a linked color profile.
+Sass should allow this to pass through,
+but is not likely to support it
+in any meaningful way.
+
+### New format-specific functions
+
+The more heavily recommended formats
+(CIE `lch()`/`lab()` and `oklch()`/`oklab()`)
+and uncalibrated CMYK (`device-cmyk()`)
+have their own functions,
+and are not part of the `color()` syntax.
+
+### CSS color-4 function support
+
+Currently,
+all of these are supported in Safari (15+):
+
+- `color(<colorspace-params> [ / <alpha-value> ]?)`
+  includes support for various color-formats,
+  all of them currently using 3 channel parameters...
+  - RGB:
+    `srgb` | `srgb-linear` | `display-p3` |
+    `a98-rgb` | `prophoto-rgb` | `rec2020`
+  - XYZ:
+    `xyz` | `xyz-d50` | `xyz-d65`
+- CIE `lch()` and `lab()`
+- `oklch()` and `oklab()`
+
+Relevant Browser issues:
+
+- CIE lab/lch:
+  - ✅ [Safari](https://bugs.webkit.org/show_bug.cgi?id=205675)
+  - [Mozilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1352757)
+  - [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=1026287)
+
+- color function:
+  - ✅ Safari
+  - [Mozilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1128204)
+  - [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=1068610)
+
+I don't see open issues for OKlab/OKlch,
+though both are already supported in Safari.
+
+### CSS color-5 function support
+
+There is experimental support for:
+
+- `color-mix()` (Safari + Firefox)
+- `color-contrast()` (Safari)
+
+A bit farther out,
+and not yet supported anywhere,
+all color functions
+are likely to get a 'relative syntax'
+for quick color adjustments:
+
+```css
+.example {
+  --accent: rgb(from mediumvioletred 255 g b);
+  color: hsl(from var(--accent) calc(h + 180deg) s l);
+}
+```
 
 ## Prior art
 
@@ -231,9 +308,15 @@ are trying to solve the same issues.
 Unfortunately, these are all interrelated
 and updating at different intervals/pace.
 
+### Media-query for `color-gamut`
+
+https://drafts.csswg.org/mediaqueries/#color-gamut
+
+Currently accepts values of `srgb` | `p3` | `rec2020`.
+
 ### WICG color API (WIP)
 
-==todo==
+https://github.com/WICG/color-api
 
 ### colorjs (WIP)
 
@@ -276,6 +359,38 @@ So colors do not have a _format_
 that authors can access or manipulate,
 but they could have a _space_ and/or _gamut_.
 This seems like the most difficult
+
+### CSS color-4 functions
+
+See [function details above](#css-color-4-function-support).
+
+Sass could begin to recognize these new functions as 'colors' --
+with the caveat that we should not
+default to channel clipping in the sRGB gamut by default.
+
+Only the `color()` function with `srgb-linear` space
+can be safely converted into Sass colors
+without any additional gamut handling.
+
+For everything else,
+we would want to extend our understanding of a color
+to include:
+
+- The gamut/space that it is defined in (a string).
+  - Currently-supported `srgb` colors
+    can be treated as part of a single space.
+  - The `color` function already has named spaces.
+    The `srgb` and `srgb-linear` colors
+    are in the same gamut as existing formats,
+    but offer more _precision_.
+  - When it comes to color gamuts,
+    I _think_ that `lab`/`lch` and `oklab`/`oklch`
+    could be treated as equivalent to `xyz`,
+    since these models describe a gamut of all visible light.
+    However, CSS treats each as a distinct space,
+    even though all srgb formats are flattened together.
+- Some representation of the color
+  in a specific format/channel-mapping
 
 ### New Sass functions
 
