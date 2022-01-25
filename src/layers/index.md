@@ -8,6 +8,8 @@ changes:
     log: Include full resource list
   - time: 2021-10-05T16:12:53-06:00
     log: Update Chrome feature flag
+  - time: 2022-01-25T11:58:34-07:00
+    log: Link to Smashing Article
 eleventyNavigation:
   key: layers
   title: Cascade Layers
@@ -79,4 +81,6 @@ and avoid specificity or source-order conflicts across concerns.
 - [OddBird Resources](https://www.oddbird.net/tags/cascade-layers/)
 - [The Future of CSS: Cascade Layers (CSS @layer)](https://www.bram.us/2021/09/15/the-future-of-css-cascade-layers-css-at-layer/)
   by **Bramus Van Damme**
+- [Getting Started With CSS Cascade Layers](https://www.smashingmagazine.com/2022/01/introduction-css-cascade-layers/)
+  by **Stephanie Eckles**
 - [Layers CodePen collection](https://codepen.io/collection/BNjmma)
