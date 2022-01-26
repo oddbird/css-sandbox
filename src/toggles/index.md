@@ -4,6 +4,8 @@ created: 2021-05-28
 changes:
   - time: 2021-06-16
     log: Updated links and meeting notes
+  - time: 2022-01-26T14:21:39-07:00
+    log: Link to CSSWG issue for discussion
 eleventyNavigation:
   key: toggles
   title: Declarative Toggles
@@ -35,7 +37,8 @@ low-level tools to address more generic
 ## Resources
 
 - CSS toggle states
-  [draft spec](https://tabatkins.github.io/css-toggle/)
+  [proposed draft spec](https://tabatkins.github.io/css-toggle/)
+- [CSS Working Group Issue](https://github.com/w3c/csswg-drafts/issues/6991)
 - Google notes on [a11y](https://docs.google.com/document/d/1g_XBu4Qi7E_oR-i75KkdHzo47GJ6Sy6h7R7aDIn-10E/edit?ts=60ca6841#)
 - Declarative show/hide
   [github repo](https://github.com/flackr/declarative-show-hide) &
