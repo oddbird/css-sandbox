@@ -4,6 +4,8 @@ created: 2022-01-14
 changes:
   - time: 2022-01-21T17:02:21-07:00
     log: Begin to flesh out use-cases and browser support
+  - time: 2022-01-26T15:32:20-07:00
+    log: Reorganize outline, draft intro and first use-case
 eleventyNavigation:
   key: guide
   title: Draft Outline for an (In)Complete Guide
@@ -15,9 +17,9 @@ note: |
   that can be published elsewhere.
 ---
 
-## What are Cascade Layers, and why would I use them?
+## Introduction: What (and why) are Cascade Layers?
 
-### Specificity conflicts can escalate quickly
+### The Problem: Specificity conflicts escalate
 
 Many of us have been in situations
 where we want to override styles
@@ -41,109 +43,62 @@ rely on a cascade as their central feature,
 but it's also true that the original cascade
 relies heavily on _heuristics_
 (an educated-guess or assumption built into the code)
-rather than providing direct & explicit control to authors.
+rather than providing direct & explicit control
+to web authors.
 
-For example, _selector specificity_ is based on the assumption
+_Selector specificity_, for example --
+our primary interaction with the cascade --
+is based on the assumption
 that more narrowly targeted styles
 (like IDs that are only used once)
 are likely more important than more generic & reusable styles
 (like classes and attributes).
+That is to say: how _specific_ the selector is.
 That's a good guess,
-but it's not a totally reliable rule --
-and the only way to fix a conflict with specificity
-is to escalate the problem by adding
-otherwise unnecessary selectors,
-or (gasp) throw the `!important` hand-grenade.
+but it's not a totally reliable rule,
+and that causes some issues:
 
-### Cascade Layers provide more reliable control
+- It conflates the act of _selecting elements_,
+  with the act of _prioritizing rule-sets_.
+- The simplest way to 'fix' a conflict with specificity
+  is to escalate the problem by adding
+  otherwise unnecessary selectors,
+  or (gasp) throwing the `!important` hand-grenade.
 
-Cascade Layers are designed to give CSS authors
+### The Solution: Cascade Layers provide control
+
+Cascade Layers give CSS authors
 more direct control over the cascade,
-so we can build more _intentional CSS systems_
-that don't rely as much
-on heuristic assumptions.
+so we can build more
+_intentionally cascading systems_,
+without relying as much on heuristic assumptions
+that are tied to selection.
 
 Using the `@layer` rule and layered `@import`s,
 we can establish our own
 _layers of the cascade_ --
-building from low-priority resets and defaults,
+building from low-priority styles
+like resets and defaults,
 through themes, frameworks, and design systems,
-up to higher-priority
+up to highest-priority styles like
 components, utilities, and overrides.
-Specificity is still applied to conflicts within each layer,
+Specificity is still applied to conflicts _within each layer_,
 but conflicts between layers are always resolved
-by using the higher-priority layer.
+by using the higher-priority layer styles.
 
-And layers are designed so that they don't _escalate_
+These layers are ordered and grouped,
+so that they don't _escalate_
 in the same way that specificity and importance can.
 Cascade Layers aren't cumulative like selectors.
 Adding more layers doesn't make something more important.
-They're also not binary like importance,
-suddenly jumping to the top of a stack,
+They're also not binary like importance --
+suddenly jumping to the top of a stack --
 or numbered like `z-index`,
-where we have to guess a number
-or just jump to `9999999`.
+where we have to guess a big number (`9999999`?).
 In fact, by default,
 layered styles are _less important_ than unlayered styles.
-Instead layers are ordered,
-and can be nested in self-contained groups.
 
-So let's see how we can put them to use!
-
-### Less intrusive resets and defaults
-
-One of the clearest initial use-cases
-would be to make low-priority defaults
-that are easy to override.
-
-Some resets have been doing this already
-by applying the `:when()` pseudo-class
-around each reset selector.
-That removes all specificity from the selectors.
-That has the desired impact,
-but also some downsides:
-
-- It has to be applied to each selector individually
-- Conflicts inside the reset have to be resolved without specificity
-
-Layers allow us to more simply wrap
-the entire reset stylesheet.
-The reset styles still have specificity information
-to help resolve internal conflicts,
-and there's no need to update each individual selector.
-
-Since layered styles have a lower priority
-than default 'unlayered' styles,
-this is a good way to start using Cascade Layers
-without re-writing your entire code-base.
-
-### Using third-party tools and frameworks
-
-Make sure you control bootstrap,
-and it doesn't control you!
-
-### Managing a complex CSS architecture (across projects & teams?)
-
-Implement a system like ITCSS
-at scale,
-using native browser features.
-
-### Designing a CSS tool or framework
-
-Frameworks can choose to expose or hide
-layers as part of their API
-
-### ❓ I just want this one property to be more `!important`
-
-It depends,
-but maybe that's the job of
-`!important`?
-
-### ❌ Scoping and namespacing styles? Nope!
-
-[Recent twitter post](https://twitter.com/TerribleMia/status/1483171004235059202)
-
-## Where layers fit in the Cascade
+### Where do layers fit in the Cascade?
 
 Since multiple selectors can apply styles
 to the same element,
@@ -175,21 +130,31 @@ it becomes more and more essential
 for CSS authors to _understand_ how it works,
 and also _take control_ of how their styles participate.
 
-## Establishing a layer order
+==todo==
+
+### Establishing a layer order
+
+==todo==
 
 How layers stack, in the order they're mentioned.
 
-### Order-setting `@layer` statements
-
-Best practice: establish the order up-front.
-
 ### Layers and `!important`
+
+==todo==
 
 Important layers are reversed!
 
-## Layering styles
+## The Syntax: Working with Cascade Layers
+
+### Order-setting `@layer` statements
+
+==todo==
+
+Best practice: establish the order up-front.
 
 ### Block `@layer` rules
+
+==todo==
 
 ```css
 @layer <name> {
@@ -198,6 +163,8 @@ Important layers are reversed!
 ```
 
 ### Grouping (nesting) layers
+
+==todo==
 
 ```css
 @layer <name-1> {
@@ -215,12 +182,16 @@ Important layers are reversed!
 
 ### Adding layers to `@import`ed styles
 
+==todo==
+
 ```css
 /* styles imported into to the <layer-name> layer */
 @import url('../example.css') layer(<layer-name>);
 ```
 
 ### Anonymous (unnamed) Layers
+
+==todo==
 
 ```css
 @layer {
@@ -233,16 +204,113 @@ Important layers are reversed!
 @import url('../example.css') layer;
 ```
 
-## Reverting layers
+### Reverting layers
+
+==todo==
 
 The `revert-layer` keyword.
 
+## Use cases: When would I want to use cascade layers?
+
+### Less intrusive resets and defaults
+
+One of the clearest initial use-cases
+would be to make low-priority defaults
+that are easy to override.
+
+Some resets have been doing this already
+by applying the `:when()` pseudo-class
+around each selector.
+That removes all specificity from the selectors,
+which has the basic impact desired,
+but also some downsides:
+
+- It has to be applied to each selector individually
+- Conflicts inside the reset have to be resolved without specificity
+
+Layers allow us to more simply wrap
+the entire reset stylesheet,
+either using the block `@layer` rule:
+
+```css
+/* reset.css */
+@layer reset {
+  /* all reset styles in here */
+}
+```
+
+Or when you import the reset:
+
+```css
+/* reset.css */
+@import url(reset.css) layer(reset);
+```
+
+**Note**: Or both!
+Layers can be nested,
+without changing their priority --
+so you can use a third-party reset,
+and ensure it gets added to the layer you want
+whether or not the reset stylesheet itself
+is written using layers internally.
+
+Since layered styles have a lower priority
+than default 'unlayered' styles,
+this is a good way to start using Cascade Layers
+without re-writing your entire code-base.
+
+The reset selectors still have specificity information
+to help resolve internal conflicts,
+without wrapping each individual selector --
+but you also get the desired outcome
+of a reset stylesheet that is easy to override.
+
+### Using third-party tools and frameworks
+
+==todo==
+
+Make sure you control bootstrap,
+and it doesn't control you!
+
+### Managing a complex CSS architecture (across projects & teams?)
+
+==todo==
+
+Implement a system like ITCSS
+at scale,
+using native browser features.
+
+### Designing a CSS tool or framework
+
+==todo==
+
+Frameworks can choose to expose or hide
+layers as part of their API
+
+### ❓ I just want this one property to be more `!important`
+
+==todo==
+
+It depends,
+but maybe that's the job of
+`!important`?
+
+### ❌ Scoping and namespacing styles? Nope!
+
+==todo==
+
+[Recent twitter post](https://twitter.com/TerribleMia/status/1483171004235059202)
+
 ## Examples: which style wins?
+
+==todo==
 
 Give various examples,
 and show which style wins in each situation.
 
 ## Debugging layer conflicts in browser developer tools
+
+==todo==
 
 We'll have to see what this looks like
 in various browsers...
@@ -299,7 +367,9 @@ and other at-rules:
 
 However, it's not clear when that feature will be implemented.
 
-### Lack of `<link>` support
+### Assigning layers in HTML with the `<link>` tag
+
+==todo==
 
 https://github.com/whatwg/meta/issues/240
 
@@ -313,8 +383,12 @@ by carefully managing selector specificity.
 
 There are many
 [reasonable tools](https://css-tricks.com/dont-fight-the-cascade-control-it/)
-that provide
+that provide…
+
+==todo==
 
 ## More resources
+
+==todo==
 
 Link to other articles and talks?
