@@ -793,10 +793,8 @@ of a reset stylesheet that is easy to override.
 
 ### Using third-party tools and frameworks
 
-==todo==
+Integrating third-party CSS libraries
 
-Make sure you control bootstrap,
-and it doesn't control you!
 
 ### Managing a complex CSS architecture (across projects & teams?)
 
@@ -969,7 +967,9 @@ but it's not clear when that will be ready either.
 - [The Future of CSS: Cascade Layers (CSS @layer)](https://www.bram.us/2021/09/15/the-future-of-css-cascade-layers-css-at-layer/)
   by **Bramus Van Damme**
 - [Getting Started With CSS Cascade Layers](https://www.smashingmagazine.com/2022/01/introduction-css-cascade-layers/)
-  by **Stephanie Eckles**
+  by **Stephanie Eckles**, _Smashing Magazine_
+- [Cascade layers are coming to your browser](https://developer.chrome.com/blog/cascade-layers/)
+  by **Una Kravets**, _Chrome Developers_
 
 ### Videos
 
