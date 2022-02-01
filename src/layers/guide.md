@@ -793,8 +793,160 @@ of a reset stylesheet that is easy to override.
 
 ### Using third-party tools and frameworks
 
-Integrating third-party CSS libraries
+Integrating third-party CSS with a project
+is one of the most common places
+to run into cascade issues.
+Whether we're using a shared reset like Normalizer or CSS Remedy,
+a generic design system like Material Design,
+a framework like Bootstrap,
+or a utility toolkit like Tailwind --
+we can't always control the selector specificity
+or importance
+of all the CSS being used on our sites.
+Sometimes this even extends to
+internal libraries, design systems, and tools
+managed elsewhere in an organization.
 
+As a result,
+we often have to structure our internal CSS
+around the third-party code,
+or escalate conflicts when they come up --
+with artificially high specificity
+or `!important` flags.
+And then we have to maintain those hacks over time,
+adapting to upstream changes.
+
+Cascade Layers give us a way to
+slot third-party code into the cascade of any project
+exactly where we want it to live --
+no matter how selectors are written internally.
+
+Depending on the type of library we're using,
+we might do that in various ways.
+Let's start with a basic layer-stack,
+working our way up from resets to utilities:
+
+```css
+@layer reset, type, theme, components, utilities;
+```
+
+And then we can incorporate some tools...
+
+#### Using a reset
+
+If we're using a tool like CSS Remedy,
+we might also have some reset styles of our own
+that we want to include.
+Let's import CSS Remedy into a sub-layer of `reset`:
+
+
+```css
+@import url('remedy.css') layer(reset.remedy);
+```
+
+Now we can add our own reset styles
+to the `reset` layer,
+without any further nesting (unless we want it).
+Since styles directly in `reset`
+will override any further nested styles,
+we can be sure our styles will always take priority
+over CSS Remedy if there's a conflict --
+no matter what changes in a new release:
+
+```css
+@import url('remedy.css') layer(reset.remedy);
+
+@layer reset {
+  :is(ol, ul)[role='list'] {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+}
+```
+
+And since the `reset` layer
+is at the bottom of the stack,
+the rest of the CSS in our system
+will override both Remedy,
+and our own local reset additions.
+
+### Using utility classes
+
+At the other end of our stack,
+'utility classes' in CSS can be a useful way
+to reproduce common patterns
+(like additional context for screen-reader)
+in a broadly-applicable way.
+Utilities tend to break the specificity heuristic,
+since we want them defined broadly
+(resulting in a low specificity),
+but we also generally want them to 'win' conflicts.
+
+By having a `utilities` layer
+at the top of our layer stack,
+we can make that possible.
+We can use that in a similar way
+to the reset example,
+both loading external utilities into a sub-layer,
+and providing our own:
+
+```css
+@import url('tailwind.css') layer(utilities.tailwind);
+
+@layer utilities {
+  /* from https://kittygiraudel.com/snippets/sr-only-class/ */
+  /* but with !important removed from the properties */
+  .sr-only {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    -webkit-clip-path: inset(50%);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    margin: -1px;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    white-space: nowrap;
+  }
+}
+```
+
+### Using design systems and component libraries
+
+There are a lot of CSS tools
+that fall somewhere in the middle of our layer stack --
+combining typography defaults, themes, components,
+and other aspects of a system.
+
+Depending on the particular tool,
+we might do something similar to
+the reset and utility examples above --
+but there are a few other options.
+A highly integrated tool
+might deserve in a top-level layer:
+
+```css
+@layer reset, bootstrap, utilities;
+@import url('bootstrap.css') layer(bootstrap);
+```
+
+If these tools start to
+provide layers as part of their public API,
+we could also break it down into parts --
+allowing us to intersperse
+our code with the library:
+
+```css
+@import url('bootstrap/reset.css') layer(reset.bootstrap);
+@import url('bootstrap/theme.css') layer(theme.bootstrap);
+@import url('bootstrap/components.css') layer(components.bootstrap);
+
+@layer theme.local {
+  /* styles here will override theme.bootstrap */
+  /* but not interfere with styles from components.bootstrap */
+}
+```
 
 ### Managing a complex CSS architecture (across projects & teams?)
 
