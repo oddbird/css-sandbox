@@ -8,6 +8,8 @@ changes:
     log: Reorganize outline, draft intro and first use-case
   - time: 2022-01-31T13:47:07-07:00
     log: Layers in the cascade, full syntax, and details on browser support
+  - time: 2022-02-01T15:40:02-07:00
+    log: Use-cases and examples
 eleventyNavigation:
   key: guide
   title: Draft Outline for an (In)Complete Guide
@@ -791,6 +793,87 @@ without wrapping each individual selector --
 but you also get the desired outcome
 of a reset stylesheet that is easy to override.
 
+### Managing a complex CSS architecture (across projects & teams?)
+
+As projects become larger and more complex,
+it can be useful to define more clear boundaries
+for naming and organizing CSS code.
+But the more CSS we have,
+the more potential we have for conflicts --
+especially from different parts of a system
+like a 'theme' or a 'component library'
+or a set of 'utility classes'.
+
+Not only do we want these organized by function,
+but it can also be useful to organize
+based on what parts of the system
+take priority in the case of a conflict.
+
+Harry Robert's Inverted Triangle CSS
+does a good job visualizing
+what those layers might contain.
+
+==image: inverted triangle layers==
+
+In fact,
+the initial pitch for adding
+layers to the CSS cascade
+used the ITCSS methodology
+as a primary example,
+and a guide for developing the feature.
+
+There is no particular technique required for this,
+but it's likely helpful to
+restrict projects to a pre-defined
+set of top-level layers --
+and then extend that set with nested layers
+as appropriate.
+
+For example:
+
+1. low level reset & normalization styles
+2. element defaults, for basic typography and legibility
+3. themes, like light & dark modes
+4. re-usable patterns that might appear across multiple components
+5. layouts and larger page structures
+6. individual components
+7. overrides and utilities
+
+We can create that top-level layer stack
+at the very start of our CSS,
+with a single layer statement:
+
+```css
+@layer
+  reset,
+  default,
+  themes,
+  patterns,
+  layouts,
+  components,
+  utilities;
+```
+
+The exact layers needed,
+and how you name those layers,
+might change from one project to the next.
+
+From there,
+we create even more detailed
+layer breakdowns.
+Maybe our components themselves
+have defaults, structures, themes, and utilities internally.
+
+```css
+@layer components {
+  @layer defaults, structures, themes, utilities;
+}
+```
+
+Without changing the top-level structure,
+we now have a way to further layer
+the styles within each component.
+
 ### Using third-party tools and frameworks
 
 Integrating third-party CSS with a project
@@ -870,7 +953,7 @@ the rest of the CSS in our system
 will override both Remedy,
 and our own local reset additions.
 
-### Using utility classes
+#### Using utility classes
 
 At the other end of our stack,
 'utility classes' in CSS can be a useful way
@@ -912,7 +995,7 @@ and providing our own:
 }
 ```
 
-### Using design systems and component libraries
+#### Using design systems and component libraries
 
 There are a lot of CSS tools
 that fall somewhere in the middle of our layer stack --
@@ -948,14 +1031,6 @@ our code with the library:
 }
 ```
 
-### Managing a complex CSS architecture (across projects & teams?)
-
-==todo==
-
-Implement a system like ITCSS
-at scale,
-using native browser features.
-
 ### Designing a CSS tool or framework
 
 ==todo==
@@ -965,17 +1040,124 @@ layers as part of their API
 
 ### ❓ I just want this one property to be more `!important`
 
-==todo==
+Counter to some expectations,
+layers don't make it easy
+to quickly escalate a particular style
+so that it overrides another.
 
-It depends,
-but maybe that's the job of
-`!important`?
+If the majority of our styles are un-layered,
+then any new layer
+will be _de-prioritized_
+in relation to the default.
+We could do that to individual style blocks,
+but it would quickly become difficult to track.
+
+Layers are intended to be more foundational,
+not style-by-style,
+but establishing consistent patterns
+across a project.
+Ideally, if we've set that up right,
+we get the correct result
+by moving our style to the appropriate
+(and pre-defined) layer.
+
+If the majority of our styles
+already fall into well-defined layers,
+and we can always consider
+adding a new highest-power layer
+at the top of a given stack,
+or using un-layered styles
+to override the layers.
+We might even consider
+having a `debug` layer at the top of the stack,
+for doing exploratory work outside of production.
+
+But adding new layers on-the-fly
+can defeat the organizational utility
+of this feature,
+and should be used carefully.
+It's best to ask:
+_Why should this style override the other?_
+
+If the answer has to do with
+one _type of style_
+always overriding another type,
+layers are probably the right solution.
+That might be because we're overriding styles
+that come from a place we don't control,
+or because we're writing a utility,
+and it should move into our `utilities` layer.
+
+If the answer has to do with
+more targeted styles overriding less targeted styles,
+we might consider making the selectors
+reflect that specificity.
+
+Or,
+on rare occasions,
+we might even have styles
+that really are _important_ --
+the feature simply doesn't work
+if you override this particular style.
+We might say adding `display: none`
+to the `[hidden]` attribute
+belongs in our lowest-priority reset,
+but should still be hard to override.
+In that case,
+`!important` really is the right tool for the job:
+
+```css
+@layer reset {
+  [hidden] { display: none !important; }
+}
+```
 
 ### ❌ Scoping and name-spacing styles? Nope!
 
-==todo==
+Cascade layers
+are clearly an organizational tool,
+and one that 'captures'
+the impact of selectors,
+especially when they conflict.
+So it can be tempting
+at first glance
+to see them as a solution
+for managing scope or name-spacing.
 
-[Recent twitter post](https://twitter.com/TerribleMia/status/1483171004235059202)
+A common first-instinct
+is to create a layer for each component
+in a project --
+hoping that will ensure (for example)
+that `.post-title`
+is only applied inside a `.post`.
+
+But cascade conflicts
+are not the same as naming conflicts,
+and layers aren't particularly well designed
+for this type of scoped organization.
+Cascade layers don't constrain
+how selectors match or apply to the HTML,
+only how they cascade together.
+So unless we can be sure that component X
+_always_ override component Y,
+individual component layers won't help much.
+Instead, we'll need to keep an eye on
+the proposed `@scope` spec
+that is being developed.
+
+It can be useful to think of
+layers and component-scopes
+instead as overlapping concerns:
+
+(maybe use the image
+from my
+[Recent twitter post](https://twitter.com/TerribleMia/status/1483171004235059202)?)
+
+Scopes describe _what_ we are styling,
+while layers describe _why_ we are styling.
+We can also think of layers as
+representing _where the style comes from_,
+while scopes represent _what the style will attach to_.
 
 ## Examples: which style wins?
 
