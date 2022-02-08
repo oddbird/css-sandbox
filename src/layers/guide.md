@@ -14,11 +14,12 @@ eleventyNavigation:
   key: guide
   title: Draft Outline for an (In)Complete Guide
   parent: layers
-warn: false
-note: |
-  This is a work-in-progress draft document,
+warn: |
+  This is an initial draft,
   working towards a more complete guide
-  that can be published elsewhere.
+  that will be published on [CSS Tricks](https://css-tricks.com/).
+  This page will be replaced by a link
+  to the final guide once it has been published.
 ---
 
 ## Introduction: what (and why) are cascade layers?
