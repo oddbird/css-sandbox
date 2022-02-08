@@ -4,6 +4,7 @@ eleventyNavigation:
   key: query-containers
   title: Container Selection Syntax Implications
   parent: container-queries
+warn: false
 ---
 
 There are three big syntax issues

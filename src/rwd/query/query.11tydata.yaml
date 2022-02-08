@@ -5,6 +5,5 @@ status:
     [Editor's Draft specification](https://drafts.csswg.org/css-contain-3/)
 warn: |
   While there is a working prototype,
-  there are still some major unresolved issues
-  around [single-axis containment](/rwd/query/contain/),
-  and [the syntax keeps changing](/rwd/query/syntax/)
+  there are still some
+  [syntax changes likely](/rwd/query/containers/)
