@@ -15,7 +15,7 @@ I want to summarize these all in one place,
 with a clear proposal (or set of options)
 to guide the discussion:
 
-## The summary
+## Context for these issues
 
 ```css
 @container (inline-size > 40em) {
@@ -185,7 +185,7 @@ then I think we can resolve to:
 
 1. Remove container-type from the container preamble.
 
-## The alternative
+### The alternative
 
 Una has
 [pointed out](https://github.com/w3c/csswg-drafts/issues/6393#issuecomment-1012446872)
