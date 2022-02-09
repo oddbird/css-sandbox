@@ -1,5 +1,6 @@
 ---
 title: Container Selection Syntax Implications
+created: 2022-02-08
 eleventyNavigation:
   key: query-containers
   title: Container Selection Syntax Implications
@@ -13,9 +14,9 @@ all related to how containers are selected
 for a given query.
 I want to summarize these all in one place,
 with a clear proposal (or set of options)
-to guide the discussion:
+to guide the discussion.
 
-## Context for these issues
+## Intro to container selection
 
 ```css
 @container (inline-size > 40em) {
@@ -59,65 +60,47 @@ Currently the `@container` syntax is broken into two parts:
 }
 ```
 
+### The three issues being discussed
+
+There are three issue threads
+involved in this conversation:
+
+1. [#6644 [css-contain-3] Determine container type automatically from the query][#6644]
+2. [#6393 [css-contain-3] Provide a syntax to query a specific container-type][#6393]
+3. [#6876 [css-contain-3] Multiple container-queries with multiple containers][#6876]
+
+[#6644]: https://github.com/w3c/csswg-drafts/issues/6644
+[#6393]: https://github.com/w3c/csswg-drafts/issues/6393
+[#6876]: https://github.com/w3c/csswg-drafts/issues/6876
+[#7020]: https://github.com/w3c/csswg-drafts/issues/7020
+
 These issues all focus around
 the logic & syntax for container selection --
 and how that impacts the preamble syntax.
+However, the implications of each issue
+are highly intertwined,
+so I'd like to discuss them all as a group.
+From there we can break out individual resolutions.
 
-## [#6644 [css-contain-3] Determine container type automatically from the query](https://github.com/w3c/csswg-drafts/issues/6644)
+(Some of these issues
+are framed around the idea of style queries.
+There's been a suggestion that we should
+[defer style queries to level 4][#7020],
+and I'm in favor of that move
+if it helps clarify implementation steps.
+But that won't allow us to defer these questions,
+which are important to the overall syntax
+of container queries.)
 
-### Current behavior
+### Current behavior is problematic
 
-- Any element with a `container-type` is considered a container
-- By default, all queries are resolved against
-  the _nearest ancestor container_ of an element,
-  no matter what queries are involved
-  or what `container-type` was used to describe the container.
-- If the container is the wrong type for a given query
-  (e.g. a size query on a style container)
-  then the query fails.
-
-(Authors can explicitly provide a container name or type
-in the `@container` preamble.)
-
-Since we resolved (in #6393)
-to make `container-type: style` the default value on all elements,
-we now have a situation where
-the _nearest ancestor container_ of an element
-is always the direct parent.
-That makes the question more urgent,
-but even if we revert that decision
-we still might want a more intelligent selection process.
-
-### Proposed behavior
-
-The proposal here is to allow the queries themselves
-to impact the details of container selection,
-so that we use the
-_nearest appropriate ancestor container_
-based on what is being queried:
-
-- If any queries require `inline-size` knowledge,
-  select from ancestor containers
-  with `size` or `inline-size` container-type
-- If any queries require `block-size` knowledge,
-  select from ancestor containers
-  with `size` container-type
-- If style queries are present,
-  select from ancestor containers
-  with `size` container-type
-  (though this is potentially all of them,
-  and would have no impact)
-
-(This matches the existing logic
-used for container-relative units.)
-
-**For example**:
-Here are three nested containers,
-and a `.card` element:
+Let's start with the following html.
+To avoid the question (for now) about style containers being automatic,
+I've listed the style type explicitly on every element.
 
 ```html
-<html style='container-type: size'>
-  <main style='container-type: inline-size'>
+<html style='container-type: size style;'>
+  <main style='container-type: inline-size style;'>
     <section style='container-type: style;'>
       <div class='card'>...</div>
     </section>
@@ -125,85 +108,137 @@ and a `.card` element:
 </html>
 ```
 
-Depending on the queries present,
-we query a different container
-for the same `.card`:
+Given that markup,
+we can consider various container queries
+that apply to the card element:
 
 ```css
-/* query the section (style) container */
+/* requires either a `size` or `inline-size` container-type */
+@container (inline-size > 40em) {
+  .card { margin: 2em; }
+}
+
+/* requires a `size` container-type */
+@container (orientation: portrait) {
+  .card { margin: 2em; }
+}
+
+/* requires a style container-type */
 @container style(font-style: normal) {
   .card { font-style: italic; }
 }
 
-/* query the main (inline-size) container */
+/* requires a style container and an inline-size container */
+/* (do they have to be the same container???) */
 @container style(font-style: normal) and (inline-size > 40em) {
   .card { padding-inline: 2em; }
 }
-
-/* queries the section (style container) */
-@container (orientation: portrait) {
-  .card { margin: 2em; }
-}
 ```
 
-There's some potential for confusion here,
-since the question you ask
-changes the target container being queried.
-But in most cases,
-this seems better than allowing queries to fail
-simply because an intervening container
-had the wrong type to provide an answer.
+In the current spec,
+containers are selected by:
 
-### Additional considerations
+- Any element with a `container-type` is considered a container
+- All query conditions are resolved against
+  the _nearest ancestor container of any type_,
+  unless otherwise specified by an explicit name/type.
+- If the queried container is the wrong type for a given condition
+  (e.g. a size condition against a style container)
+  then the query fails.
 
-If we agree to go this direction,
-it raises two additional questions:
+That means all of the size conditions above
+would return false no matter the actual size available,
+since the default container (the direct parent)
+is only able to resolve style queries.
+So we have some choices to make.
 
-1. Do we still need any way to query explicit container-types in the preamble?
-   _I don't see any obvious use-cases for it._
-2. When a container-name is provided in the preamble,
-   does that replace the automated selection,
-   or do we look for a container with appropriate name AND type?
-   _I would expect to get a container of correct name AND type._
+## #6644 Determine container type automatically from the query?
 
-### Proposed resolutions
+The proposal here is to allow the queries themselves
+to impact the container selection process,
+so that we use the
+_nearest appropriate ancestor container_
+based on what type of container is needed
+to appropriately answer the conditions raised:
 
-1. When selecting a container to query,
-   determine a container-type automatically
-   from the types of conditions
-2. Explicit container-selection preambles
-   are combined with the automatic selection logic
+- If a condition requires `inline-size` knowledge,
+  select from ancestor containers
+  with `size` or `inline-size` container-type
+- If a condition requires `block-size` knowledge,
+  select from ancestor containers
+  with `size` container-type
+- If a condition requires `style` knowledge,
+  select from ancestor containers
+  with `style` container-type
+  (currently all of them).
+- Etc, as new container/query types are added,
+  the selection mechanism can expand to handle their needs.
 
-## [#6393 [css-contain-3] Provide a syntax to query a specific container-type](https://github.com/w3c/csswg-drafts/issues/6393)
+This is the behavior @fantasai are proposing.
+We think this approach will:
 
-### Proposed resolution
+- help authors avoid false-negatives
+  when an improper container-type gets added
+  between the element and its intended container.
+- encourage a best-practice of using named containers
+  when it's important to query against a specific container.
+- allow us to remove the preamble syntax
+  for explicitly querying a given `container-type`,
+  since that's now handled for us.
+  I don't see any use-cases
+  for altering that implicit selection.
 
-If we keep our previous resolution
-to make all elements default to `container-type: style`,
-and we resolve on the proposal above,
-then I think we can resolve to:
+This is even more urgent,
+since we resolved previously (in #6393)
+to make `container-type: style` the default value on all elements --
+which would mean that
+the _nearest ancestor container_ of an element
+is always the direct parent.
+This proposal resolves that potential issue,
+while also making it impossible
+for the author to accidentally get themselves
+in the same situation.
 
-1. Remove container-type from the container preamble.
+But this decision has implications
+for the other two issues.
 
-### The alternative
+## #6393 Provide a syntax to query a specific container-type
 
 Una has
 [pointed out](https://github.com/w3c/csswg-drafts/issues/6393#issuecomment-1012446872)
 that making every element a `style` container
-(and therefor defaulting to direct-parent queries)
-is not a good assumption for non-inherited styles.
+is only useful when querying inherited styles.
 For example, if you query the `background-color` of a container,
 it may not be set on the parent,
 but on an arbitrary ancestor.
 
-She's proposed that we remove this implicit behavior,
-and also reject the implicit selection behavior above.
+While it might be reasonable to
+search the ancestor tree for appropriate `container-type`,
+it's not reasonable to search for
+an appropriate property declaration.
 
-I agree that it's the wrong assumption
-for some queries,
-but I think it's the right assumption
-for some inherited styles.
-I expect this to be a very common use-case:
+She's proposed that we
+reverse our decision on [#6393][]
+(making every element a style container),
+and also reject the automatic selection above.
+In fact, _if we reject automatic container selection,
+I think we have to reverse the style container choice._
+
+That would take us back to:
+
+- All containers are explicitly generated by the author
+- All container queries use the nearest container,
+  even if the type will cause an instant false negative.
+- To avoid that risk,
+  authors will need to always specify the name or type (or both)
+  explicitly in the container preamble
+
+Una can speak to that more, if she wants.
+
+While I agree that the parent element
+will be the wrong choice for some non-inherited styles,
+I expect inherited styles
+to be a very common use-case:
 
 ```css
 em { font-style: italic; }
@@ -212,156 +247,120 @@ em { font-style: italic; }
 }
 ```
 
-Additionally, I think it sets the right precedent
-for using a `container-name` whenever more clarity is needed.
-It would be fragile to assume that
-_the nearest style container will always have a background_,
-and it would be more readable and more robust
-to query for a container with e.g. `container-name: has-bg`.
+(This is the same functionality
+proposed elsewhere as a `toggle()` function --
+recently [deferred to css-values-5](https://github.com/w3c/csswg-drafts/issues/6753).)
 
-Im convinced that having smarter implicit selection
-makes the code more clear and more robust
-in the long run --
-with explicit container-selection
-using the container names
-rather than their types.
+Additionally,
+the argument seems circular to me.
+If selecting the appropriate `type`
+is only useful for avoiding false negatives --
+but not specific enough
+to ensure we're always getting the most useful container --
+then container-type isn't what authors should use
+for explicit container selection.
+With or without the default style container-type,
+it would be fragile to assume that
+_the nearest style container will always have a background_.
+Authors should be encouraged to use a `container-name`
+whenever that level of specificity is needed,
+(e.g. `container-name: has-bg`).
 
-## [#6876 [css-contain-3] Multiple container-queries with multiple containers](https://github.com/w3c/csswg-drafts/issues/6876)
+## #6876 Multiple container-queries with multiple containers
 
-Bramus has suggested
-that we also consider allowing
-a single `@container` rule
-to query conditions on multiple different containers.
+This last issue is still an open question,
+no matter how we resolve the other two issues --
+but it becomes especially relevant to clarify
+if we follow the path @fantasai and I are proposing.
 
-### Already possible with nested rules
-
-According to the current draft,
-this functionality is already be possible
-by nesting `@container` rules:
-
-> Style rules defined on an element
-> inside multiple nested container queries
-> apply when all of the wrapping container queries
-> are true for that element.
-
-Since each container query
-handles selection of containers internally,
-each nested rule can be used
-to query aspects of different containers.
-
-Combined (`AND`) conditions
-are relatively straight forward:
+If we look at two of the single-condition queries above,
+each one will now seek out the appropriate container
+to resolve the condition:
 
 ```css
-@container inline-container (inline-size > 30em) {
-  @container block-container (block-size > 30em) {
-    .child {
-      /* conditions match on both containers! */
-    }
+/* use the  `main` container: nearest inline-size type */
+@container (inline-size > 40em) {
+  .card { margin: 2em; }
+}
+
+/* use the `section` container: nearest style type */
+@container style(font-style: normal) {
+  .card { font-style: italic; }
+}
+```
+
+But what happens if we combine
+the two conditions in a single query?
+What container/s are selected?
+
+```css
+@container style(font-style: normal) and (inline-size > 40em) {
+  .card { padding-inline: 2em; }
+}
+```
+
+We have a choice:
+
+1. Use the nearest single container that is able to resolve all conditions
+2. Allow each condition to select a different container.
+
+The **first option**
+(**which we prefer**)
+means the way you ask the question
+might change the answer you get.
+But it helps keep things simple:
+a single container query rule
+only needs a single container-selection preamble,
+and can always be resolved against a single container.
+
+It's still possible to query multiple containers
+by nesting the queries:
+
+```css
+@container style(font-style: normal) {
+  @container (inline-size > 40em) {
+    .card { padding-inline: 2em; }
   }
 }
 ```
 
-`OR` conditions are a bit more awkward,
-as the entire style-block would need to be duplicated
+This gives us the `AND` of two queries
+referencing two containers.
+The `OR` version requires duplicated styles,
+which is less ideal, but still possible.
+Down the road,
+we could still consider adding syntax sugar for this --
+using the `@when` rule, or something similar
+that can wrap our existing single-container syntax
+in distinct functions.
+That can be deferred for now
+without holding up progress on the core functionality.
 
-```css
-@container inline-container (inline-size > 30em) {
-  .child {
-    /* conditions match on inline-container! */
-  }
-}
-/* OR */
-@container block-container (block-size > 30em) {
-  .child {
-    /* conditions match on block-container! */
-  }
-}
-```
+The **second option** means a single query
+can (and will often) be resolved against multiple containers.
+That also means we would want
+a unique preamble for each condition.
+There have been a few syntax proposals thrown around,
+but so far nothing that strikes me
+as clear and legible.
 
-### Do we want syntax sugar for this?
+I'm not convinced it's a appropriate syntax sugar,
+if it makes the simple use-case more complicated.
 
-If we think this is worth addressing
-with some syntax sugar
-to allow querying multiple containers
-in a single rule,
-we have a few options
-depending on the default behavior we want.
+## Proposed resolutions
 
-By default, we assume:
-1. all conditions are queried against the same container (current behavior).
-2. each condition will find its own container to query.
+These are my proposed resolutions:
 
-In the **first case**
-we would need a syntax to break conditions apart,
-into multiple container groups.
-This would be similar in some ways to the `@when` rule
-providing wrappers around existing conditions:
+1. [#6644][#6644] When selecting a container,
+   determine a container-type automatically
+   based on the combined condition-types required in the query.
+2. [#6393][#6393] Remove the container-type syntax
+   from the preamble of the `@container` rule.
+3. [#6876][#6876] A single `@container` rule
+   resolves all conditions against the same container by default.
+   Defer the question of additional syntax sugar to level 4.
 
-```css
-/* query a single container by default */
-@container (inline-size > 30em) and style(--card: true) {
-  .child { /*...*/ }
-}
+And a possible follow-up:
 
-/* allow specifying multiple containers */
-@container from(layout-a (inline-size > 30em))
-       and from(layout-b style(--card: true)) {
-  .child { /*...*/ }
-}
-```
-
-One advantage of this approach
-is that we might be able to ship the default behavior unchanged,
-and then solve this problem
-in another level of the spec.
-
-In the **second case** we need a way to group conditions
-that should be using the same container:
-
-```css
-/* query multiple containers by default */
-@container layout-a (inline-size > 30em)
-       and layout-b style(--card: true) {
-  .child { /*...*/ }
-}
-
-/* allow grouping multiple conditions */
-@container layout-a (
-             (inline-size > 30em) and style(--card: true)
-           ) {
-  .child { /*...*/ }
-}
-```
-
-The potential advantage here
-is that the nested and un-nested versions
-behave the same by default:
-
-```css
-/* potential to query multiple containers by default */
-@container (inline-size > 30em) and style(--card: true) {
-  .child { /*...*/ }
-}
-
-@container (inline-size > 30em) {
-  @container style(--card: true) {
-    .child { /*...*/ }
-  }
-}
-```
-
-The downside is potentially less clarity.
-
-### Proposal
-
-These aren't meant as final syntax proposals.
-I think either approach might need more time
-to bikeshed the details in the issue.
-
-I see three paths:
-- Close no-change (we don't need this)
-- Keep the current single-container default,
-  and defer the issue as we work out the details
-- Switch to a multi-container default,
-  and prioritize finalizing the syntax
+4. [#7020][#7020] Defer style containers and conditions
+   to level 4
