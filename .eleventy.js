@@ -51,6 +51,8 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPairedShortcode('md', type.render);
   eleventyConfig.addPairedShortcode('mdInline', type.inline);
   eleventyConfig.addPairedShortcode('typogr', type.set);
+  eleventyConfig.addPairedShortcode('note', type.note);
+  eleventyConfig.addPairedShortcode('warn', type.warn);
 
   eleventyConfig.addCollection("changes", function(collectionApi) {
     const all = collectionApi.getAll();

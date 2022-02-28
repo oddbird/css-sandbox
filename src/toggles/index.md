@@ -34,6 +34,10 @@ But I'm also interested in
 low-level tools to address more generic
 "toggle" behavior
 
+## Our notes
+
+{{ collections.all | eleventyNavigation('toggles') | eleventyNavigationToHtml | typogr | safe }}
+
 ## Resources
 
 - CSS toggle states

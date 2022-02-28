@@ -1,7 +1,7 @@
 tags:
   - toggles
 status:
-  type: warn
+  type: note
   text: |
-    Work on this feature has moved to an
+    See the
     [Unofficial Draft specification](https://tabatkins.github.io/css-toggle/)

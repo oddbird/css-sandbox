@@ -28,10 +28,26 @@ const render = (content, type = true) =>
 const inline = (content, type = true) =>
   type ? set(mdown.renderInline(content)) : mdown.renderInline(content);
 
+const note = (content) => {
+  return `<aside data-alert="note">
+            <strong>Note:</strong>
+            ${content ? inline(content) : ''}
+          </aside>`;
+}
+
+const warn = (content) => {
+  return `<aside data-alert="warn">
+            <strong>Warning:</strong>
+            ${content ? inline(content) : ''}
+          </aside>`;
+}
+
 module.exports = {
   mdown,
   amp,
   set,
   render,
   inline,
+  warn,
+  note,
 };
