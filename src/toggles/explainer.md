@@ -8,6 +8,8 @@ changes:
     log: Clarify toggle-root syntax, and document additional questions
   - time: 2022-03-02T13:59:04-07:00
     log: Additional examples and questions to consider
+  - time: 2022-03-02T16:36:16-07:00
+    log: Document the basic issues with carousel/scrolling
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -58,6 +60,22 @@ with built-in accessibility and performance.
 
 ## Goals [or Motivating Use Cases, or Scenarios]
 
+To borrow language from Nicole Sullivan:
+
+> a _gesture_
+> on a _trigger_
+> causes a _state change_
+> on a _target_
+
+Where:
+
+- a _gesture_ is some form of user interaction,
+  like click/enter activation, scrolling, etc
+- a _trigger_ and a _target_ are both elements in the DOM
+  (often different elements, but sometimes the same element)
+- a _state change_ can be moving through a list of possible states,
+  or setting a particular state
+
 Several of the expected use-cases
 involve showing and hiding content
 based on the state of a toggle:
@@ -75,15 +93,15 @@ for a toggle to have less invasive impact:
 
 - light/dark/high-contrast/auto color themes
 - adjusting font sizes
-- compact/comfortable spacing
-- calendar/agenda view
+- adjusting compact/comfortable spacing
+- adjusting 'views', eg calendar/agenda or horizontal/vertical layout
 
 The [Open UI](https://open-ui.org/) project
 has been working on new elements/attributes
 that could help with some of these use-cases
 at a high level --
-such as section lists ('spicy sections')
-and popups.
+such as panel sets ('spicy sections'),
+selectmenus, and popups.
 It's our goal that CSS toggles provide
 some shared functionality
 that those elements & attributes can rely on,
@@ -543,7 +561,7 @@ summary {
 }
 
 details > :not(summary) {
-  toggle-visibility: details;
+  toggle-visibility: toggle details;
 }
 ```
 
@@ -568,7 +586,7 @@ Where each term toggles the following definitions:
 }
 
 .accordion > dd {
-  toggle-visibility: glossary;
+  toggle-visibility: toggle glossary;
 }
 ```
 
@@ -589,7 +607,46 @@ summary {
 }
 
 details > :not(summary) {
-  toggle-visibility: details;
+  toggle-visibility: toggle details;
+}
+```
+
+### Tree views
+
+A tree view
+can be created by nesting
+the accordion/disclosure pattern:
+
+```html
+<ul>
+  <li><a href='#'>home</a></li>
+  <li>
+    <button class='tree'>resources</button>
+    <ul>
+      <li><a href='#'>articles</a></li>
+      <li><a href='#'>demos</a></li>
+      <li>
+        <button class='tree'>media</button>
+        <ul>
+          <li><a href='#'>audio</a></li>
+          <li><a href='#'>visual</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+```
+
+And applying the show/hide behavior
+at every level:
+
+```css
+.tree {
+  toggle: tree;
+}
+
+.tree + ul {
+  toggle-visibility: toggle tree;
 }
 ```
 
@@ -721,7 +778,96 @@ a feature more like the `sibling-count()`/`sibling-index()`
 [functions proposed elsewhere](https://github.com/w3c/csswg-drafts/issues/4559).
 {% endwarn %}
 
+### Carousels and slide-shows?
+
+The current spec doesn't have great support
+for carousel-like design patterns,
+but it wouldn't take much to improve the basics.
+Let's imagine the following html structure:
+
+```html
+<section>
+  <article>…</article>
+  <article>…</article>
+  <article>…</article>
+  <article>…</article>
+</section>
+```
+
+We can add a toggle
+to track the state of the carousel:
+
+```css
+section {
+  /* 4 is the number of slides */
+  /* sticky behavior starting at 1 ensures a slide is always active */
+  toggle-root: slides 1/4 sticky
+}
+```
+
+From here, we're in a similar situation to the
+'table-of-contents' example above.
+Ideally we would want some way to tie
+`article` visibility to the specific state of our toggle.
+Failing that, we can do something like:
+
+```css
+/* articles end up on the left */
+article {
+  transform: translateX(var(--x, -100%));
+  transition: transform 300ms ease-out;
+}
+
+/* bring the active slide into view */
+article:nth-child(<n>):toggle(slides <n>) {
+  --x: 0;
+}
+
+/* move upcoming slides to the right */
+article:nth-child(<n>):toggle(slides <n>) ~ article {
+  --x: -100%;
+}
+```
+
+For navigating the carousel,
+both pagination controls and a 'next slide' trigger
+would be straight-forward.
+We just need to put them
+anywhere visible to the `section` element:
+
+```css
+.next-slide {
+  toggle-trigger: slides;
+}
+
+.to-slide-3 {
+  toggle-trigger: slides 3;
+}
+```
+
+At this point, we likely want a way
+for triggers to reverse-increment,
+so that we can also add a 'previous slide' trigger.
+
+In many cases,
+we would also want to control this carousel
+using scroll,
+in addition to (or instead of) buttons.
+That would require further integration
+with scroll/snapping behavior,
+which hasn't been defined.
+
 ## Detailed Design Discussion
+
+### Interaction between scrolling and toggles
+
+For the carousel, and other design patterns,
+it would be useful to have a two-way integration
+between toggles and scrolling/scroll-snapping,
+so that:
+
+- Scrolling/snapping could trigger active state
+- Changing active state could change scroll position
 
 ### Avoiding recursive behavior with toggle selectors
 
