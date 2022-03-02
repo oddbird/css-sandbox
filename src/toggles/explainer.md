@@ -6,6 +6,8 @@ changes:
     log: Flesh out syntax and initial examples
   - time: 2022-03-02T11:44:12-07:00
     log: Clarify toggle-root syntax, and document additional questions
+  - time: 2022-03-02T13:59:04-07:00
+    log: Additional examples and questions to consider
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -188,13 +190,20 @@ might be defined on the document root:
 }
 ```
 
+{% warn %}
+We could consider adding longhand properties
+for the various parts of the toggle description,
+and make `toggle-root` into a shorthand.
+But that's not a simple request for implementors,
+since it would involve
+collating multiple list-valued properties.
+{% endwarn %}
+
 #### Toggle names
 
 Each toggle definition begins with
 a (required) **toggle name** --
 an identifier that allows us to access this particular toggle.
-The remaining values are all optional,
-though there is no longhand for defining them individually.
 
 #### Toggle states
 
@@ -411,6 +420,18 @@ and available when relevant:
 }
 ```
 
+{% warn 'Question' %}
+Should we extend this syntax to allow
+associating an element `toggle-visibility`
+with a _particular_ active state?
+Something like
+`toggle-visibility: toggle tabs 3;`
+could associate the visibility of an element
+with the 3rd active state of the `tabs` toggle.
+See the [toc-style tab markup](#tabs-using-table-of-contents-code-order)
+use-case, for example.
+{% endwarn %}
+
 ### Selecting based on toggle state (`:toggle()`)
 
 While toggling visibility is common,
@@ -460,7 +481,7 @@ but would also be useful in describing patterns like
 tabs or exclusive accordions.
 
 See the
-'[tab and accordion toggle-groups](#tab-and-accordion-toggle-groups)'
+'[tab and accordion toggle-groups](#tab-and-exclusive-accordion-toggle-groups)'
 section
 for a full example of this use-case.
 
@@ -476,9 +497,13 @@ to be grouped in the tab order
 Existing HTML radio input behavior
 would require both features --
 grouping both the trigger focus and states.
-Would it be possible to address that from CSS,
-or does focus-management require an HTML attribute?
 {% endnote %}
+
+{% warn 'Question' %}
+Would it be possible to address focus-grouping from CSS,
+as part of this proposal,
+or does that focus-management require an HTML attribute?
+{% endwarn %}
 
 ### Javascript API for CSS toggles
 
@@ -491,7 +516,84 @@ Copy earlier examples into this section,
 and flesh out additional use-cases.
 {% endnote %}
 
-### Tab and accordion toggle-groups
+### Binary switch
+
+We can recreate the basic behavior
+of a self-toggling checkbox
+or switch component:
+
+```css
+.switch {
+  toggle: switch;
+}
+
+.switch:toggle(switch) {
+  /* style the active state */
+}
+```
+
+### Details and accordion disclosure components
+
+The behavior of a details/summary element
+can be replicated:
+
+```css
+summary {
+  toggle: details;
+}
+
+details > :not(summary) {
+  toggle-visibility: details;
+}
+```
+
+This can be extended to a whole
+list of elements,
+to create a non-exclusive accordion:
+
+```html
+<dl class='accordion'>
+  <dt>Term 1</dt>
+  <dd>Long description......</dd>
+  <dt>Term 2</dt>
+  <dd>Another long description.....</dd>
+</dl>
+```
+
+Where each term toggles the following definitions:
+
+```css
+.accordion > dt {
+  toggle: glossary;
+}
+
+.accordion > dd {
+  toggle-visibility: glossary;
+}
+```
+
+Both of these examples
+rely on the toggled content following the trigger element.
+By moving the toggle-root to a wrapping element
+we can avoid that restriction.
+With this code,
+the summary is no longer required to come first:
+
+```css
+details {
+  toggle-root: details;
+}
+
+summary {
+  toggle-trigger: details;
+}
+
+details > :not(summary) {
+  toggle-visibility: details;
+}
+```
+
+### Tab and exclusive-accordion toggle-groups
 
 Given the following HTML
 (similar to the proposed 'spicy sections' element):
@@ -537,6 +639,87 @@ panel-card {
   toggle-visibility: toggle tab;
 }
 ```
+
+The same CSS works,
+even if additional wrappers are added
+around each tab/card pair:
+
+```html
+<panel-set>
+  <panel-wrap>
+    <panel-tab>first tab</panel-tab>
+    <panel-card>first panel content</panel-card>
+  </panel-wrap>
+  <panel-wrap>
+    <panel-tab>second tab</panel-tab>
+    <panel-card>second panel content</panel-card>
+  </panel-wrap>
+</panel-set>
+```
+
+### Tabs using table-of-contents code order?
+
+In order to properly layout tabs
+as a group above the panel contents,
+it's common for tab components
+use a table-of-contents approach to the markup:
+
+```html
+<panel-set>
+  <tab-list>
+    <panel-tab>first tab</panel-tab>
+    <panel-tab>second tab</panel-tab>
+  </tab-list>
+  <card-list>
+    <panel-card>first panel content</panel-card>
+    <panel-card>second panel content</panel-card>
+  </card-list>
+</panel-set>
+```
+
+This complicates things,
+since we can no longer rely on
+the flow of toggle-scopes
+to associate each trigger
+with an individual iteration of the toggle.
+
+The rough behavior is still possible to achieve,
+using a single sticky toggle
+with multiple active states,
+but it requires somewhat explicit
+nth-of-type/nth-child selectors:
+
+```css
+/* shared toggle with an active state for each tab-panel */
+panel-set {
+  toggle-root: tabs 1/<tab-count> sticky;
+}
+
+/* each tab sets an explicit state */
+panel-tab:nth-child(<tab-position>) {
+  toggle-trigger: tabs <tab-position>;
+}
+
+/* each panel responds to an explicit state */
+panel-card:nth-child(<tab-position>):toggle(tabs <tab-position>) {
+  display: block;
+}
+```
+
+There are several ways
+we might be able to improve on this.
+Most important, perhaps,
+we could consider extending `toggle-visibility`
+to accept not only a toggle name,
+but also a specific active state.
+
+{% warn 'Question' %}
+Can we also improve on
+the bulky/repetitive selector logic here?
+That seems like it would require
+a feature more like the `sibling-count()`/`sibling-index()`
+[functions proposed elsewhere](https://github.com/w3c/csswg-drafts/issues/4559).
+{% endwarn %}
 
 ## Detailed Design Discussion
 
