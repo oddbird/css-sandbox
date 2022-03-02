@@ -4,6 +4,8 @@ created: 2022-02-28
 changes:
   - time: 2022-03-01T18:41:51-07:00
     log: Flesh out syntax and initial examples
+  - time: 2022-03-02T11:44:12-07:00
+    log: Clarify toggle-root syntax, and document additional questions
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -115,6 +117,10 @@ ul { list-style-type: toggle(disc; circle; square; box); }
 
 This proposal is unrelated to that CSS function.
 (We might want to bikeshed the naming of one or the other).
+[David Baron has proposed][cycle] `cycle()`
+as an alternative name for the `toggle()` function.
+
+[cycle]: https://lists.w3.org/Archives/Public/www-style/1999May/0067
 
 The word is also sometimes used
 in reference to '[switch](https://open-ui.org/components/switch)' components.
@@ -131,8 +137,7 @@ First off the toggles themselves:
 
 - Every **toggle** has a name, a current state,
   set number of possible states,
-  and some metadata for determining how to move between states
-  (e.g. cycling vs linear).
+  and some metadata for determining how to move between states.
 - Any element can become a **toggle root**
   for any number of toggles,
   using the `toggle-root` property.
@@ -183,22 +188,66 @@ might be defined on the document root:
 }
 ```
 
-Each toggle definition has several parts.
-While most are optional,
-they are not made available as longhand properties:
+#### Toggle names
 
-- **toggle name**: an identifier for accessing the toggle
-- **maximum state**: `1` (the default) for a binary toggle,
-  or higher integers for additional active states
-- **initial state**: `0` (the default) for inactive,
-  or a positive integer for active state
-  (must be less than or equal to the maximum)
+Each toggle definition begins with
+a (required) **toggle name** --
+an identifier that allows us to access this particular toggle.
+The remaining values are all optional,
+though there is no longhand for defining them individually.
+
+#### Toggle states
+
+After the name, we can optionally define
+the initial and maximum states.
+States are (currently) represented as integers,
+where `0` is considered 'inactive'
+and there can be any number of 'active' states
+represented by positive integers:
+
+- The **maximum state** (`[1,∞]`) defaults to `1` (a binary toggle),
+  and represents the number of possible active states.
+- The **initial state** (`[0,<maximum>]`) defaults to `0` (inactive),
+  and can be any number less than or equal to the maximum.
+
+If a single integer is given,
+that sets the maximum state.
+To set both the initial and maximum,
+we can use two `/`-divided integers in the form
+`<initial-state>/<maximum-state>`.
+
+```css
+:root {
+  /* 2 active states (initially inactive) */
+  toggle-root: color-mode 2;
+  /* same result as above */
+  toggle-root: color-mode 0/2;
+}
+
+.my-toggle {
+  /* 4 active states (initially in 2nd active state) */
+  toggle-root: my-toggle 2/4;
+}
+```
+
+{% warn 'ToDo' %}
+We hope to also allow for a list of 'named states',
+which would provide more clarity around the purpose of a state
+beyond simple numbering.
+{% endwarn %}
+
+#### Toggle keywords
+
+Finally, there are three optional boolean keywords:
+
 - **sticky**: boolean (`false` if omitted)
   indicates the behavior for moving past the maximum state --
   either remaining active (returning to `1`) if sticky,
   or deactivating (returning to `0`) if omitted
 - **group**: boolean (`false` if omitted)
-  indicates if this toggle is part of a '_toggle group_' using the same name
+  indicates if this toggle is part of a
+  '[_toggle group_](#grouping-exclusive-toggles-toggle-group)'
+  using the same name
 - **self**:  boolean (`false` if omitted)
   optionally narrows '_toggle scope_' (what elements 'see' the toggle)
   to descendant elements (narrow scope) --
@@ -206,29 +255,10 @@ they are not made available as longhand properties:
   following siblings & their descendants (wide scope),
   similar to a CSS counter
 
-The current formal syntax for each toggle definition is:
-
-```
-  <toggle-name>
-  [
-    [ <integer [0,∞]> / ]? <integer [1,∞]> ||
-    sticky ||
-    group ||
-    self
-  ]?
-```
-
-Where the integers represent initial/maximum values.
-When both values are present
-the first value (before the `/`) represents initial state,
-and the second value represents maximum state.
-When only one is given,
-that value acts as the maximum.
-
-{% warn 'ToDo' %}
-We hope to also allow for a list of 'named states',
-in order to provide more clarity around the purpose of a state
-beyond simple numbering.
+{% warn 'Question' %}
+Should there be an option similar to `sticky`
+that makes the progression linear,
+without cycling back to either `0` or `1`?
 {% endwarn %}
 
 ### Establishing toggle triggers (`toggle-trigger`)
@@ -280,6 +310,12 @@ button[toggle-colors='auto'] {
   toggle-trigger: color-mode 0;
 }
 ```
+
+{% warn 'Question' %}
+Are there other types of incrementing we might need?
+For example: an option to 'reverse increment',
+e.g. for moving backwards in a carousel?
+{% endwarn %}
 
 ### Combined root and trigger shorthand (`toggle`)
 
@@ -336,8 +372,22 @@ The `toggle-visibility` property
 allows an element to automatically tie its display
 to the state of a particular toggle.
 
+{% note %}
+The existing
+[`content-visibility` property](https://developer.mozilla.org/en-US/docs/Web/CSS/content-visibility)
+provides an `auto` value,
+allowing the contents to remain accessible
+to various searching and accessibility features
+like find-in-page, hash-navigation, or tab order,
+when hidden from rendering --
+but then to automatically become visible
+when the element becomes relevant to the user.
+The `toggle-visibility` property
+would work similarly.
+{% endnote %}
+
 In addition to changing visibility based on the toggle state,
-this allows us to change the toggle based on visibility.
+this allows us to change the toggle based on its visibility.
 If a currently-hidden element becomes 'relevant to the user'
 (through linking, search, etc)
 then the toggle is set to an active state,
