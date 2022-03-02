@@ -28,17 +28,17 @@ const render = (content, type = true) =>
 const inline = (content, type = true) =>
   type ? set(mdown.renderInline(content)) : mdown.renderInline(content);
 
-const note = (content) => {
+const note = (content, label) => {
   return `<aside data-alert="note">
-            <strong>Note:</strong>
-            ${content ? inline(content) : ''}
+            <strong>${label || 'Note'}:</strong>
+            <div>${render(content.trim())}</div>
           </aside>`;
 }
 
-const warn = (content) => {
+const warn = (content, label) => {
   return `<aside data-alert="warn">
-            <strong>Warning:</strong>
-            ${content ? inline(content) : ''}
+            <strong>${label || 'Warning'}:</strong>
+            <div>${render(content.trim())}</div>
           </aside>`;
 }
 

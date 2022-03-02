@@ -1,18 +1,14 @@
 
-{% macro note(description) %}
-
+{% macro note(description, label='Note') %}
   <aside data-alert="note">
-    <strong>Note:</strong>
-    {{ description | mdInline | safe }}
+    <strong>{{ label }}:</strong>
+    <div>{{ description | md | safe }}</div>
   </aside>
-
 {% endmacro %}
 
-{% macro warn(description) %}
-
+{% macro warn(description, label='Warning') %}
   <aside data-alert="warn">
-    <strong>Warning:</strong>
-    {{ description | mdInline | safe }}
+    <strong>{{ label }}:</strong>
+    <div>{{ description | md | safe }}</div>
   </aside>
-
 {% endmacro %}

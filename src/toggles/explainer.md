@@ -1,25 +1,28 @@
 ---
 title: CSS Toggles Explainer & Proposal
 created: 2022-02-28
+changes:
+  - time: 2022-03-01T18:41:51-07:00
+    log: Flesh out syntax and initial examples
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
   parent: toggles
 warn: |
-  This explainer is an incomplete draft,
-  still under active development.
+  This explainer is still under active development.
 ---
 
 ## Authors
 
 - Explainer by Miriam Suzanne
-- Draft specification by Miriam and Tab Atkins Jr.
+  (with some language re-used from the draft spec)
+- [Unofficial draft specification](https://tabatkins.github.io/css-toggle/)
+  by Miriam Suzanne and Tab Atkins Jr.
 - See the [References & Acknowledgements](#references--acknowledgements)
   for additional contributors and prior art
 
 ## Participate
 
-- [Unofficial draft specification](https://tabatkins.github.io/css-toggle/)
 - [Github issues for draft spec](https://github.com/tabatkins/css-toggle)
 - [CSSWG tracking issue](https://github.com/w3c/csswg-drafts/issues/6991)
 
@@ -96,19 +99,28 @@ _how this feature should work_:
 
 ## Non-goals
 
-Toggling in CSS will need to integrate smoothly
-with other important features
-that are being discussed,
-such as:
+The term 'toggle' has been used in reference to
+various different features over the years.
 
-- 'Focus groups' would allow grouping multiple toggle-triggers
-  in a single tab-stop for keyboard interaction
-- 'Gestures' could expand what it means to interact with a toggle-trigger
+[CSS Values & Units level 5](https://drafts.csswg.org/css-values-5/#funcdef-toggle)
+defines an (unimplemented) `toggle()` function that allows
+cycling through a set of values as elements are nested.
+For example, toggling between `italic`/`normal`
+or cycling through different list markers:
 
-While we need to keep these integrations in mind,
-along with the HTML features being developed in Open UI --
-this proposal is focused on the specifics
-of setting/managing toggle states in CSS.
+```css
+em { font-style: toggle(italic; normal); }
+ul { list-style-type: toggle(disc; circle; square; box); }
+```
+
+This proposal is unrelated to that CSS function.
+(We might want to bikeshed the naming of one or the other).
+
+The word is also sometimes used
+in reference to '[switch](https://open-ui.org/components/switch)' components.
+While this proposal has some overlap with a switch --
+it could be used to generate the switch behavior --
+we are not attempting to define a new element here.
 
 ## Proposal for declarative CSS toggles
 
@@ -129,7 +141,9 @@ Once we have toggles,
 we need a way to access them --
 both for the sake of _changing_ state,
 and also in order to _use_ that state somehow.
-A toggle is 'visible' to its root element
+Every toggle has a **toggle scope**
+of elements that are able to 'see' or alter its state.
+That scope includes the toggle-root element
 and any descendants (similar to inheritance),
 as well as (optionally) siblings and the descendants of siblings
 (similar to the css counters).
@@ -143,14 +157,267 @@ Any element that can 'see' and access a given toggle:
 - Can use the `:toggle()` pseudo-class
   to select based on the current state of the toggle
 
+It's important for authors to understand
+the distinctions between these things:
+
+- The _toggle root element_, where a toggle is 'hosted'
+- The _toggle scope_, where a toggle is 'visible'
+- Any number of _toggle trigger elements_,
+  which can update the toggle state when activated
+
+### Establishing toggles (`toggle-root`)
+
+The `toggle-root` property
+generates new toggles on a given element,
+and controls how those toggles behave.
+The overall syntax allows either `none`,
+or a comma-separated list of toggle definitions.
+
+A simple auto/light/dark color-mode toggle
+might be defined on the document root:
+
+```css
+:root {
+  /* color-mode toggle with 2 active states */
+  toggle-root: color-mode 2;
+}
+```
+
+Each toggle definition has several parts.
+While most are optional,
+they are not made available as longhand properties:
+
+- **toggle name**: an identifier for accessing the toggle
+- **maximum state**: `1` (the default) for a binary toggle,
+  or higher integers for additional active states
+- **initial state**: `0` (the default) for inactive,
+  or a positive integer for active state
+  (must be less than or equal to the maximum)
+- **sticky**: boolean (`false` if omitted)
+  indicates the behavior for moving past the maximum state --
+  either remaining active (returning to `1`) if sticky,
+  or deactivating (returning to `0`) if omitted
+- **group**: boolean (`false` if omitted)
+  indicates if this toggle is part of a '_toggle group_' using the same name
+- **self**:  boolean (`false` if omitted)
+  optionally narrows '_toggle scope_' (what elements 'see' the toggle)
+  to descendant elements (narrow scope) --
+  otherwise a toggle is also visible to
+  following siblings & their descendants (wide scope),
+  similar to a CSS counter
+
+The current formal syntax for each toggle definition is:
+
+```
+  <toggle-name>
+  [
+    [ <integer [0,∞]> / ]? <integer [1,∞]> ||
+    sticky ||
+    group ||
+    self
+  ]?
+```
+
+Where the integers represent initial/maximum values.
+When both values are present
+the first value (before the `/`) represents initial state,
+and the second value represents maximum state.
+When only one is given,
+that value acts as the maximum.
+
+{% warn 'ToDo' %}
+We hope to also allow for a list of 'named states',
+in order to provide more clarity around the purpose of a state
+beyond simple numbering.
+{% endwarn %}
+
+### Establishing toggle triggers (`toggle-trigger`)
+
+Once a toggle has been established,
+any elements inside the _scope_ of that toggle
+can be set as 'triggers' for that scope,
+using the `toggle-trigger` property.
+Triggers would become activatable in the page
+(part of the focus order, and able to receive interaction) --
+so that user-activation of the trigger element
+increments the state of one or more toggles.
+
+{% warn 'ToDo' %}
+Need to define what it means
+to 'become activatable' --
+including how that interacts with future gestures,
+beyond simple click/keyboard activation.
+{% endwarn %}
+
+The `toggle-trigger` property can be set to `none`,
+or a comma-separated list of one or more
+toggle-activation instructions.
+Each instruction includes:
+
+- The _name_ of the toggle to activate
+- An (optional) _target state_ for the toggle
+
+When a trigger is activated by a user,
+then for each toggle listed,
+if a toggle of that name is visible to the trigger,
+its state is either incremented by 1 (default)
+or moved to the _target state_ (if valid).
+
+To trigger the color-mode toggle created above,
+we could add triggers anywhere in the page
+(since the toggle scope is the entire document in this case).
+Triggers could either cycle the value,
+or set it to a particular state:
+
+```css
+button[toggle-colors] {
+  /* advance toggle to next state on activation */
+  toggle-trigger: color-mode;
+}
+
+button[toggle-colors='auto'] {
+  /* set toggle to a specific state on activation */
+  toggle-trigger: color-mode 0;
+}
+```
+
+### Combined root and trigger shorthand (`toggle`)
+
+While it can be useful to have them separate,
+there are many use-cases where the same element
+can act as both _root_ and _trigger_ for a toggle.
+The `toggle` shorthand property
+has the same syntax as `toggle-root`,
+but establishes the element as both root and trigger.
+
+For example,
+a definition list:
+
+```html
+<dl class='accordion'>
+  <dt>Term 1</dt>
+  <dd>Long description......</dd>
+  <dt>Term 2</dt>
+  <dd>Another long description.....</dd>
+</dl>
+```
+
+Could set each term as both a toggle  root
+and a trigger for its own toggle:
+
+```css
+.accordion > dt {
+  toggle: glossary;
+}
+```
+
+{% note %}
+When multiple toggles have the same name
+and overlapping scope,
+an element will only see the 'closer' toggle --
+so each `glossary` toggle in the example
+is only available to the `dd` element that comes immediately after
+(before another `glossary` toggle is defined)
+{% endnote %}
+
+### Toggling visibility (`toggle-visibility`)
+
+One of the common use-cases for this feature
+is the ability to build various types of
+'disclosure widget' --
+from tabs and accordions, to popups, and details/summary.
+It's essential that we make that
+both simple to achieve and also accessible by default.
+In many cases,
+we want this 'off-screen' (temporarily hidden) content
+to remain available for accessibility features,
+in-page searching, linking, focus, etc.
+The `toggle-visibility` property
+allows an element to automatically tie its display
+to the state of a particular toggle.
+
+In addition to changing visibility based on the toggle state,
+this allows us to change the toggle based on visibility.
+If a currently-hidden element becomes 'relevant to the user'
+(through linking, search, etc)
+then the toggle is set to an active state,
+and the content is displayed.
+
+The spec currently allows `normal` (no effect)
+or `toggle <toggle-name>` values.
+Using our definition-list example above,
+we can add visibility-toggling to the definitions --
+hidden by default,
+but connected to toggle state
+and available when relevant:
+
+```css
+.accordion > dt {
+  toggle: glossary;
+}
+
+.accordion > dd {
+  toggle-visibility: toggle glossary;
+}
+```
+
+### Selecting based on toggle state (`:toggle()`)
+
+While toggling visibility is common,
+there are often associated styles based on the same state
+(e.g. styling the active tab, when its contents are visible) --
+or toggles that don't relate to visibility at all.
+The `:toggle()` functional pseudo-class
+allows us to select elements based on the state of a toggle
+(as long as the element is in that toggle's scope)
+and style based on the toggle state.
+
+The function itself requires a toggle-name,
+and also accepts an optional integer
+for selecting on specific active states
+when there are multiple.
+
+With our auto/light/dark mode example,
+we can apply the color theme on the root element:
+
+```css
+html { /* auto settings, using media queries */ }
+html:toggle(color-mode 1) {
+  /* light mode color settings */
+}
+html:toggle(color-mode 2) {
+  /* dark mode color settings */
+}
+```
+
+We can also add active styling to the triggers:
+
+```css
+button[toggle-colors='dark']:toggle(color-mode 2) {
+  border-color: cyan;
+}
+```
+
+### Grouping exclusive toggles (`toggle-group`)
+
 Toggles can also be grouped together
 using the `toggle-group` property --
 in which case only one toggle from the group
 can be 'active' at a time.
-This is similar to how radio inputs work in HTML.
 
-{% note %}Toggle groups are not the same
-as 'focus groups' proposed elsewhere.
+This is similar to how radio inputs work in HTML,
+but would also be useful in describing patterns like
+tabs or exclusive accordions.
+
+See the
+'[tab and accordion toggle-groups](#tab-and-accordion-toggle-groups)'
+section
+for a full example of this use-case.
+
+{% note %}
+Toggle groups are not the same
+as '[focus groups](https://github.com/openui/open-ui/issues/401)'
+proposed elsewhere.
 The former impacts how _multiple toggles_ relate
 (one active at a time),
 while the latter allows _multiple triggers_
@@ -158,38 +425,127 @@ to be grouped in the tab order
 (one tab-stop for all interactions).
 Existing HTML radio input behavior
 would require both features --
-grouping both the trigger focus and states.{% endnote %}
+grouping both the trigger focus and states.
+Would it be possible to address that from CSS,
+or does focus-management require an HTML attribute?
+{% endnote %}
 
-In order to avoid circular logic,
-toggles are persistent and (once created)
-their state cannot be changed from CSS directly.
+### Javascript API for CSS toggles
 
-### The anatomy of a toggle
-
-Each toggle has a number of characteristics:
-
-- **name**:
-  a custom identifier used to reference the toggle
-- **state**:
-  a non-negative integer from `0` (inactive)
-  through any number of active states (`1` or higher)
-- **state names**:
-  a list of custom identifiers for the possible states
-- **group**:
-  a boolean indicator if the toggle is part of a toggle-group
-  (using the same toggle name)
-- **scope**:
-  a keyword specifying how broadly the toggle can be 'seen':
-  - `narrow` (only visible to descendants)
-  - `wide` (also visible to siblings & sibling descendants)
+{% note 'ToDo' %}Needs explainer{% endnote %}
 
 ## Key scenarios
 
+{% note 'ToDo' %}
+Copy earlier examples into this section,
+and flesh out additional use-cases.
+{% endnote %}
+
+### Tab and accordion toggle-groups
+
+Given the following HTML
+(similar to the proposed 'spicy sections' element):
+
+```html
+<panel-set>
+  <panel-tab>first tab</panel-tab>
+  <panel-card>first panel content</panel-card>
+  <panel-tab>second tab</panel-tab>
+  <panel-card>second panel content</panel-card>
+</panel-set>
+```
+
+We can define the exclusive/grouped behavior
+using toggles:
+
+```css
+panel-set {
+  /* The common ancestor establishes a group */
+  toggle-group: tab;
+}
+
+panel-tab {
+  /* Each tab creates a sticky toggle
+    (so once it’s open, clicking again won’t close it),
+    opts into the group,
+    and declares itself a toggle activator */
+  toggle: tab 1 group sticky;
+}
+
+panel-tab:first-of-type {
+  /* The first tab also sets its initial state
+    to be active */
+  toggle: tab 1/1 group sticky;
+}
+
+panel-tab:toggle(tab) {
+  /* styling for the active tab */
+}
+
+panel-card {
+  /* card visibility is linked to toggle state */
+  toggle-visibility: toggle tab;
+}
+```
+
 ## Detailed Design Discussion
+
+### Avoiding recursive behavior with toggle selectors
+
+In order to allow selector access to toggles
+(using the `:toggle()` functional pseudo-class)
+without causing recursive behavior,
+toggles exist and persist as independent state on a given element --
+unaffected by any CSS properties.
+
+CSS properties can only:
+- create new toggles, and establish their initial state
+- add or remove toggle-triggering behavior
+
+### Accessibility implications
+
+- a toggle-trigger element needs to become activatable/focusable/etc,
+  and communicate in the a11y tree that it’s a checkbox/radio/etc
+- we can infer what type of control it is
+  by examining the properties of the toggle:
+  if it’s part of a group, sticky, etc.
+- if `toggle-visibility` is in use,
+  we can also automatically infer all the tab-set ARIA roles
+
+### Other component interactions
+
+There are several important interactions
+with related features
+that we need to keep in mind
+(some may require additional research):
+
+- gestures
+  (long-term, toggles should not be limited to tap/click/enter activation)
+- tab/accordion '[panel set/section list][sl]' element (aka 'spicy sections')
+- [popup][] attributes
+  - can open/close use toggles?
+  - can toggles work with 'light dismiss'?
+
+[sl]: https://github.com/tabvengers/spicy-sections
+[popup]: https://open-ui.org/components/popup
 
 ## Considered Alternatives
 
+### Previous [CSS toggle states][] proposal
+
+[CSS Toggle States]: https://tabatkins.github.io/specs/css-toggle-states/
+
+{% note 'ToDo' %}Needs commentary{% endnote %}
+
+### [Declarative show-hide][] explainer
+
+[Declarative show-hide]: https://github.com/flackr/declarative-show-hide
+
+{% note 'ToDo' %}Needs commentary{% endnote %}
+
 ## Stakeholder Feedback / Opposition
+
+No known opposition.
 
 ## References & Acknowledgements
 

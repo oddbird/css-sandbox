@@ -14,7 +14,8 @@ eleventyNavigation:
 
 There are many use-cases
 that require "toggling" the state of one element
-by clicking on a different element.
+by interacting with a different element.
+
 Many of these could be described
 in terms of _show/hide_ states specifically:
 
@@ -25,14 +26,25 @@ in terms of _show/hide_ states specifically:
 - summary/details
 
 The OpenUI project
-has been working on new elements
+has been working on several new elements/attributes
 that could help with those use-cases
 at a high level --
-which I'll try to track here.
-
-But I'm also interested in
+but we're also interested in
 low-level tools to address more generic
-"toggle" behavior
+"toggle" behavior.
+Ideally a low-level 'CSS Toggles' feature
+can be used to power the higher-level HTML features
+that are in development --
+while also allowing for more style-centric toggles:
+
+- light/dark color modes
+- increase/decrease font-sizes
+- etc
+
+In all of the use-cases,
+we hope that accessibility can be
+built in by default --
+rather than tacked on (inconsistently) by authors.
 
 ## Our notes
 
@@ -51,6 +63,15 @@ low-level tools to address more generic
   [demo site](https://spicy-sections.glitch.me/)
 
 ## Toggle States
+
+{% warn %}
+The following syntax is slightly outdated.
+I'll update it soon --
+but for now the ideas/approach
+are still roughly accurate.
+See the [explainer](explainer/)
+for up-to-date developments.
+{% endwarn %}
 
 The goal is that we can describe an element as having toggle states,
 which can be "shared by" or "forwarded to" other elements --
