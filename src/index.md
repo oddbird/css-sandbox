@@ -15,20 +15,23 @@ eleventyNavigation:
 
 This is a scratch site for
 [Miriam Suzanne](https://oddbird.net/authors/miriam/)
+and [OddBird](https://oddbird.net/)
 to take notes & document ideas
 related to the
-[CSS Working Group](https://github.com/w3c/csswg-drafts/)
-and CSS Specifications.
+[CSS Working Group](https://github.com/w3c/csswg-drafts/),
+the [Sass language](https://sass-lang.com/),
+and related web platform features.
 
-The real conversation happens in [CSSWG issue threads][drafts] --
-but I wanted a place to gather my own thoughts
+Most conversations happen in [CSSWG issue threads][drafts] --
+but we wanted a place to gather our thoughts
 around those conversations.
-Everything here is just un-official **work-in-progress** --
-an ever-changing reflection of my own personal thoughts.
+Everything here is un-official **work-in-progress** --
+an ever-changing reflection of
+what we're working on and thinking about.
 
 [gh]: https://github.com/oddbird/css-sandbox
 [drafts]: https://github.com/w3c/csswg-drafts/issues
 
-## My Notes (So Far)
+## Our Notes (So Far)
 
 {{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | typogr | safe }}

@@ -5,7 +5,7 @@ is_log: true
 eleventyNavigation:
   key: changes
   title: Full Site Changelog
-  parent: home
+  parent: resources
 ---
 
 {% set changelog = collections.all | getChangelog %}
