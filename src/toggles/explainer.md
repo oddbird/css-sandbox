@@ -10,6 +10,8 @@ changes:
     log: Additional examples and questions to consider
   - time: 2022-03-02T16:36:16-07:00
     log: Document the basic issues with carousel/scrolling
+  - time: 2022-03-09T11:46:28-07:00
+    log: Clarify presentational restriction in non-goals
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -121,6 +123,37 @@ _how this feature should work_:
 
 ## Non-goals
 
+### Managing application state
+
+While there is a much larger need
+for improved application state management on the web,
+this proposal is focused specifically on the needs of CSS.
+That line is not necessarily clean and simple to define --
+but we think that:
+
+- State changes which need to update the DOM,
+  or be 'saved' into app state
+  should be primarily handled outside CSS.
+  Those are not presentation-specific concerns.
+- It should still be possible to use this feature
+  in tandem with other web languages
+  to represent/display those more complex application states in CSS.
+
+For example, interacting with a 'tab' or 'accordion' design pattern
+is a purely presentational concern that requires some state management.
+However, changing the 'status' of a user/page
+from 'logged out' to 'logged-in' --
+or deleting an item from a list --
+are broader application states
+that may only be 'reflected' in the presentation.
+
+That means we need both:
+
+- a CSS syntax that allows for handling presentational needs
+- an API allowing other web languages to read & set CSS states when necessary
+
+### Potential name confusion
+
 The term 'toggle' has been used in reference to
 various different features over the years.
 
@@ -148,6 +181,10 @@ While this proposal has some overlap with a switch --
 it could be used to generate the switch behavior --
 we are not attempting to define a new element here.
 
+It's also possible that the term 'toggle' could cause confusion,
+as many might expect it to have a boolean (on/off) behavior.
+The current proposal, however, allows for any number of desired states.
+
 ## Proposal for declarative CSS toggles
 
 ### Broad overview
@@ -157,7 +194,8 @@ First off the toggles themselves:
 
 - Every **toggle** has a name, a current state,
   set number of possible states,
-  and some metadata for determining how to move between states.
+  and some metadata for determining
+  how to move between states by default.
 - Any element can become a **toggle root**
   for any number of toggles,
   using the `toggle-root` property.
@@ -258,7 +296,7 @@ we can use two `/`-divided integers in the form
 ```
 
 {% warn 'ToDo' %}
-We hope to also allow for a list of 'named states',
+We plan to also allow for a list of 'named states',
 which would provide more clarity around the purpose of a state
 beyond simple numbering.
 {% endwarn %}
@@ -283,9 +321,9 @@ Finally, there are three optional boolean keywords:
   similar to a CSS counter
 
 {% warn 'Question' %}
-Should there be an option similar to `sticky`
-that makes the progression linear,
-without cycling back to either `0` or `1`?
+There should be an option similar to `sticky`
+that makes the default progression linear,
+without cycling back to either `0` or `1`.
 {% endwarn %}
 
 ### Establishing toggle triggers (`toggle-trigger`)
