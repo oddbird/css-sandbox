@@ -12,6 +12,8 @@ changes:
     log: Document the basic issues with carousel/scrolling
   - time: 2022-03-09T11:46:28-07:00
     log: Clarify presentational restriction in non-goals
+  - time: 2022-03-11T15:53:53-07:00
+    log: Document potential missing features
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -71,8 +73,10 @@ To borrow language from Nicole Sullivan:
 
 Where:
 
-- a _gesture_ is some form of user interaction,
-  like click/enter activation, scrolling, etc
+- a _gesture_ is usually some form of user interaction,
+  like click/enter activation, scrolling, etc.
+  It may also be useful to consider non-user 'gestures'
+  such as animation events that trigger a toggle state.
 - a _trigger_ and a _target_ are both elements in the DOM
   (often different elements, but sometimes the same element)
 - a _state change_ can be moving through a list of possible states,
@@ -91,7 +95,7 @@ based on the state of a toggle:
 - off-canvas menus
 
 However, there are also use-cases
-for a toggle to have less invasive impact:
+for a toggle to have more complex style impact:
 
 - light/dark/high-contrast/auto color themes
 - adjusting font sizes
@@ -120,6 +124,8 @@ _how this feature should work_:
   should be established and accessed in CSS,
   rather than relying on unique IDs or selectors-as-property-values.
 - JS should not be required in the most common use-cases
+- Defaults should help facilitate the most common use-cases,
+  while still allowing more complex state interactions.
 
 ## Non-goals
 
@@ -147,9 +153,19 @@ or deleting an item from a list --
 are broader application states
 that may only be 'reflected' in the presentation.
 
+The boundaries are complicated,
+since it may be useful for eg:
+
+- Activating a `save` button changes a toggle state to `saving`
+- The styles are able to reflect that state change immediately
+- JS can listen for either the button activation, or the state change,
+  in order to trigger a network request and/or change app state internally
+- JS can then trigger a change in the CSS toggle state
+  when the internal app data updates are complete
+
 That means we need both:
 
-- a CSS syntax that allows for handling presentational needs
+- a CSS syntax that allows for handling the presentational needs
 - an API allowing other web languages to read & set CSS states when necessary
 
 ### Potential name confusion
@@ -183,7 +199,8 @@ we are not attempting to define a new element here.
 
 It's also possible that the term 'toggle' could cause confusion,
 as many might expect it to have a boolean (on/off) behavior.
-The current proposal, however, allows for any number of desired states.
+The current proposal, however,
+allows for any number of desired states.
 
 ## Proposal for declarative CSS toggles
 
@@ -195,7 +212,7 @@ First off the toggles themselves:
 - Every **toggle** has a name, a current state,
   set number of possible states,
   and some metadata for determining
-  how to move between states by default.
+  how to move between states _by default_.
 - Any element can become a **toggle root**
   for any number of toggles,
   using the `toggle-root` property.
@@ -897,16 +914,6 @@ which hasn't been defined.
 
 ## Detailed Design Discussion
 
-### Interaction between scrolling and toggles
-
-For the carousel, and other design patterns,
-it would be useful to have a two-way integration
-between toggles and scrolling/scroll-snapping,
-so that:
-
-- Scrolling/snapping could trigger active state
-- Changing active state could change scroll position
-
 ### Avoiding recursive behavior with toggle selectors
 
 In order to allow selector access to toggles
@@ -929,6 +936,54 @@ CSS properties can only:
 - if `toggle-visibility` is in use,
   we can also automatically infer all the tab-set ARIA roles
 
+### Syntax for named states
+
+{% note 'ToDo' %}Define this syntax{% endnote %}
+
+### Allow trigger-defined/unknown states?
+
+The current spec requires a `toggle-root`
+to establish all the possible states in advance,
+along with a 'default' progression through those states.
+Then `toggle-trigger` elements are allowed
+to define more specific actions
+(moving from one arbitrary state to another)
+outside the default.
+
+That is:
+triggers can define arbitrary transitions between states,
+but they are not able to define _new states_ --
+only move between the previously-defined options.
+
+An alternative approach might be
+to consider both the `toggle-root` progression and states
+to be 'defaults' --
+while allowing both custom states
+and custom transitions to be defined
+at the trigger level:
+
+```css
+html {
+  /* no states defined */
+  toggle-root: page;
+}
+
+button.save {
+  /* triggers can define arbitrary states */
+  toggle-trigger: page saving;
+}
+```
+
+### Interaction between scrolling and toggles?
+
+For the carousel, and other design patterns,
+it would be useful to have a two-way integration
+between toggles and scrolling/scroll-snapping,
+so that:
+
+- Scrolling/snapping could trigger active state
+- Changing active state could change scroll position
+
 ### Other component interactions
 
 There are several important interactions
@@ -938,6 +993,8 @@ that we need to keep in mind
 
 - gestures
   (long-term, toggles should not be limited to tap/click/enter activation)
+- non-user trigger events
+  (could be useful to trigger toggles from e.g. an animation event)
 - tab/accordion '[panel set/section list][sl]' element (aka 'spicy sections')
 - [popup][] attributes
   - can open/close use toggles?

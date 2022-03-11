@@ -67,18 +67,23 @@ code {
   background: var(--callout);
   font-family: var(--code-fonts);
   font-size: 0.8em;
-}
 
-pre code {
-  background: unset;
-  color: unset;
-  display: unset;
-  padding: unset;
+  pre:not([class*="language-"]) & {
+    display: block;
+    padding: 1em;
+  }
 }
 
 pre[class*="language-"] {
   @media (min-width: 50em) {
     margin-inline: -1em;
+  }
+
+  code {
+    background: unset;
+    color: unset;
+    display: unset;
+    padding: unset;
   }
 }
 
