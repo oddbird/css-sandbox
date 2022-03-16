@@ -14,6 +14,8 @@ changes:
     log: Clarify presentational restriction in non-goals
   - time: 2022-03-11T15:53:53-07:00
     log: Document potential missing features
+  - time: 2022-03-16T15:22:03-06:00
+    log: Propose syntax improvements around named states, & dynamic transitions
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -313,19 +315,88 @@ we can use two `/`-divided integers in the form
 ```
 
 {% warn 'ToDo' %}
-We plan to also allow for a list of 'named states',
-which would provide more clarity around the purpose of a state
-beyond simple numbering.
+Consider using a keyword,
+rather than a slash for the divider?
+Similar to the keywords in new color syntax
+and gradient functions,
+writing `my-toggle 1 of 4`
+or `my-toggle 4 at 1` (max first)
+might provide more clarity
+about the relationship between these numbers.
 {% endwarn %}
 
-#### Toggle keywords
+{% warn %}
+The following examples are not yet supported
+by the draft specification.
+{% endwarn %}
 
-Finally, there are three optional boolean keywords:
+We plan to also allow for a list of 'named states'
+which would provide more clarity around the purpose of a state
+beyond simple numbering.
+This syntax still needs some attention,
+but will likely require a wrapping function
+or brackets.
+This is still unspecified,
+but I imagine something like this could work
+(setting multiple toggles to show variants):
 
-- **sticky**: boolean (`false` if omitted)
-  indicates the behavior for moving past the maximum state --
-  either remaining active (returning to `1`) if sticky,
-  or deactivating (returning to `0`) if omitted
+```css
+html {
+  toggle-root:
+    colors [auto light dark] at light,
+    middle-out 10 at 5,
+    switch /* `1 at 0` is the default */
+  ;
+}
+```
+
+Personally,
+I like brackets as a parallel
+to the existing syntax
+for named grid lines.
+
+#### Default toggle actions
+
+While it's possible to define
+more complex actions to move
+from one specific state to another --
+as you might in more complex state machines --
+many of the known use-cases
+can be handled with simple
+increment/decrement actions.
+
+To facilitate these simpler use-cases,
+every toggle has a pre-defined flow
+when activated by a generic trigger.
+This is set with one of several keywords:
+
+- (default): when no keyword is provided,
+  the state will increment until reaching the maximum state,
+  and then return to `0` (inactive).
+- **sticky**: state will increment until reaching the maximum,
+  and then return to `1` (first active).
+- **linear**: state will increment until reaching the maximum,
+  and then stay at the maximum until given more explicit direction.
+
+{% warn 'Question' %}
+Are there other simple defaults
+that should be available at this level?
+For example,
+would `reverse-*` versions of each behavior
+be useful?
+{% endwarn %}
+
+{% warn 'ToDo' %}
+Currently only `sticky`
+and the default full-cycle behavior
+are defined in the specification.
+{% endwarn %}
+
+#### Toggle groups and scopes
+
+Finally, there are two optional boolean keywords,
+for grouping and scoping toggles:
+
 - **group**: boolean (`false` if omitted)
   indicates if this toggle is part of a
   '[_toggle group_](#grouping-exclusive-toggles-toggle-group)'
@@ -334,14 +405,12 @@ Finally, there are three optional boolean keywords:
   optionally narrows '_toggle scope_' (what elements 'see' the toggle)
   to descendant elements (narrow scope) --
   otherwise a toggle is also visible to
-  following siblings & their descendants (wide scope),
-  similar to a CSS counter
+  following siblings & their descendants (wide scope)
 
-{% warn 'Question' %}
-There should be an option similar to `sticky`
-that makes the default progression linear,
-without cycling back to either `0` or `1`.
-{% endwarn %}
+The default 'wide' scope is similar
+to the way CSS counters behave,
+while the 'narrow' (`self`) scope
+is more similar to inheritance.
 
 ### Establishing toggle triggers (`toggle-trigger`)
 
@@ -357,7 +426,7 @@ increments the state of one or more toggles.
 {% warn 'ToDo' %}
 Need to define what it means
 to 'become activatable' --
-including how that interacts with future gestures,
+including how that relates to future gestures,
 beyond simple click/keyboard activation.
 {% endwarn %}
 
@@ -379,25 +448,76 @@ To trigger the color-mode toggle created above,
 we could add triggers anywhere in the page
 (since the toggle scope is the entire document in this case).
 Triggers could either cycle the value,
-or set it to a particular state:
+or set it to a particular state.
+The current spec allows these two formats:
 
 ```css
 button[toggle-colors] {
-  /* advance toggle to next state on activation */
+  /* on activation: advance toggle to next state along default path */
   toggle-trigger: color-mode;
 }
 
-button[toggle-colors='auto'] {
-  /* set toggle to a specific state on activation */
-  toggle-trigger: color-mode 0;
+button[toggle-colors='dark'] {
+  /* on activation: set toggle to a specific numbered state */
+  toggle-trigger: color-mode 2;
 }
 ```
 
-{% warn 'Question' %}
-Are there other types of incrementing we might need?
-For example: an option to 'reverse increment',
-e.g. for moving backwards in a carousel?
-{% endwarn %}
+Where possible,
+I would expect named states
+to be available by either name or number,
+so that the example above establishes a `dark` state,
+and would be identical to:
+
+```css
+button[toggle-colors='dark'] {
+  /* on activation: set toggle to a specific numbered state */
+  toggle-trigger: color-mode dark;
+}
+```
+
+We also clearly need
+a way to 'decrement' states --
+for example,
+allowing us to move backwards
+in a slideshow or carousel.
+The current spec does not define a syntax for this,
+and doesn't have a clear way to add it.
+I could imagine something like
+(syntax TBD):
+
+```css
+.next {
+  /* incrementing would be the default */
+  toggle-trigger: slide;
+  toggle-trigger: slide next;
+}
+
+.previous {
+  toggle-trigger: slide previous;
+}
+```
+
+In order to clearly delineate
+between these default transitions
+and direct changes 'to' an explicit state,
+we could use a keyword prefix for the latter:
+
+```css
+.dark {
+  toggle-trigger: color-mode to dark;
+}
+```
+
+There is much more to explore
+along these lines,
+especially if we want to allow for
+state-machine 'transitions'
+that define [dynamic state changes](#triggering-dynamic-transitions).
+I think that would make sense
+as a level 2 extension of this proposal,
+and a case that we should consider
+while designing the syntax.
 
 ### Combined root and trigger shorthand (`toggle`)
 
@@ -580,7 +700,31 @@ or does that focus-management require an HTML attribute?
 
 ### Javascript API for CSS toggles
 
-{% note 'ToDo' %}Needs explainer{% endnote %}
+It's important
+that toggle states are both
+'available to' JavaScript,
+and can also be 'manipulated by'
+scripting.
+
+The details still need to be fleshed out,
+but roughly we would want to:
+
+- Expose a map of toggles on an element,
+  associating each toggle name with the details of the toggle
+- Ability to create toggles manually
+- Ability to delete toggles manually
+- Ability to set toggle state manually
+
+I expect each state of a toggle
+would have an optional name and number value exposed --
+where predefined states have both a name & number,
+but any trigger-defined states
+only have one or the other
+(as defined by the trigger).
+
+{% note 'ToDo' %}
+Needs details.
+{% endnote %}
 
 ## Key scenarios
 
@@ -912,33 +1056,139 @@ That would require further integration
 with scroll/snapping behavior,
 which hasn't been defined.
 
-## Detailed Design Discussion
+### Triggering dynamic transitions
 
-### Avoiding recursive behavior with toggle selectors
+In many state machines,
+a given active state is able to describe
+a the named 'transitions' that are available
+for a triggering event.
+Rather than having the trigger define
+'what state to move to' explicitly,
+the trigger would choose one of several
+available transitions away from the current state,
+and the transition itself determines the target state.
 
-In order to allow selector access to toggles
-(using the `:toggle()` functional pseudo-class)
-without causing recursive behavior,
-toggles exist and persist as independent state on a given element --
-unaffected by any CSS properties.
+This may not be required in a first version
+of CSS toggles,
+but we should consider how/if
+the syntax could be extended
+to support this use-case.
 
-CSS properties can only:
-- create new toggles, and establish their initial state
-- add or remove toggle-triggering behavior
+My initial sense is that
+we could allow this sort of 'state machine'
+to be defined using an at-rule
+(name TBD):
 
-### Accessibility implications
+```css
+@machine <machine-name> {
+  <state-1> {
+    <transition-1>: <target-state>;
+    <transition-2>: <target-state>;
+  }
+  <state-2> {
+    <transition-1>: <target-state>;
+    <transition-2>: <target-state>;
+  }
+}
+```
 
-- a toggle-trigger element needs to become activatable/focusable/etc,
-  and communicate in the a11y tree that it’s a checkbox/radio/etc
-- we can infer what type of control it is
-  by examining the properties of the toggle:
-  if it’s part of a group, sticky, etc.
-- if `toggle-visibility` is in use,
-  we can also automatically infer all the tab-set ARIA roles
+When creating a new toggle,
+it could be based on one of these named machines
+(syntax TBD):
 
-### Syntax for named states
+```css
+html {
+  toggle-root: my-toggle machine(<machine-name>);
+}
+```
 
-{% note 'ToDo' %}Define this syntax{% endnote %}
+We could consider adding an setting
+at the toggle-root level
+to either enforce that all triggers
+use named transitions (`strict`),
+or optionally allow triggers
+to choose between states, transitions,
+and default incrementing:
+
+```css
+html {
+  toggle-root: my-toggle machine(<machine-name>, strict);
+}
+```
+
+On the trigger side,
+we would need a syntax
+that clearly references a transition name,
+rather than a target-state name --
+potentially a keyword or function
+(actual syntax TBD):
+
+```css
+.save {
+  /* move to an explicit target state */
+  toggle-trigger: my-toggle to saved;
+  toggle-trigger: my-toggle to(saved);
+
+  /* trigger a named transition, that defines target state */
+  toggle-trigger: my-toggle do save;
+  toggle-trigger: my-toggle do(save);
+}
+```
+
+As an example,
+[Adam Argyle posted](https://github.com/tabatkins/css-toggle/issues/7#issuecomment-862779118)
+this state machine diagram:
+
+![fetch machine with initial state of idle, and fetch transition to loading, then resolve transition to success or reject transition to failure, with a retry transition that returns to loading](https://user-images.githubusercontent.com/1134620/122304047-6bee8f00-ceb9-11eb-99eb-27f7765b1b7c.png)
+
+We could establish that as
+a machine for CSS toggles:
+
+```css
+@machine fetch {
+  idle {
+    try: loading;
+  }
+  loading {
+    resolve: success;
+    reject: failure;
+  }
+  failure {
+    try: loading;
+  }
+  /* as a final state, 'success' does not have transitions */
+}
+```
+
+I've reused the `try`
+transition name in place of `fetch` and `retry`,
+so that a single trigger can
+activate either transition,
+as long as the machine is either
+in a 'idle' or 'failure' state:
+
+```css
+form {
+  /* maybe name can be optionally implied by machine()? */
+  toggle-root: machine(fetch);
+}
+
+.try {
+  toggle-trigger: fetch do try;
+}
+```
+
+{% note %}
+All of this behavior is already possible
+with the specified syntax,
+since trigger actions can be re-defined
+based on the current state --
+however, the result is difficult to read
+or define clearly in a single place.
+Each trigger would need to
+define it's own transtions:
+`.try:not(:toggle(fetch loading)) { toggle-trigger: fetch to loading; }`.
+{% endnote %}
 
 ### Allow trigger-defined/unknown states?
 
@@ -973,6 +1223,50 @@ button.save {
   toggle-trigger: page saving;
 }
 ```
+
+New states defined by a trigger
+would not have a number/name association,
+and would fall 'outside' the default cycle behavior.
+From there we would have to decide
+if the default trigger event either:
+
+- has no effect
+- acts as a temporary 'maximum' value
+  (so that events follow the established
+  from-maximum transition described by either
+  `linear`, `sticky`, or the default cycle behavior)
+
+{% note %}
+There have been many discussions about
+how to express 'indeterminate' state
+in the current syntax --
+and in many ways this feature would be
+similar to allowing 'indeterminate' states.
+{% endnote %}
+
+## Detailed Design Discussion
+
+### Avoiding recursive behavior with toggle selectors
+
+In order to allow selector access to toggles
+(using the `:toggle()` functional pseudo-class)
+without causing recursive behavior,
+toggles exist and persist as independent state on a given element --
+unaffected by any CSS properties.
+
+CSS properties can only:
+- create new toggles, and establish their initial state
+- add or remove toggle-triggering behavior
+
+### Accessibility implications
+
+- a toggle-trigger element needs to become activatable/focusable/etc,
+  and communicate in the a11y tree that it’s a checkbox/radio/etc
+- we can infer what type of control it is
+  by examining the properties of the toggle:
+  if it’s part of a group, sticky, etc.
+- if `toggle-visibility` is in use,
+  we can also automatically infer all the tab-set ARIA roles
 
 ### Interaction between scrolling and toggles?
 
