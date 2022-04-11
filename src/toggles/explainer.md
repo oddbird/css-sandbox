@@ -16,6 +16,8 @@ changes:
     log: Document potential missing features
   - time: 2022-03-16T15:22:03-06:00
     log: Propose syntax improvements around named states, & dynamic transitions
+  - time: 2022-04-11T15:41:59-06:00
+    log: Links to js polyfill & demo
 eleventyNavigation:
   key: toggles-explainer
   title: CSS Toggles Explainer
@@ -26,17 +28,24 @@ warn: |
 
 ## Authors
 
-- Explainer by Miriam Suzanne
-  (with some language re-used from the draft spec)
-- [Unofficial draft specification](https://tabatkins.github.io/css-toggle/)
-  by Miriam Suzanne and Tab Atkins Jr.
-- See the [References & Acknowledgements](#references--acknowledgements)
-  for additional contributors and prior art
+- Miriam Suzanne
+- Tab Atkins Jr.
+
+See the [References & Acknowledgements](#references--acknowledgements)
+for additional contributors and prior art
 
 ## Participate
 
-- [Github issues for draft spec](https://github.com/tabatkins/css-toggle)
+- [Unofficial draft specification][spec]
+- [Github issues for draft spec][issues]
 - [CSSWG tracking issue](https://github.com/w3c/csswg-drafts/issues/6991)
+- [OddBird JS polyfill/prototype][polyfill]
+  (and [demo][])
+
+[spec]: https://tabatkins.github.io/css-toggle/
+[issues]: https://github.com/tabatkins/css-toggle
+[polyfill]: https://github.com/oddbird/css-toggles
+[demo]: https://toggles.oddbird.net/
 
 ## Introduction
 
@@ -355,6 +364,15 @@ I like brackets as a parallel
 to the existing syntax
 for named grid lines.
 
+{% note %}
+The [Toggles Polyfill][polyfill] currently supports:
+- the specified `initial/max` syntax
+- the keyword `max at initial` syntax
+- the bracket/keyword `[one two three] at three` named-state syntax
+
+[polyfill]: https://github.com/oddbird/css-toggles
+{% endnote %}
+
 #### Default toggle actions
 
 While it's possible to define
@@ -625,6 +643,15 @@ See the [toc-style tab markup](#tabs-using-table-of-contents-code-order)
 use-case, for example.
 {% endwarn %}
 
+{% note %}
+The [Toggles Polyfill][polyfill] currently implements
+`toggle-visibility` by simply applying `display:none`
+without any of the expected benefits
+that a browser implementation might provide.
+
+[polyfill]: https://github.com/oddbird/css-toggles
+{% endnote %}
+
 ### Selecting based on toggle state (`:toggle()`)
 
 While toggling visibility is common,
@@ -749,6 +776,11 @@ or switch component:
 }
 ```
 
+{% note %}
+See the
+[binary switch demo](https://toggles.oddbird.net/#binary-switch).
+{% endnote %}
+
 ### Details and accordion disclosure components
 
 The behavior of a details/summary element
@@ -789,6 +821,11 @@ Where each term toggles the following definitions:
 }
 ```
 
+{% note %}
+See the
+[accordion demo](https://toggles.oddbird.net/#accordion).
+{% endnote %}
+
 Both of these examples
 rely on the toggled content following the trigger element.
 By moving the toggle-root to a wrapping element
@@ -809,6 +846,46 @@ details > :not(summary) {
   toggle-visibility: toggle details;
 }
 ```
+
+### Color-mode preferences
+
+It is very common for sites to support
+both light and dark 'modes' for a site,
+and provide a toggle between those modes.
+Some sites also provide 'auto' mode (the result of a user-preference)
+and/or additional modes like 'high-contrast'.
+
+This use-case could be handled
+with a toggle on the root element.
+In this case I'm using the
+proposed syntax for named states:
+
+```css
+html {
+  toggle-root: mode [auto light dark];
+}
+
+html:toggle(mode light) {
+  /* colors for light mode */
+}
+
+html:toggle(mode dark) {
+  /* colors for dark mode */
+}
+
+.mode-btn {
+  toggle-trigger: mode;
+}
+```
+
+{% note %}
+See the
+[named-modes demo](https://toggles.oddbird.net/#named-modes),
+and a similar
+[named-colors demo](https://toggles.oddbird.net/#named-colors)
+with individual triggers
+for each state.
+{% endnote %}
 
 ### Tree views
 
@@ -848,6 +925,11 @@ at every level:
   toggle-visibility: toggle tree;
 }
 ```
+
+{% note %}
+See the
+[tree-view demo](https://toggles.oddbird.net/#tree-view).
+{% endnote %}
 
 ### Tab and exclusive-accordion toggle-groups
 
@@ -912,6 +994,11 @@ around each tab/card pair:
   </panel-wrap>
 </panel-set>
 ```
+
+{% note %}
+See the
+[panelset demo](https://toggles.oddbird.net/#panelset).
+{% endnote %}
 
 ### Tabs using table-of-contents code order?
 
@@ -1188,6 +1275,11 @@ or define clearly in a single place.
 Each trigger would need to
 define it's own transtions:
 `.try:not(:toggle(fetch loading)) { toggle-trigger: fetch to loading; }`.
+{% endnote %}
+
+{% note %}
+See the
+[`@machine` demo](https://toggles.oddbird.net/#machine).
 {% endnote %}
 
 ### Allow trigger-defined/unknown states?

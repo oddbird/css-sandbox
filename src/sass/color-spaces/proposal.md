@@ -485,7 +485,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   is-powerless($color, $channel)
   ```
 
-  * ==todo: defined space-by-space?==
+  * ==todo: defined space-by-space in the function==
 
 ### `is-in-gamut()`
 
@@ -493,7 +493,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   is-in-gamut($color, $space)
   ```
 
-  * ==todo (is this a good name?)==
+  * ==todo==
 
 ### `to-gamut()`
 
@@ -501,7 +501,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   to-gamut($color, $channel)
   ```
 
-  * ==todo (is this a good name?)==
+  * ==todo==
 
 ### `to-space()`
 
@@ -519,7 +519,7 @@ These new and modified functions are part of the `sass:color` built-in module.
 
   * If `$space` is not a [color space](#color-space), throw an error.
 
-    > ==Should this allow extended/legacy color spaces, as aliases for srgb?==
+    > ==todo: allow extended/legacy color spaces==
 
   * Return the result of [converting](#converting-a-color) the `origin-color`
     `$color` to the `target-space` `$space`.
@@ -740,11 +740,16 @@ These new CSS functions are provided globally.
   * ==todo==
 
 
-{% warn 'Questions' %}
-- Legacy-function support for explicit `none` channels?
-{% endwarn %}
+<!-- {% warn 'Questions' %}
+…
+{% endwarn %} -->
 
 {% note 'ToDo' %}
+- Legacy-function support for explicit `none` channels?
+  (what does CSS do??)
+- allow hwb/hsl as full spaces, only converted when legacy
+- Convert 'between predefined rgb spaces' (define that term)
+- Add maximum channels as param in parsing logic
 - Unprefixed support for all new color functions
 - Allow rgb inspection to return out-of-gamut values
 - Extend `scale` to allow any channel with clear boundaries?
