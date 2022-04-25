@@ -226,9 +226,17 @@ The color spaces and their channels are:
   * `green`
   * `blue`
 
-  > Colors described in `rgb`, `hsl`, `hwb`, hex, and named keywords
-  > are all part of the `srgb` color space.
+  > Colors described in `rgb`, hex, and named keywords are all part of the
+  > `srgb` color space, along with legacy colors described in `hsl` or `hwb`.
 
+* `hwb` (RGB):
+  * `hue` (polar angle)
+  * `whiteness`
+  * `blackness`
+* `hsl` (RGB):
+  * `hue` (polar angle)
+  * `saturation`
+  * `lightness`
 * `srgb-linear` (RGB):
   1. `red`
   2. `green`
@@ -277,24 +285,6 @@ The color spaces and their channels are:
   1. `lightness`
   2. `chroma`
   3. `hue` (polar angle)
-
-### Extended Color Spaces
-
-> While all the `srgb` formats create colors in a single shared color space,
-> color interpolation and inspection functions may need access to these
-> additional spaces.
-
-The extended color spaces include all regular [color spaces](#color-space) in
-addition to the following `sRGB`-based spaces:
-
-* `hwb` (RGB):
-  * `hue` (polar angle)
-  * `whiteness`
-  * `blackness`
-* `hsl` (RGB):
-  * `hue` (polar angle)
-  * `saturation`
-  * `lightness`
 
 ### Color Interpolation
 
@@ -365,11 +355,10 @@ into premultiplied color values as follows:
 
 ### Converting a Color
 
-Colors can be converted from one [color space](#extended-color-spaces) to
-another. Algorithms for color conversion are defined in the
-[CSS Color Level 4][color-4] specification. Each algorithm takes a color
-`origin-color`, and a string `target-space`, and returns a color `output-color`.
-The algorithms are:
+Colors can be converted from one [color space](#color-space) to another.
+Algorithms for color conversion are defined in the [CSS Color Level 4][color-4]
+specification. Each algorithm takes a color `origin-color`, and a string
+`target-space`, and returns a color `output-color`. The algorithms are:
 
 * [HSL to sRGB](https://www.w3.org/TR/css-color-4/#hsl-to-rgb)
 
@@ -395,7 +384,8 @@ The algorithms are:
 
 ### Parsing Color Components
 
-This procedure accepts a single input argument `input` to parse, throws any
+This procedure accepts an input argument `input` to parse, along with a `max`
+argument representing the number of color channels allowed, then throws any
 common errors if necessary, and returns either `null` (if the syntax contains
 special CSS values), or a list of parsed values:
 
@@ -418,25 +408,24 @@ special CSS values), or a list of parsed values:
     * If the last element of `input` is an unquoted string that contains `/`,
       return `null`.
 
+      > This solves for a legacy handling of `/` in Sass that would produce an
+      > unquoted string when the alpha value is a css function such as `var()`
+
     * If the last element of `channels` has preserved its status as two
       slash-separated numbers:
 
-      * Let `last` be the number before the slash and `alpha` the number after
-        the slash.
-
-      * Append the value of `last` to the end of `channels`.
+      * Let `alpha` the number after the slash, and replace the last element
+        of `channels` with the number before the slash.
 
   * If `channels` is not an unbracketed space-separated list, throw an error.
 
   * If either `channels` or `alpha` is a special variable string, or if
     `alpha` is a special number, return `null`.
 
+  * If `channels` has more than `max` elements, throw an error.
+
   * If any element of `channels` is a [special variable string][] or a special
     number, return `null`.
-
-    > This passes along variables to CSS before checking against to see if the
-    > there are extra channel values explicitly given. ==Do we want to throw
-    > an error for extra channels?==
 
   * If `alpha` is defined:
 
@@ -564,7 +553,7 @@ These new CSS functions are provided globally.
   hwb($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels`.
+  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
 
   * If `components` is null, return a plain CSS function string with the name
     `"hwb"` and the argument `$channels`.
@@ -588,7 +577,7 @@ These new CSS functions are provided globally.
   lab($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels`.
+  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
 
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
@@ -747,9 +736,7 @@ These new CSS functions are provided globally.
 {% note 'ToDo' %}
 - Legacy-function support for explicit `none` channels?
   (what does CSS do??)
-- allow hwb/hsl as full spaces, only converted when legacy
 - Convert 'between predefined rgb spaces' (define that term)
-- Add maximum channels as param in parsing logic
 - Unprefixed support for all new color functions
 - Allow rgb inspection to return out-of-gamut values
 - Extend `scale` to allow any channel with clear boundaries?
