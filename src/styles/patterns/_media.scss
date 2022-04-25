@@ -1,3 +1,5 @@
+@use 'sass:math';
+
 figure {
   margin: 1.5em 0;
 }
@@ -35,5 +37,5 @@ img {
 }
 
 [data-ratio] {
-  --ratio: #{(16/9)};
+  --ratio: #{(math.div(16, 9))};
 }
