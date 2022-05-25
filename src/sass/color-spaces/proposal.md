@@ -4,6 +4,10 @@ created: 2022-03-11
 changes:
   - time: 2022-04-04T15:56:51-06:00
     log: Defining color terms, procedures, and functions
+  - time: 2022-05-25T13:47:45-06:00
+    log: |
+      Define color parsing, missing/powerless components,
+      and channel boundaries
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
