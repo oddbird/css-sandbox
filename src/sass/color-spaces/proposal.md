@@ -8,6 +8,8 @@ changes:
     log: |
       Define color parsing, missing/powerless components,
       and channel boundaries
+  - time: 2022-06-01T13:35:32-06:00
+    log: Define gamut-mapping, and allow spaces to represent gamuts
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -269,32 +271,32 @@ The color spaces and their channels are:
   2. `green` (bounded [0,1])
   3. `blue` (bounded [0,1])
 * `xyz`:
-  1. `x` (bounded [0,1])
-  2. `y` (bounded [0,1])
-  3. `z` (bounded [0,1])
+  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
 * `xyz-d50`:
-  1. `x` (bounded [0,1])
-  2. `y` (bounded [0,1])
-  3. `z` (bounded [0,1])
+  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
 * `xyz-d65`:
-  1. `x` (bounded [0,1])
-  2. `y` (bounded [0,1])
-  3. `z` (bounded [0,1])
+  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
 * `lab`:
-  1. `lightness` (bounded [0,100])
+  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 100.0`)
   2. `a` (percentage-mapped `-100% == -125, 100% == 125`)
   3. `b` (percentage-mapped `-100% == -125, 100% == 125`)
 * `lch`:
-  1. `lightness` (bounded [0,100])
-  2. `chroma` (bounded [0,150])
+  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 100.0`)
+  2. `chroma` (percentage-mapped `0% = 0, 100% = 150`)
   3. `hue` (polar angle)
 * `oklab`:
-  1. `lightness` (bounded [0,1])
+  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 1.0`)
   2. `a` (percentage-mapped `-100% = -0.4, 100% = 0.4`)
   3. `b` (percentage-mapped `-100% = -0.4, 100% = 0.4`)
 * `oklch`:
-  1. `lightness` (bounded [0,1])
-  2. `chroma` (bounded [0,0.4])
+  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  2. `chroma` (percentage-mapped `0% = 0.0, 100% = 0.4`)
   3. `hue` (polar angle)
 
 ### Missing Components
@@ -343,6 +345,25 @@ result of color-space conversion, then that value is considered to be
 
   > The current spec has an open issue to determine if high values of
   > `lightness` (whites) should make the `hue` and `chroma` values powerless.
+
+### Color Gamuts
+
+A _color gamut_ is a range of colors that can be displayed by a given device,
+or described in a given color space. The predefined RGB gamuts are:
+
+* `srgb`
+* `display-p3`
+* `a98-rgb`
+* `prophoto-rgb`
+* `rec2020`
+
+There are several color spaces that are associated with the `srgb` gamut:
+
+* `srgb-linear`
+* `hwb`
+* `hsl`
+
+All other color spaces describe unknown or theoretically infinite gamuts.
 
 ### Color Interpolation Method
 
@@ -449,6 +470,27 @@ The algorithms are:
 > For additional details, see the [Sample code for color conversions][convert].
 
 [convert]: https://www.w3.org/TR/css-color-4/#color-conversion-code
+
+### Gamut Mapping
+
+> Some [color spaces](#color-space) describe limited
+> [color gamuts](#color-gamuts). If a color is 'out of gamut' for a particular
+> space (most often because of conversion from a larger-gamut color-space), it
+> can be useful to 'map' that color to the nearest available 'in-gamut' color.
+> Gamut mapping is the process of finding an in-gamut color with the least
+> objectionable change in visual appearance.
+
+Gamut mapping in Sass follows the [CSS gamut mapping algorithm][css-mapping].
+This procedure accepts a color `origin` in the color space `origin color space`,
+and a destination color space `destination`. It returns the result of a
+[CSS gamut map](css-map) procedure, which is a color in the `destination` color
+space.
+
+> This algorithm implements a relative colorimetric intent, and colors inside
+> the destination gamut are unchanged.
+
+[css-mapping]: https://drafts.csswg.org/css-color/#css-gamut-mapping-algorithm
+[css-map]: https://drafts.csswg.org/css-color/#css-gamut-map
 
 ### Parsing Color Components
 
@@ -645,10 +687,20 @@ These new and modified functions are part of the `sass:color` built-in module.
   is-in-gamut($color, $space)
   ```
 
-  * Let `color` be the result of calling `to-space($color, $space)`.
+  * If `$color` is not a color, throw an error.
 
-  * If any of the channels in `$space` are 'bounded' channels, and any of the
-    channel values are outside the bounded range, return `false`.
+  * Let `space` be the value of `$space` if specified, or the result of calling
+    `space($color)` otherwise.
+
+  * If `space` is not a valid [color space](#color-space), throw an error.
+
+  * Let `gamut` be the [color gamut](#color-gamuts) associated with `space`
+    if an association is defined, or the value of `space` otherwise.
+
+  * Let `color` be the result of calling `to-space($color, space)`.
+
+  * For all bounded channels in `space`, if the associated channel value in
+    `$color` is outside the bounded range, return `false`.
 
   * Otherwise, return `true`.
 
@@ -658,7 +710,18 @@ These new and modified functions are part of the `sass:color` built-in module.
   to-gamut($color, $space)
   ```
 
-  * ==todo: gamut mapping==
+  * If `$color` is not a color, throw an error.
+
+  * Let `origin-space` be the result of calling `space($color)` otherwise.
+
+  * Let `target-space` be the value of `$space` if specified, or the value of
+    `origin-space` otherwise.
+
+  * If `target-space` is not a valid [color space](#color-space), throw an error.
+
+  * Return the result of [gamut mapping](#gamut-mapping) with `$color` as the
+    `origin` color, `origin-space` as the `origin color space`, and
+    `target-space` as the `destination` color space.
 
 ### `channel()`
 
@@ -676,8 +739,8 @@ These new and modified functions are part of the `sass:color` built-in module.
     * Let `color` be the result of calling `to-space($color, $space)`, and let
       `space` be the value of `$space`.
 
-  * If `space` is a [known color space](#known-color-spaces), let `channels` be
-    a map with channel names defined in `space`, and their corresponding values
+  * If `space` is a valid [color space](#color-space), let `channels` be
+    a map of channel names defined for `space`, and their corresponding values
     in `color`, or a map with 1-indexed number keys and their corresponding
     values in `color` otherwise.
 
@@ -686,11 +749,6 @@ These new and modified functions are part of the `sass:color` built-in module.
   * If `value` is `null`, throw an error.
 
   * Otherwise, return `value`.
-
-{% note %}
-Do we want to deprecate the existing individual channel functions
-(red, green, etc) to avoid confusion?
-{% endnote %}
 
 ## Global Functions
 
@@ -707,14 +765,17 @@ These new CSS functions are provided globally.
   * If `components` is null, return a plain CSS function string with the name
     `"hwb"` and the argument `$channels`.
 
-  * Let `channels` be the first element and `alpha` the second element of `components`.
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
 
   * Let `hue`, `whiteness`, and `blackness` be the three elements of `channels`.
 
-  * Call `hwb()` with `hue`, `whiteness`, `blackness`, and `alpha` as arguments
-    and return the result.
+    ==todo: error on badly formed channel values==
 
-    > ==Check how CSS handles RGB in terms of legacy transforms/powerless values==
+  * Return a color in the `hwb` space, with the given `hue`, `whiteness`,
+    and `blackness` channels, and `alpha` value.
+
+    > Should this be a legacy color, converted to srgb?
 
 [parsing]: #parsing-color-components
 
@@ -729,14 +790,10 @@ These new CSS functions are provided globally.
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
 
-  * Let `channels` be the first element and `alpha` the second element of `parsed`.
-
-  * If `channels` has more or fewer than three elements, throw an error.
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
 
   * Let `lightness`, `a`, and `b` be the three elements of `channels`.
-
-  * If any of `lightness`, `a`, and `b` aren't numbers or the keyword `none`,
-    throw an error.
 
   * If `lightness` is a number without the unit `%`, throw an error.
 
