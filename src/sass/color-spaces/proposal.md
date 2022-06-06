@@ -10,6 +10,10 @@ changes:
       and channel boundaries
   - time: 2022-06-01T13:35:32-06:00
     log: Define gamut-mapping, and allow spaces to represent gamuts
+  - time: 2022-06-06T17:10:38-06:00
+    log: |
+      Improve parsing logic, and flesh out hwb() function
+      based on [sample code](https://github.com/oddbird/sass-colors-sample)
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -23,6 +27,13 @@ This proposal adds Sass support for several new CSS color spaces defined in
 colors outside the sRGB gamut.
 
 [color-4]: https://www.w3.org/TR/css-color-4/
+
+{% note %}
+In order to test the logic of the following
+procedures and functions,
+we have begun to implement some
+[sample code with tests](https://github.com/oddbird/sass-colors-sample).
+{% endnote %}
 
 ## Table of Contents
 
@@ -494,14 +505,17 @@ space.
 
 ### Parsing Color Components
 
-This procedure accepts an input argument `input` to parse, along with a `max`
-argument representing the number of color channels allowed, then throws any
-common errors if necessary, and returns either `null` (if the syntax contains
-special CSS values), or a list of parsed values:
+This procedure accepts an input argument `input` to parse, along with an
+`expected` argument representing the number of color channels expected, then
+throws any common parse errors if necessary, and returns either `null` (if the
+syntax contains special CSS values), or a list of parsed values:
 
   * If `input` is a [special variable string][], return `null`.
 
-  * If `input` is an unbracketed slash-separated list:
+  * If `input` is a bracketed list, or a list with a separator other than
+    'slash' or 'space', throw an error.
+
+  * If `input` is a slash-separated list:
 
     * If `input` doesn't have exactly two elements, throw an error.
 
@@ -509,8 +523,6 @@ special CSS values), or a list of parsed values:
       element of `input`.
 
   * Otherwise:
-
-    * If `input` is not an unbracketed space-separated list, throw an error.
 
     * Let `channels` be an unbracketed space separated list of all except the
       last element of `input`.
@@ -520,48 +532,83 @@ special CSS values), or a list of parsed values:
       * Let `split-last` be the result calling `string.split()` with the last
         element of `input` as the string to split, and `/` as the separator.
 
-      * If there are not two items in `split-list`, throw an error.
+      * If there are not two items in `split-last`, throw an error.
 
-      * If either item in `split-list` can be coerced to a number, replace the
+      * If either item in `split-last` can be coerced to a number, replace the
         current value of the item with the resulting number value.
 
-      * Let `alpha` the second value in `split-list`, and replace the last element
-        of `channels` with the first value in `split-list`.
+      * Let `alpha` be the second value in `split-last`, and append the first
+        value of `split-last` to `channels`.
 
       > This solves for a legacy handling of `/` in Sass that would produce an
       > unquoted string when the alpha value is a css function such as `var()`
       > or when either value is the keyword `none`.
 
-    * If the last element of `channels` has preserved its status as two
+    * Otherwise, if the last element of `input` has preserved its status as two
       slash-separated numbers:
 
-      * Let `alpha` be the number after the slash, and replace the last element
-        of `channels` with the number before the slash.
+      * Let `alpha` be the number after the slash, and append the number before
+        the slash to `channels`.
 
-  * If `channels` is not an unbracketed space-separated list, throw an error.
+    * Otherwise, append the last element of `input` to `channels`
 
-  * If either `channels` or `alpha` is a special variable string, or if
-    `alpha` is a special number, return `null`.
+  * If `channels` is undefined or an empty list, throw an error.
 
-  * If `channels` has more than `max` elements, throw an error.
+  * If `channels` is not a [special variable string][]:
 
-  * If any element of `channels` is a [special variable string][] or a special
-    number, return `null`.
+    * If `channels` is not an unbracketed space-separated list, throw an error.
 
-  * If `alpha` is defined:
+    * If `channels` has more than `expected` elements, throw an error.
 
-    * If `alpha` is not a number or the keyword `none`, throw an error.
+    * If any element of channels is not either a number, a special variable
+      string, a special number string, or the keyword `none`, throw an error.
+
+  * If `alpha` is undefined, let `alpha` be `1`.
+
+  * Otherwise, If `alpha` is not either [special variable string][] or a
+    special number string:
 
     * If `alpha` is a number, set `alpha` to the result of
-      [percent-converting][] `alpha` with a `max` of 1.
+      [percent-converting][] `alpha` with a max of 1.
 
-  * Otherwise, let `alpha` be `1`.
+    * Otherwise, if `alpha` is not the keyword `none`, throw an error.
+
+  * If either `channels` or `alpha` is a special variable string, or if
+    `alpha` is a special number string, return `null`.
+
+  * If any element of `channels` is a [special variable string][] or a special
+    number string, return `null`.
+
+    > Doing this late in the process allows us to throw any obvious syntax
+    > errors, even for colors that can't be fully resolved on the server.
+
+  * If the length of `channels` is not equal to `expected`, throw an error.
+
+    > Once special values have been handled, any colors remaining should have
+    > exactly the expected number of channels.
 
   * Return an unbracketed slash-separated list with `channels` as the first
     element, and `alpha` as the second.
 
 [special variable string]: ../spec/functions.md#special-variable-string
 [percent-converting]: #percent-converting-a-number
+
+### Normalizing Hue
+
+This process accepts a `hue` angle, and boolean `convert-none` arguments. It
+returns the hue normalized to degrees in a half-open range of `[0,360)` if
+possible, converting `none` to `0` when requested. Otherwise
+it throws an error for invalid `hue`.
+
+* If the value of `hue` is `none`:
+
+  * If `convert-none` is `true`, return `0`.
+
+  * Otherwise, return `hue` without changes.
+
+* Set `hue` to the result of converting `hue` to `deg` allowing unitless.
+
+* Return `((hue + 1) % 360) - 1`.
 
 ### Interpolating Colors
 
@@ -750,7 +797,7 @@ These new and modified functions are part of the `sass:color` built-in module.
 
   * Otherwise, return `value`.
 
-## Global Functions
+## New Global Functions
 
 These new CSS functions are provided globally.
 
@@ -770,12 +817,23 @@ These new CSS functions are provided globally.
 
   * Let `hue`, `whiteness`, and `blackness` be the three elements of `channels`.
 
-    ==todo: error on badly formed channel values==
+  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
+    `convert-none` set to `false`.
+
+  * For each `channel` of `whiteness` and `blackness`, if `channel` is not `none`:
+
+    * If `channel` doesn't have unit `%`, throw an error.
+
+    * Set `channel` to the result of clamping `channel` between `0%` and `100%`.
+
+  * If `whiteness + blackness > 100%` with values of `none` treated as `0`:
+
+    * Set `whiteness` to `whiteness / (whiteness + blackness) * 100%`.
+
+    * Set `blackness` to `blackness / (whiteness + blackness) * 100%`.
 
   * Return a color in the `hwb` space, with the given `hue`, `whiteness`,
     and `blackness` channels, and `alpha` value.
-
-    > Should this be a legacy color, converted to srgb?
 
 [parsing]: #parsing-color-components
 
