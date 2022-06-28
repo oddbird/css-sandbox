@@ -14,6 +14,10 @@ changes:
     log: |
       Improve parsing logic, and flesh out hwb() function
       based on [sample code](https://github.com/oddbird/sass-colors-sample)
+  - time: 2022-06-28T17:34:49-06:00
+    log: |
+      Define hwb, (ok)lab, and (ok)lch functions,
+      and update todo lists.
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -450,13 +454,15 @@ When no hue interpolation method is given, the default is `shorter`.
 
 ### Converting a Color
 
-Colors can be converted from one [color space](#color-space) to another.
-Algorithms for color conversion are defined in the [CSS Color Level 4][color-4]
+Colors can be converted from one [color space][] to another. Algorithms for
+color conversion are defined in the [CSS Color Level 4][color-4]
 specification. Each algorithm takes a color `origin-color`, and a string
 `target-space`, and returns a color `output-color`.
 
-Colors defined in an RGB [color space](#color-space) using the the `color()`
+Colors defined in an RGB [color space][] using the the `color()`
 function syntax, are referred to as _predefined RGB spaces_.
+
+[color-space]: #color-space
 
 The algorithms are:
 
@@ -565,8 +571,7 @@ syntax contains special CSS values), or a list of parsed values:
 
   * If `alpha` is undefined, let `alpha` be `1`.
 
-  * Otherwise, If `alpha` is not either [special variable string][] or a
-    special number string:
+  * Otherwise, If `alpha` is not either [special number string][]:
 
     * If `alpha` is a number, set `alpha` to the result of
       [percent-converting][] `alpha` with a max of 1.
@@ -574,10 +579,9 @@ syntax contains special CSS values), or a list of parsed values:
     * Otherwise, if `alpha` is not the keyword `none`, throw an error.
 
   * If either `channels` or `alpha` is a special variable string, or if
-    `alpha` is a special number string, return `null`.
+    `alpha` is a [special number string][], return `null`.
 
-  * If any element of `channels` is a [special variable string][] or a special
-    number string, return `null`.
+  * If any element of `channels` is a [special number string][], return `null`.
 
     > Doing this late in the process allows us to throw any obvious syntax
     > errors, even for colors that can't be fully resolved on the server.
@@ -591,14 +595,14 @@ syntax contains special CSS values), or a list of parsed values:
     element, and `alpha` as the second.
 
 [special variable string]: ../spec/functions.md#special-variable-string
+[special number string]: ../spec/functions.md#special-number-string
 [percent-converting]: #percent-converting-a-number
 
 ### Normalizing Hue
 
 This process accepts a `hue` angle, and boolean `convert-none` arguments. It
-returns the hue normalized to degrees in a half-open range of `[0,360)` if
-possible, converting `none` to `0` when requested. Otherwise
-it throws an error for invalid `hue`.
+returns the hue normalized to degrees when possible, and converting `none` to
+`0` when requested. Otherwise it throws an error for invalid `hue`.
 
 * If the value of `hue` is `none`:
 
@@ -606,9 +610,10 @@ it throws an error for invalid `hue`.
 
   * Otherwise, return `hue` without changes.
 
-* Set `hue` to the result of converting `hue` to `deg` allowing unitless.
+* Return the result of converting `hue` to `deg` allowing unitless.
 
-* Return `((hue + 1) % 360) - 1`.
+  > Normalizing the result into a half-open range of `[0,360)` might also be
+  > possible here, but is potentially a lossy transformation.
 
 ### Interpolating Colors
 
@@ -659,9 +664,9 @@ given `color`:
 
 * Return the resulting `color` with un-premultiplied channels.
 
-## Color Module Functions
+## New Color Module Functions
 
-These new and modified functions are part of the `sass:color` built-in module.
+These new functions are part of the built-in `sass:color` module.
 
 ### `space()`
 
@@ -672,7 +677,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   * If `$color` is not a color, throw an error.
 
   * Return a quoted string with the name of `$color`s associated
-    [color space](#color-space).
+    [color space][].
 
 ### `to-space()`
 
@@ -688,7 +693,7 @@ These new and modified functions are part of the `sass:color` built-in module.
 
     > This allows unknown spaces, as long as they match the origin space.
 
-  * If `$space` is not a [color space](#color-space), throw an error.
+  * If `$space` is not a [color space][], throw an error.
 
   * Return the result of [converting](#converting-a-color) the `origin-color`
     `$color` to the `target-space` `$space`.
@@ -739,7 +744,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   * Let `space` be the value of `$space` if specified, or the result of calling
     `space($color)` otherwise.
 
-  * If `space` is not a valid [color space](#color-space), throw an error.
+  * If `space` is not a valid [color space][], throw an error.
 
   * Let `gamut` be the [color gamut](#color-gamuts) associated with `space`
     if an association is defined, or the value of `space` otherwise.
@@ -764,7 +769,7 @@ These new and modified functions are part of the `sass:color` built-in module.
   * Let `target-space` be the value of `$space` if specified, or the value of
     `origin-space` otherwise.
 
-  * If `target-space` is not a valid [color space](#color-space), throw an error.
+  * If `target-space` is not a valid [color space][], throw an error.
 
   * Return the result of [gamut mapping](#gamut-mapping) with `$color` as the
     `origin` color, `origin-space` as the `origin color space`, and
@@ -786,10 +791,10 @@ These new and modified functions are part of the `sass:color` built-in module.
     * Let `color` be the result of calling `to-space($color, $space)`, and let
       `space` be the value of `$space`.
 
-  * If `space` is a valid [color space](#color-space), let `channels` be
-    a map of channel names defined for `space`, and their corresponding values
-    in `color`, or a map with 1-indexed number keys and their corresponding
-    values in `color` otherwise.
+  * If `space` is a known [color space][], let `channels` be a map of channel
+    names defined for `space`, and their corresponding values in `color`, or a
+    map with 1-indexed number keys and their corresponding values in `color`
+    otherwise.
 
   * Let `value` be the result of calling `map.get(channels, $channel)`.
 
@@ -826,13 +831,18 @@ These new CSS functions are provided globally.
 
     * Set `channel` to the result of clamping `channel` between `0%` and `100%`.
 
+      > Clamping the high end doesn't seem necessary given the next step, but
+      > the browser implementations do clamp before normalizing the sum.
+
   * If `whiteness + blackness > 100%` with values of `none` treated as `0`:
 
-    * Set `whiteness` to `whiteness / (whiteness + blackness) * 100%`.
+    * If `whiteness` is not none, set `whiteness` to
+      `whiteness / (whiteness + blackness) * 100%`.
 
-    * Set `blackness` to `blackness / (whiteness + blackness) * 100%`.
+    * If `blackness` is not none, set `blackness` to
+      `blackness / (whiteness + blackness) * 100%`.
 
-  * Return a color in the `hwb` space, with the given `hue`, `whiteness`,
+  * Return a legacy color in the `hwb` space, with the given `hue`, `whiteness`,
     and `blackness` channels, and `alpha` value.
 
 [parsing]: #parsing-color-components
@@ -853,11 +863,16 @@ These new CSS functions are provided globally.
 
   * Let `lightness`, `a`, and `b` be the three elements of `channels`.
 
-  * If `lightness` is a number without the unit `%`, throw an error.
+  * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
+    throw an error.
 
-  * If either of `a` or `b` is a number with a unit, throw an error.
+    > Percent-converting would be inappropriate here, since the channels should
+    > not be clamped to the percentage range.
 
-  * ==todo==
+  * If `lightness` is a number less than `0`, set `lightness` to `0%`.
+
+  * Return a color in the `lab` [color space][], with the given `lightness`,
+    `a`, and `b` channels, and `alpha` value.
 
 ### `lch()`
 
@@ -865,33 +880,27 @@ These new CSS functions are provided globally.
   lch($channels)
   ```
 
-  * If `$channels` is a special number string, return a plain CSS function
-    string with the name `"lab"` and the argument `$channels`.
+  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
 
-  * If `$channels` is not an unbracketed space-separated list, throw an error.
+  * If `components` is null, return a plain CSS function string with the name
+    `"lab"` and the argument `$channels`.
 
-  * If `$channels` does not include exactly three elements, throw an error.
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
 
-  * Let `lightness` and `chroma` be the first two elements of `$channels`
+  * Let `lightness`, `chroma`, and `hue` be the three elements of `channels`.
 
-  * If the third element of `$channels` has preserved its status as
-    two slash-separated values:
+  * If `chroma` or `lightness` is a number with a unit other than `%`, throw an
+    error.
 
-    * Let `hue` be the number before the slash and `alpha` the number
-      after the slash.
+  * For each `channel` in `chroma` and `lightness`, if `channel` is a number
+    less than `0`, set `channel` to `0%`.
 
-  * Otherwise:
+  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
+    `convert-none` set to `false`.
 
-    * Let `hue` be the third element of `$channels`.
-
-  * If `chroma` is a number with a unit, throw an error.
-
-  * If `lightness` is a number without the unit `%`, throw an error.
-
-  * * If `hue` has any units other than `deg`, throw an error.
-
-  * ==todo==
-
+  * Return a color in the `lch` [color space][], with the given `lightness`,
+    `chroma`, and `hue` channels, and `alpha` value.
 
 ### `oklab()`
 
@@ -899,33 +908,26 @@ These new CSS functions are provided globally.
   oklab($channels)
   ```
 
-  * If `$channels` is a special number string, return a plain CSS function
-    string with the name `"lab"` and the argument `$channels`.
+  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
 
-  * If `$channels` is not an unbracketed space-separated list, throw an error.
+  * If `components` is null, return a plain CSS function string with the name
+    `"lab"` and the argument `$channels`.
 
-  * If `$channels` does not include exactly three elements, throw an error.
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
 
-  * Let `lightness` and `a` be the first two elements of `$channels`.
+  * Let `lightness`, `a`, and `b` be the three elements of `channels`.
 
-  * If the third element of `$channels` has preserved its status as
-    two slash-separated values:
+  * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
+    throw an error.
 
-    * Let `b` be the number before the slash and `alpha` the number
-      after the slash.
+    > Percent-converting would be inappropriate here, since the channels should
+    > not be clamped to the percentage range.
 
-  * Otherwise:
+  * If `lightness` is a number less than `0`, set `lightness` to `0%`.
 
-    * Let `b` be the third element of `$channels`.
-
-  * If any of `lightness`, `a`, `b`, or `alpha` aren't numbers, or the keyword
-    `none`, throw an error.
-
-  * If `lightness` is a number without the unit `%`, throw an error.
-
-  * If either of `a` or `b` is a number with a unit, throw an error.
-
-  * ==todo==
+  * Return a color in the `oklab` [color space][], with the given `lightness`,
+    `a`, and `b` channels, and `alpha` value.
 
 ### `oklch()`
 
@@ -933,32 +935,27 @@ These new CSS functions are provided globally.
   oklch($channels)
   ```
 
-  * If `$channels` is a special number string, return a plain CSS function
-    string with the name `"lab"` and the argument `$channels`.
+  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
 
-  * If `$channels` is not an unbracketed space-separated list, throw an error.
+  * If `components` is null, return a plain CSS function string with the name
+    `"lab"` and the argument `$channels`.
 
-  * If `$channels` does not include exactly three elements, throw an error.
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
 
-  * Let `lightness` and `chroma` be the first two elements of `$channels`.
+  * Let `lightness`, `chroma`, and `hue` be the three elements of `channels`.
 
-  * If the third element of `$channels` has preserved its status as
-    two slash-separated values:
+  * If `chroma` or `lightness` is a number with a unit other than `%`, throw an
+    error.
 
-    * Let `hue` be the number before the slash and `alpha` the number
-      after the slash.
+  * For each `channel` in `chroma` and `lightness`, if `channel` is a number
+    less than `0`, set `channel` to `0%`.
 
-  * Otherwise:
+  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
+    `convert-none` set to `false`.
 
-    * Let `hue` be the third element of `$channels`.
-
-  * If `chroma` is a number with a unit, throw an error.
-
-  * If `lightness` is a number without the unit `%`, throw an error.
-
-  * * If `hue` has any units other than `deg`, throw an error.
-
-  * ==todo==
+  * Return a color in the `oklch` [color space][], with the given `lightness`,
+    `chroma`, and `hue` channels, and `alpha` value.
 
 ### `color()`
 
@@ -966,36 +963,39 @@ These new CSS functions are provided globally.
   color($description)
   ```
 
-  * If `$description` is a special number string, return a plain CSS function
-    string with the name `"color"` and the argument `$channels`.
-
-  * If `$description` is not an unbracketed space-separated list, throw an error.
-
-  * Let `space` be the first element of `$description`.
-
-  * If `space` is not an unquoted string, throw an error.
-
-  * Let `channels` be a list of the remaining elements.
-
-  * If the last element of `channels` has preserved its status as
-    two slash-separated values:
-
-    * Let `alpha` be the value after the slash.
-
-    * Let the last element of `channels` be the value before the slash.
-
-  * If `channels` or any element of `channels` is a special number string,
-    return a plain CSS function string with the name `"color"` and the argument
-    `$description`.
-
   * ==todo==
 
+## Modified Color Module Functions
+
+{% note 'ToDo' %}
+- `hwb()`
+- `adjust()`
+- `change()`
+- `scale()`
+- `mix()`
+- `complement()` (perform hue adjustment in the proper space)
+- `invert()` (perform inversion in the proper space)
+- `grayscale()`? (return color in the proper space)
+- `alpha()`? (return color in the proper space)
+- `ie-hex-str()`? (handling for out-of-gamut colors?)
+- individual channel functions?
+{% endnote %}
+
+## Modified Global Functions
+
+{% note 'ToDo' %}
+- `rgb()`/`rgba()`
+- `hsl()`/`hsla()`
+- legacy functions not added to the color module?
+{% endnote %}
+
+## Temporary notes
 
 <!-- {% warn 'Questions' %}
 …
 {% endwarn %} -->
 
-{% note 'ToDo' %}
+{% note 'Work In Progress' %}
 - Legacy-function support for explicit `none` channels?
   - missing/powerless = 0 for legacy colors
   - legacy syntax (with commas or *a) does not accept `none`
