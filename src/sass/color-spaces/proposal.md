@@ -18,6 +18,8 @@ changes:
     log: |
       Define hwb, (ok)lab, and (ok)lch functions,
       and update todo lists.
+  - time: 2022-07-03T12:31:55-06:00
+    log: Add support for color-spaces in color component parsing
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -511,10 +513,12 @@ space.
 
 ### Parsing Color Components
 
-This procedure accepts an input argument `input` to parse, along with an
-`expected` argument representing the number of color channels expected, then
-throws any common parse errors if necessary, and returns either `null` (if the
-syntax contains special CSS values), or a list of parsed values:
+This procedure accepts an input argument `input` to parse, along with an integer
+`expected` parameter representing the number of color channels expected, and a
+boolean `includes-space` parameter if the color-space is included in the `input`.
+It throws common parse errors if necessary, and returns either `null` (if the
+syntax contains special CSS values), or a list of parsed values. The return
+value is in the format `<color-space>? (<channel>+) / <alpha>`. The procedure is:
 
   * If `input` is a [special variable string][], return `null`.
 
@@ -525,12 +529,12 @@ syntax contains special CSS values), or a list of parsed values:
 
     * If `input` doesn't have exactly two elements, throw an error.
 
-    * Otherwise, let `channels` be the first element and `alpha` the second
+    * Otherwise, let `components` be the first element and `alpha` the second
       element of `input`.
 
   * Otherwise:
 
-    * Let `channels` be an unbracketed space separated list of all except the
+    * Let `components` be an unbracketed space separated list of all except the
       last element of `input`.
 
     * If the last element of `input` is an unquoted string that contains `/`:
@@ -543,8 +547,8 @@ syntax contains special CSS values), or a list of parsed values:
       * If either item in `split-last` can be coerced to a number, replace the
         current value of the item with the resulting number value.
 
-      * Let `alpha` be the second value in `split-last`, and append the first
-        value of `split-last` to `channels`.
+      * Let `alpha` be the second element in `split-last`, and append the first
+        element of `split-last` to `components`.
 
       > This solves for a legacy handling of `/` in Sass that would produce an
       > unquoted string when the alpha value is a css function such as `var()`
@@ -554,15 +558,29 @@ syntax contains special CSS values), or a list of parsed values:
       slash-separated numbers:
 
       * Let `alpha` be the number after the slash, and append the number before
-        the slash to `channels`.
+        the slash to `components`.
 
-    * Otherwise, append the last element of `input` to `channels`
+    * Otherwise, append the last element of `input` to `components`
 
-  * If `channels` is undefined or an empty list, throw an error.
+  * If `components` is undefined or an empty list, throw an error.
 
-  * If `channels` is not a [special variable string][]:
+  * If `components` is a [special variable string][]:
 
-    * If `channels` is not an unbracketed space-separated list, throw an error.
+    * Let `channels` be the value of `components`.
+
+  * Otherwise:
+
+    * If `components` is not an unbracketed space-separated list, throw an error.
+
+    * If `includes-space` is true:
+
+      * Let `space` be the first element in `components`, and let `channels` be
+        an unbracketed space-separated list with the remaining elements from
+        `components`.
+
+      * If `space` is not a string, throw an error.
+
+    * Otherwise, let `channels` be the value of `components`.
 
     * If `channels` has more than `expected` elements, throw an error.
 
@@ -571,15 +589,15 @@ syntax contains special CSS values), or a list of parsed values:
 
   * If `alpha` is undefined, let `alpha` be `1`.
 
-  * Otherwise, If `alpha` is not either [special number string][]:
+  * Otherwise, If `alpha` is not a [special number string][]:
 
     * If `alpha` is a number, set `alpha` to the result of
       [percent-converting][] `alpha` with a max of 1.
 
     * Otherwise, if `alpha` is not the keyword `none`, throw an error.
 
-  * If either `channels` or `alpha` is a special variable string, or if
-    `alpha` is a [special number string][], return `null`.
+  * If `space` or `channels` is a [special variable string][], or if `alpha` is
+    a [special number string][], return `null`.
 
   * If any element of `channels` is a [special number string][], return `null`.
 
@@ -591,8 +609,16 @@ syntax contains special CSS values), or a list of parsed values:
     > Once special values have been handled, any colors remaining should have
     > exactly the expected number of channels.
 
-  * Return an unbracketed slash-separated list with `channels` as the first
+  * If `space` is defined, set `components` to an unbracketed space-separated
+    list with `space` as the first element, and `channels` as the second.
+
+  * Otherwise, set `components` to the value of `channels`.
+
+  * Return an unbracketed slash-separated list with `components` as the first
     element, and `alpha` as the second.
+
+    > This results in valid CSS color-value output, while also grouping
+    > space, channels, and alpha as separate elements in nested lists.
 
 [special variable string]: ../spec/functions.md#special-variable-string
 [special number string]: ../spec/functions.md#special-number-string
@@ -831,8 +857,7 @@ These new CSS functions are provided globally.
 
     * Set `channel` to the result of clamping `channel` between `0%` and `100%`.
 
-      > Clamping the high end doesn't seem necessary given the next step, but
-      > the browser implementations do clamp before normalizing the sum.
+      > Clamping happens before relative scaling
 
   * If `whiteness + blackness > 100%` with values of `none` treated as `0`:
 
@@ -865,9 +890,6 @@ These new CSS functions are provided globally.
 
   * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
     throw an error.
-
-    > Percent-converting would be inappropriate here, since the channels should
-    > not be clamped to the percentage range.
 
   * If `lightness` is a number less than `0`, set `lightness` to `0%`.
 
@@ -921,9 +943,6 @@ These new CSS functions are provided globally.
   * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
     throw an error.
 
-    > Percent-converting would be inappropriate here, since the channels should
-    > not be clamped to the percentage range.
-
   * If `lightness` is a number less than `0`, set `lightness` to `0%`.
 
   * Return a color in the `oklab` [color space][], with the given `lightness`,
@@ -963,7 +982,7 @@ These new CSS functions are provided globally.
   color($description)
   ```
 
-  * ==todo==
+  * ==todo: is there special parsing for each space?==
 
 ## Modified Color Module Functions
 
