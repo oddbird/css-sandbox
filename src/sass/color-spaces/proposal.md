@@ -20,6 +20,8 @@ changes:
       and update todo lists.
   - time: 2022-07-03T12:31:55-06:00
     log: Add support for color-spaces in color component parsing
+  - time: 2022-07-08T18:13:39-06:00
+    log: Parser support for color() syntax, and all new functions defined
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -40,6 +42,14 @@ procedures and functions,
 we have begun to implement some
 [sample code with tests](https://github.com/oddbird/sass-colors-sample).
 {% endnote %}
+
+{% warn 'Open Questions' %}
+- What do we want to do with the `hwb()` color-module function,
+  now that there is a corresponding global function.
+  (This is the only color format with a color-module function)
+- When making adjustments in a space that requires conversion,
+  is the returned color in the original or converted space?
+{% endwarn %}
 
 ## Table of Contents
 
@@ -215,12 +225,14 @@ A *color* is an object with several parts:
 
 * A string [*color space*](#color-space)
 
-* An ordered list of *channel* values [as defined by that color space](#color-space)
+* An ordered list of *channel* values as defined by that [color space][].
 
 * A numeric *alpha* value which can be safely clamped in the `0-1` or `0%-100%`
   range. Values outside that range are allowed, but meaningless.
 
-* A boolean *is-legacy* to indicate a [legacy color](#legacy-color)
+* A boolean *is-legacy* to indicate a [legacy color][].
+
+[legacy color]: #legacy-color
 
 ### Legacy Color
 
@@ -233,7 +245,7 @@ Colors that are defined using the CSS color names, hex syntax, `rgb()`,
 `rgba()`, `hsl()`, `hsla()`, or `hwb()` -- along with colors that result from
 legacy interpolation -- are considered *legacy colors*. All legacy colors use
 the `srgb` color space, with `red`, `green`, and `blue` channels. The output of
-a legacy color is not required to match the input syntax.
+a [legacy color][] is not required to match the input syntax.
 
 ### Color Space
 
@@ -315,6 +327,24 @@ The color spaces and their channels are:
   1. `lightness` (percentage-mapped `0% = 0.0, 100% = 1.0`)
   2. `chroma` (percentage-mapped `0% = 0.0, 100% = 0.4`)
   3. `hue` (polar angle)
+
+### Predefined Color Spaces
+
+> 'Predefined color spaces' can be described using the `color()` function.
+
+The _predefined RGB spaces_ are:
+
+* `srgb-linear`
+* `display-p3`
+* `a98-rgb`
+* `prophoto-rgb`
+* `rec2020`
+
+The _predefined XYZ spaces_ are:
+
+* `xyz`
+* `xyz-d50`
+* `xyz-d65`
 
 ### Missing Components
 
@@ -422,7 +452,8 @@ interpolation method:
 
 * If the host syntax defines what method to use use, use the specified method.
 
-* Otherwise, if all the colors involved are *legacy colors*, use `srgb`.
+* Otherwise, if all the colors involved are [legacy colors](#legacy-color),
+  use `srgb`.
 
 * Otherwise, use `oklab`.
 
@@ -460,9 +491,6 @@ Colors can be converted from one [color space][] to another. Algorithms for
 color conversion are defined in the [CSS Color Level 4][color-4]
 specification. Each algorithm takes a color `origin-color`, and a string
 `target-space`, and returns a color `output-color`.
-
-Colors defined in an RGB [color space][] using the the `color()`
-function syntax, are referred to as _predefined RGB spaces_.
 
 [color-space]: #color-space
 
@@ -513,14 +541,23 @@ space.
 
 ### Parsing Color Components
 
-This procedure accepts an input argument `input` to parse, along with an integer
-`expected` parameter representing the number of color channels expected, and a
-boolean `includes-space` parameter if the color-space is included in the `input`.
-It throws common parse errors if necessary, and returns either `null` (if the
-syntax contains special CSS values), or a list of parsed values. The return
-value is in the format `<color-space>? (<channel>+) / <alpha>`. The procedure is:
+This procedure accepts an `input` parameter to parse, along with a `space`
+parameter representing the [color space][] if known. It throws common parse
+errors if necessary, and returns either `null` (if the `input` contains special
+CSS values), or a list of parsed values. The return value is in the format
+`<color-space>? (<channel>+) / <alpha>`, where the color space is included in
+the return value if it was not passed in initially.
+
+> This supports both the known color formats like `hsl()` and `rgb()`, where
+> the space is determined by the function, as well as the syntax of `color()`,
+> where the space is included as one of the input arguments (and may be a
+> user-defined space).
+
+The procedure is:
 
   * If `input` is a [special variable string][], return `null`.
+
+  * Let `include-space` be true if `space` is undefined, and false otherwise.
 
   * If `input` is a bracketed list, or a list with a separator other than
     'slash' or 'space', throw an error.
@@ -572,17 +609,19 @@ value is in the format `<color-space>? (<channel>+) / <alpha>`. The procedure is
 
     * If `components` is not an unbracketed space-separated list, throw an error.
 
-    * If `includes-space` is true:
-
-      * Let `space` be the first element in `components`, and let `channels` be
-        an unbracketed space-separated list with the remaining elements from
-        `components`.
-
-      * If `space` is not a string, throw an error.
+    * If `space` is undefined, let `space` be the first element in `components`,
+      and let `channels` be an unbracketed space-separated list with the
+      remaining elements from `components`.
 
     * Otherwise, let `channels` be the value of `components`.
 
-    * If `channels` has more than `expected` elements, throw an error.
+    * If `space` is not a string, throw an error.
+
+    * Let `expected` be the number of channels in `space` if `space` is a known
+      [color-space][], and null otherwise.
+
+    * If `expected` is not null, and `channels` has more than `expected`
+      elements, throw an error.
 
     * If any element of channels is not either a number, a special variable
       string, a special number string, or the keyword `none`, throw an error.
@@ -597,28 +636,35 @@ value is in the format `<color-space>? (<channel>+) / <alpha>`. The procedure is
     * Otherwise, if `alpha` is not the keyword `none`, throw an error.
 
   * If `space` or `channels` is a [special variable string][], or if `alpha` is
-    a [special number string][], return `null`.
+    a [special number string][], or if `space` is not a known [color space][],
+    return `null`.
+
+    > Unknown color spaces are valid in CSS, but should not be treated as
+    > color objects for the sake of Sass manipulation.
 
   * If any element of `channels` is a [special number string][], return `null`.
 
     > Doing this late in the process allows us to throw any obvious syntax
     > errors, even for colors that can't be fully resolved on the server.
 
-  * If the length of `channels` is not equal to `expected`, throw an error.
+  * If `expected` is not null, and the length of `channels` is not equal to
+    `expected`, throw an error.
 
     > Once special values have been handled, any colors remaining should have
     > exactly the expected number of channels.
 
-  * If `space` is defined, set `components` to an unbracketed space-separated
+  * If `include-space` is true, let `parsed` be an unbracketed space-separated
     list with `space` as the first element, and `channels` as the second.
 
-  * Otherwise, set `components` to the value of `channels`.
+  * Otherwise, let `parsed` be the value of `channels`.
 
-  * Return an unbracketed slash-separated list with `components` as the first
+  * Return an unbracketed slash-separated list with `parsed` as the first
     element, and `alpha` as the second.
 
     > This results in valid CSS color-value output, while also grouping
     > space, channels, and alpha as separate elements in nested lists.
+    > Alternately, we could allow `parsed` to be a single flat list, even
+    > when the color-space is included?
 
 [special variable string]: ../spec/functions.md#special-variable-string
 [special number string]: ../spec/functions.md#special-number-string
@@ -643,16 +689,53 @@ returns the hue normalized to degrees when possible, and converting `none` to
 
 ### Interpolating Colors
 
-This procedure accepts two color arguments (`color-1` and `color-2`), an
-optional [color interpolation method](#color-interpolation-method) `method`,
-and a percentage `distance` along the resulting interpolation path. It returns
-a new color `mix` that represents the appropriate mix of input colors.
+This procedure accepts two color arguments (`color1` and `color2`), an
+optional [color interpolation method][] `method`, and a percentage `weight`
+for `color1` in the mix. It returns a new color `mix` that represents the
+appropriate mix of input colors.
 
-* Set `color-1` to the result of [premultiplying] `color-1`, and set `color-2`
-  to the result of [premultiplying] `color-2`.
+* If either `color1` or `color2` is not a color, throw an error.
+
+* If `weight` is undefined, set `weight` to `50%`.
+
+* Otherwise, if `weight` is not a percentage
+
+* If `method` is undefined:
+
+  * Let `interpolation-space` be `srgb` if `color1` and `color2` are both
+    [legacy colors](#legacy-color), and `oklab` otherwise.
+
+* Otherwise, if `method` is not a [color interpolation method][color-method],
+  throw an error.
+
+* Otherwise:
+
+  * Let `interpolation-space` be the [color space][] specified in `method`.
+
+  * If `interpolation-space` is a [PolarColorSpace][color-method], let
+    `interpolation-arc` be the [hue interpolation method][hue-interpolation]
+    specified in `method`.
+
+* For each `color` of `color1` and `color2`:
+
+  * Set `color` to the results of [converting][] `color` into
+    `interpolation-space`.
+
+  * If any `component` of `color` is `none`, set `component` to the value
+    of the corresponding component in the other color.
+
+    > If both values are `none`, the interpolation result for that component
+    > will also be `none`.
+
+  * Set `color` to the result of [premultiplying] `color`.
+
+==todo: finish this process==
 
 [premultiplying]: #premultiply-transparent-colors
 [un-premultiplying]: #premultiply-transparent-colors
+[color-method]: #color-interpolation-method
+[hue-method]: #hue-interpolation-method
+[converting]: #converting-a-color
 
 #### Premultiply Transparent Colors
 
@@ -721,7 +804,7 @@ These new functions are part of the built-in `sass:color` module.
 
   * If `$space` is not a [color space][], throw an error.
 
-  * Return the result of [converting](#converting-a-color) the `origin-color`
+  * Return the result of [converting][] the `origin-color`
     `$color` to the `target-space` `$space`.
 
 ### `is-legacy()`
@@ -732,7 +815,7 @@ These new functions are part of the built-in `sass:color` module.
 
   * If `$color` is not a color, throw an error.
 
-  * Return `true` if `$color` is a [legacy color](#legacy-color), or `false`
+  * Return `true` if `$color` is a [legacy color][], or `false`
     otherwise.
 
 ### `is-powerless()`
@@ -838,7 +921,7 @@ These new CSS functions are provided globally.
   hwb($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
+  * Let `components` be the result of [parsing] `$channels` in an `hwb` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"hwb"` and the argument `$channels`.
@@ -878,7 +961,7 @@ These new CSS functions are provided globally.
   lab($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
+  * Let `components` be the result of [parsing] `$channels` in an `lab` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
@@ -902,7 +985,7 @@ These new CSS functions are provided globally.
   lch($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
+  * Let `components` be the result of [parsing] `$channels` in an `lch` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
@@ -930,7 +1013,7 @@ These new CSS functions are provided globally.
   oklab($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
+  * Let `components` be the result of [parsing] `$channels` in an `oklab` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
@@ -954,7 +1037,7 @@ These new CSS functions are provided globally.
   oklch($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` with a `max` of 3.
+  * Let `components` be the result of [parsing] `$channels` in an `oklch` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"lab"` and the argument `$channels`.
@@ -982,12 +1065,60 @@ These new CSS functions are provided globally.
   color($description)
   ```
 
-  * ==todo: is there special parsing for each space?==
+  * Let `components` be the result of [parsing] `$description` with
+    undefined space.
+
+  * If `components` is null, return a plain CSS function string with the name
+    `"color"` and the argument `$description`.
+
+  * Let `color` be the first element and `alpha` the second element of
+    `components`.
+
+  * Let `space` be the first element and `channels` the second element of
+    `color`.
+
+  * If `space` is not a [predefined color space][predefined], throw an error,.
+
+    > Custom spaces have already been output as CSS functions.
+
+  * For each `channel` element of `channels`, if `channel` is a number:
+
+    * If `channel` has a unit other than `%`, throw an error.
+
+    * If `channel` is a percentage, set `channel` to the result of
+      `channel / 100%`.
+
+    * If `space` is a [predefined RGB space][predefined], set `channel` to the
+      result of clamping `channel` between `0` and `1`.
+
+  * Return a color in the `space` [color space][], with the given `channels`
+    and `alpha` value.
+
+[predefined]: #predefined-color-spaces
 
 ## Modified Color Module Functions
 
+### `mix()`
+
+```
+mix($color1, $color2,
+  $weight: 50%, $method: null)
+```
+
+  * If either `$color1` or `$color2` is not a color, throw an error.
+
+  * If `$weight` is not a percentage between `0%` and `100%`, throw an error.
+
+  * If `$space` is not a [color space][] or `null`, throw an error.
+
+  * Let `space` be the value of `$space` if `$space` is not `null`, and the
+    result of calling `space($color1)` otherwise.
+
+  * Let `color1` be the result of calling `$color`
+
+### ToDo
+
 {% note 'ToDo' %}
-- `hwb()`
 - `adjust()`
 - `change()`
 - `scale()`
@@ -1010,21 +1141,16 @@ These new CSS functions are provided globally.
 
 ## Temporary notes
 
-<!-- {% warn 'Questions' %}
-…
-{% endwarn %} -->
-
 {% note 'Work In Progress' %}
 - Legacy-function support for explicit `none` channels?
   - missing/powerless = 0 for legacy colors
   - legacy syntax (with commas or *a) does not accept `none`
-- Unprefixed support for all new color functions
 - Allow rgb inspection to return out-of-gamut values
 - Extend `scale` to allow any channel with clear boundaries?
 - Expand set/adjust/scale for new spaces
 - Expand mix/compliment for new spaces
 - For manipulating `none` (missing) channels:
-  - `set()` overrides
+  - `change()` overrides
   - `adjust()`/`scale()` throw errors (or assume 0???)
   - `channel()` returns `none`
 - Add color-space args to interpolation functions
