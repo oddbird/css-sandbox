@@ -22,6 +22,16 @@ changes:
     log: Add support for color-spaces in color component parsing
   - time: 2022-07-08T18:13:39-06:00
     log: Parser support for color() syntax, and all new functions defined
+  - time: 2022-08-09T17:10:33-06:00
+    log: |
+      - Finalize color interpolation logic, and `color.mix()` function.
+      - Note potential issues with missing (`none`) channels in conversion.
+      - Deprecate individual channel inspection functions in favor of
+        `color.channel()`.
+      - Organize global and color-module function groups.
+      - Complete specification of global `hwb()` function,
+        and deprecate `color.hwb()` functions.
+      - Specify updates to global `rgb()` functions.
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -39,17 +49,16 @@ colors outside the sRGB gamut.
 {% note %}
 In order to test the logic of the following
 procedures and functions,
-we have begun to implement some
+we have started to implement
 [sample code with tests](https://github.com/oddbird/sass-colors-sample).
 {% endnote %}
 
-{% warn 'Open Questions' %}
-- What do we want to do with the `hwb()` color-module function,
-  now that there is a corresponding global function.
-  (This is the only color format with a color-module function)
-- When making adjustments in a space that requires conversion,
-  is the returned color in the original or converted space?
-{% endwarn %}
+{% warn %}
+We may delay support
+for explicit `none` channel/alpha values,
+if the open CSS issues have not been resolved
+in time for us to ship.
+{% endnote %}
 
 ## Table of Contents
 
@@ -457,32 +466,6 @@ interpolation method:
 
 * Otherwise, use `oklab`.
 
-#### Hue Interpolation Methods
-
-> When interpolating between polar-angle hue channels, there are multiple
-> 'directions' the interpolation could move, following different logical rules.
-
-The [hue interpolation methods][hue-interpolation] below are defined in
-[CSS Color Level 4][color-4]. Unless the type of hue interpolation is
-the value `specified`, both angles need to be constrained to `[0, 360)` prior
-to interpolation.
-
-> One way to do this is `n = ((n % 360) + 360) % 360`.
-
-When no hue interpolation method is given, the default is `shorter`.
-
-* [shorter](https://www.w3.org/TR/css-color-4/#shorter)
-
-* [longer](https://www.w3.org/TR/css-color-4/#hue-longer)
-
-* [increasing](https://www.w3.org/TR/css-color-4/#increasing)
-
-* [decreasing](https://www.w3.org/TR/css-color-4/#decreasing)
-
-* [specified](https://www.w3.org/TR/css-color-4/#hue-specified)
-
-[hue-interpolation]: https://www.w3.org/TR/css-color-4/#hue-interpolation
-
 ## Procedures
 
 ### Converting a Color
@@ -491,6 +474,9 @@ Colors can be converted from one [color space][] to another. Algorithms for
 color conversion are defined in the [CSS Color Level 4][color-4]
 specification. Each algorithm takes a color `origin-color`, and a string
 `target-space`, and returns a color `output-color`.
+
+> Note the [open issue](https://github.com/w3c/csswg-drafts/issues/7536) about
+> how to properly handle `none` values while converting a color.
 
 [color-space]: #color-space
 
@@ -542,7 +528,7 @@ space.
 ### Parsing Color Components
 
 This procedure accepts an `input` parameter to parse, along with a `space`
-parameter representing the [color space][] if known. It throws common parse
+parameter representing the [color space][], if known. It throws common parse
 errors if necessary, and returns either `null` (if the `input` contains special
 CSS values), or a list of parsed values. The return value is in the format
 `<color-space>? (<channel>+) / <alpha>`, where the color space is included in
@@ -633,7 +619,7 @@ The procedure is:
     * If `alpha` is a number, set `alpha` to the result of
       [percent-converting][] `alpha` with a max of 1.
 
-    * Otherwise, if `alpha` is not the keyword `none`, throw an error.
+    * Otherwise, throw an error.
 
   * If `space` or `channels` is a [special variable string][], or if `alpha` is
     a [special number string][], or if `space` is not a known [color space][],
@@ -684,8 +670,9 @@ returns the hue normalized to degrees when possible, and converting `none` to
 
 * Return the result of converting `hue` to `deg` allowing unitless.
 
-  > Normalizing the result into a half-open range of `[0,360)` might also be
-  > possible here, but is potentially a lossy transformation.
+> Normalizing the result into a half-open range of `[0,360)` would be a lossy
+> transformation, since some forms of [hue interpolation][hue-method] require
+> the specified hue values.
 
 ### Interpolating Colors
 
@@ -698,30 +685,33 @@ appropriate mix of input colors.
 
 * If `weight` is undefined, set `weight` to `50%`.
 
-* Otherwise, if `weight` is not a percentage
+* If `weight` doesn't have unit `%` or isn't between `0%` and `100%`
+  (inclusive), throw an error.
 
 * If `method` is undefined:
 
-  * Let `interpolation-space` be `srgb` if `color1` and `color2` are both
-    [legacy colors](#legacy-color), and `oklab` otherwise.
+  * Let `interpolation-space` be `srgb` if `is-legacy`, and `oklab` otherwise.
 
-* Otherwise, if `method` is not a [color interpolation method][color-method],
-  throw an error.
+    > This default behavior is defined in [CSS Color Level 4][color-4].
 
 * Otherwise:
 
+  * If `method` is not a [color interpolation method][color-method], throw an
+    error.
+
   * Let `interpolation-space` be the [color space][] specified in `method`.
 
-  * If `interpolation-space` is a [PolarColorSpace][color-method], let
-    `interpolation-arc` be the [hue interpolation method][hue-interpolation]
-    specified in `method`.
+  * If `interpolation-space` is a [PolarColorSpace][color-method]:
+
+    * Let `interpolation-arc` be the `HueInterpolationMethod` specified in
+      `method`, or `shorter` if no hue interpolation is specified.
 
 * For each `color` of `color1` and `color2`:
 
   * Set `color` to the results of [converting][] `color` into
     `interpolation-space`.
 
-  * If any `component` of `color` is `none`, set `component` to the value
+  * If any `component` of `color` is `none`, set that `component` to the value
     of the corresponding component in the other color.
 
     > If both values are `none`, the interpolation result for that component
@@ -729,12 +719,30 @@ appropriate mix of input colors.
 
   * Set `color` to the result of [premultiplying] `color`.
 
-==todo: finish this process==
+* Let `mix` be a new color in the `interpolation-space` [color space][],
+  with `none` for alpha and all channel values.
+
+  * For each `channel` of `mix`:
+
+    * Let `channel1` and `channel2` be the corresponding channel values in
+      `color11` and `color2` respectively.
+
+    * If `channel` represents a hue angle, set `channel1` and `channel2`
+      respectively to the results of [hue interpolation][hue-method] with
+      `channel1` as `hue1`, `channel2` as `hue2`, using the `interpolation-arc`
+      method.
+
+    * Set `channel` to the result of calculating
+      `(channel1 * weight1) + (channel2 * weight2)`.
+
+    * If `is-legacy`, set `channel` to the result of rounding `channel`.
+
+* Return the color `mix`.
 
 [premultiplying]: #premultiply-transparent-colors
 [un-premultiplying]: #premultiply-transparent-colors
 [color-method]: #color-interpolation-method
-[hue-method]: #hue-interpolation-method
+[hue-method]: #hue-interpolation
 [converting]: #converting-a-color
 
 #### Premultiply Transparent Colors
@@ -773,11 +781,53 @@ given `color`:
 
 * Return the resulting `color` with un-premultiplied channels.
 
+#### Hue Interpolation
+
+> When interpolating between polar-angle hue channels, there are multiple
+> 'directions' the interpolation could move, following different logical rules.
+
+This process accepts two hue angles (`hue1` and `hue2`), and returns both hues
+adjusted according to the given `method`. When no hue interpolation `method` is
+specified, the default is `shorter`.
+
+The process for each [hue interpolation method][hue-interpolation] is defined
+in [CSS Color Level 4][color-4]. Unless the `menthod` is the value `specified`,
+both angles need to be constrained to `[0, 360)` prior to interpolation.
+
+* [shorter](https://www.w3.org/TR/css-color-4/#shorter)
+
+* [longer](https://www.w3.org/TR/css-color-4/#hue-longer)
+
+* [increasing](https://www.w3.org/TR/css-color-4/#increasing)
+
+* [decreasing](https://www.w3.org/TR/css-color-4/#decreasing)
+
+* [specified](https://www.w3.org/TR/css-color-4/#hue-specified)
+
+[hue-interpolation]: https://www.w3.org/TR/css-color-4/#hue-interpolation
+
+## Deprecated Functions
+
+Individual color-channel functions defined globally or in the color module are
+deprecated in favor of the new `color.channel()` function. That includes:
+
+* `color.red()`/`red()`
+* `color.green()`/`green()`
+* `color.blue()`/`blue()`
+* `color.hue()`/`hue()`
+* `color.saturation()`/`saturation()`
+* `color.lightness()`/`lightness()`
+* `color.whiteness()`
+* `color.blackness()`
+
+While deprecated, if the specified color argument is not a [legacy color][],
+throw an error.
+
 ## New Color Module Functions
 
 These new functions are part of the built-in `sass:color` module.
 
-### `space()`
+### `color.space()`
 
 * ```
   space($color)
@@ -788,7 +838,7 @@ These new functions are part of the built-in `sass:color` module.
   * Return a quoted string with the name of `$color`s associated
     [color space][].
 
-### `to-space()`
+### `color.to-space()`
 
 * ```
   to-space($color, $space)
@@ -807,7 +857,7 @@ These new functions are part of the built-in `sass:color` module.
   * Return the result of [converting][] the `origin-color`
     `$color` to the `target-space` `$space`.
 
-### `is-legacy()`
+### `color.is-legacy()`
 
 * ```
   is-legacy($color)
@@ -818,7 +868,7 @@ These new functions are part of the built-in `sass:color` module.
   * Return `true` if `$color` is a [legacy color][], or `false`
     otherwise.
 
-### `is-powerless()`
+### `color.is-powerless()`
 
 * ```
   is-powerless($color, $channel, $space)
@@ -842,7 +892,7 @@ These new functions are part of the built-in `sass:color` module.
   * Return `true` if the channel `$channel` is [powerless](#powerless-components)
     in `color`, otherwise return `false`.
 
-### `is-in-gamut()`
+### `color.is-in-gamut()`
 
 * ```
   is-in-gamut($color, $space)
@@ -865,7 +915,7 @@ These new functions are part of the built-in `sass:color` module.
 
   * Otherwise, return `true`.
 
-### `to-gamut()`
+### `color.to-gamut()`
 
 * ```
   to-gamut($color, $space)
@@ -884,7 +934,7 @@ These new functions are part of the built-in `sass:color` module.
     `origin` color, `origin-space` as the `origin color space`, and
     `target-space` as the `destination` color space.
 
-### `channel()`
+### `color.channel()`
 
 * ```
   channel($color, $channel, $space)
@@ -911,6 +961,57 @@ These new functions are part of the built-in `sass:color` module.
 
   * Otherwise, return `value`.
 
+## Modified Color Module Functions
+
+### `color.hwb()`
+
+These functions are now deprecated. Authors should use global `hwb()` instead.
+
+* ```
+  hwb($channels)
+  ```
+
+  This function is available as a global function named `hwb()`.
+
+* ```
+  hwb($hue, $whiteness, $blackness, $alpha: 1)
+  ```
+
+  * Return the result of calling the global function
+    `hwb($hue $whiteness $blackness / $alpha)`.
+
+  > The new logic allows for `none` as well as clamping of `whiteness` &
+  > `blackness` values outside the `0-100%` range.
+
+### `color.mix()`
+
+```
+mix($color1, $color2,
+  $weight: 50%, $method: null)
+```
+
+  * Return the result [interpolating](#interpolating-colors) between `$color1`
+    and `$color2` with the specified `$weight` and `$method`.
+
+### ToDo
+
+{% note 'ToDo' %}
+- `adjust()`
+- `change()`
+- `scale()` (any channel with clear boundaries)
+- `complement()` (perform hue adjustment in the proper space)
+- `invert()` (perform inversion in the proper space)
+- `grayscale()` (perform inversion in the proper space)
+- `alpha()`
+- `ie-hex-str()`? DEPRECATE, meantime gamut-map.
+
+For manipulating `none` (missing) channels:
+
+- `change()` overrides
+- `adjust()`/`scale()` throw errors (or assume 0???)
+- `channel()` returns `none`
+{% endnote %}
+
 ## New Global Functions
 
 These new CSS functions are provided globally.
@@ -921,7 +1022,7 @@ These new CSS functions are provided globally.
   hwb($channels)
   ```
 
-  * Let `components` be the result of [parsing] `$channels` in an `hwb` space.
+  * Let `components` be the result of [parsing] `$channels` with an `hwb` space.
 
   * If `components` is null, return a plain CSS function string with the name
     `"hwb"` and the argument `$channels`.
@@ -938,9 +1039,10 @@ These new CSS functions are provided globally.
 
     * If `channel` doesn't have unit `%`, throw an error.
 
-    * Set `channel` to the result of clamping `channel` between `0%` and `100%`.
+    * Set `channel` to the result of clamping `channel` between `0%` and `100%`
+      (inclusive).
 
-      > Clamping happens before relative scaling
+  > Clamping happens before relative scaling
 
   * If `whiteness + blackness > 100%` with values of `none` treated as `0`:
 
@@ -950,8 +1052,8 @@ These new CSS functions are provided globally.
     * If `blackness` is not none, set `blackness` to
       `blackness / (whiteness + blackness) * 100%`.
 
-  * Return a legacy color in the `hwb` space, with the given `hue`, `whiteness`,
-    and `blackness` channels, and `alpha` value.
+  * Return a [legacy color][] in the `hwb` space, with the given `hue`,
+    `whiteness`, and `blackness` channels, and `alpha` value.
 
 [parsing]: #parsing-color-components
 
@@ -1096,62 +1198,76 @@ These new CSS functions are provided globally.
 
 [predefined]: #predefined-color-spaces
 
-## Modified Color Module Functions
-
-### `mix()`
-
-```
-mix($color1, $color2,
-  $weight: 50%, $method: null)
-```
-
-  * If either `$color1` or `$color2` is not a color, throw an error.
-
-  * If `$weight` is not a percentage between `0%` and `100%`, throw an error.
-
-  * If `$space` is not a [color space][] or `null`, throw an error.
-
-  * Let `space` be the value of `$space` if `$space` is not `null`, and the
-    result of calling `space($color1)` otherwise.
-
-  * Let `color1` be the result of calling `$color`
-
-### ToDo
-
-{% note 'ToDo' %}
-- `adjust()`
-- `change()`
-- `scale()`
-- `mix()`
-- `complement()` (perform hue adjustment in the proper space)
-- `invert()` (perform inversion in the proper space)
-- `grayscale()`? (return color in the proper space)
-- `alpha()`? (return color in the proper space)
-- `ie-hex-str()`? (handling for out-of-gamut colors?)
-- individual channel functions?
-{% endnote %}
-
 ## Modified Global Functions
 
+Any legacy global functions that are not explicitly updated here should continue
+to behave as alias functions for their appropriately updated counterparts.
+
+> Note that the new logic preserves decimal values in color channels, as well
+> as preserving the initial color-space used in defining a color.
+
+### `rgb()`
+
+* ```
+  rgb($red, $green, $blue, $alpha)
+  ```
+
+  * If any argument is a [special number], return a plain CSS function
+    string with the name `"rgb"` and the arguments `$red`, `$green`, `$blue`,
+    and `$alpha`.
+
+  * If any of `$red`, `$green`, `$blue`, or `$alpha` aren't numbers, throw an
+    error.
+
+  * Let `red`, `green`, and `blue` be the result of [percent-converting][]
+    `$red`, `$green`, and `$blue`, respectively, with a `max` of 255.
+
+  * Let `alpha` be the result of percent-converting `$alpha` with a `max` of 1.
+
+  * Return a [legacy color][] in the `rgb` space, with the given `red`,
+    `green`, and `blue` channels, and `alpha` value.
+
+* ```
+  rgb($red, $green, $blue)
+  ```
+
+  * If any argument is a [special number][], return a plain CSS function string
+    with the name `"rgb"` and the arguments `$red`, `$green`, and `$blue`.
+
+  * Otherwise, return the result of calling `rgb()` with `$red`, `$green`,
+    `$blue`, and `1`.
+
+* ```
+  rgb($channels)
+  ```
+
+  * Let `components` be the result of [parsing] `$channels` with an `rgb` space.
+
+  * If `components` is null, return a plain CSS function string with the name
+    `"rgb"` and the argument `$channels`.
+
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
+
+  * Let `red`, `green`, and `blue` be the three elements of `channels`.
+
+  * Return the result of calling `rgb()` with `red`, `green`, `blue`, and
+    `alpha` as arguments.
+
+* ```
+  rgb($color, $alpha)
+  ```
+
+  * If either argument is a [special variable string][], return a plain CSS
+    function string with the name `"rgb"` and the same arguments.
+
+  * If `$color` is not a [legacy color][], throw an error.
+
+  * Return the result of calling `rgb()` with `$color`'s red, green, and blue
+    channels as unitless number arguments, and `$alpha` as the final argument.
+
 {% note 'ToDo' %}
-- `rgb()`/`rgba()`
+- `rgba()`
 - `hsl()`/`hsla()`
-- legacy functions not added to the color module?
-{% endnote %}
-
-## Temporary notes
-
-{% note 'Work In Progress' %}
-- Legacy-function support for explicit `none` channels?
-  - missing/powerless = 0 for legacy colors
-  - legacy syntax (with commas or *a) does not accept `none`
 - Allow rgb inspection to return out-of-gamut values
-- Extend `scale` to allow any channel with clear boundaries?
-- Expand set/adjust/scale for new spaces
-- Expand mix/compliment for new spaces
-- For manipulating `none` (missing) channels:
-  - `change()` overrides
-  - `adjust()`/`scale()` throw errors (or assume 0???)
-  - `channel()` returns `none`
-- Add color-space args to interpolation functions
 {% endnote %}
