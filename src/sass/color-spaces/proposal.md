@@ -24,14 +24,20 @@ changes:
     log: Parser support for color() syntax, and all new functions defined
   - time: 2022-08-09T17:10:33-06:00
     log: |
-      - Finalize color interpolation logic, and `color.mix()` function.
-      - Note potential issues with missing (`none`) channels in conversion.
+      - Finalize color interpolation logic, and `color.mix()` function
+      - Note potential issues with missing (`none`) channels in conversion
       - Deprecate individual channel inspection functions in favor of
-        `color.channel()`.
-      - Organize global and color-module function groups.
+        `color.channel()`
+      - Organize global and color-module function groups
       - Complete specification of global `hwb()` function,
-        and deprecate `color.hwb()` functions.
-      - Specify updates to global `rgb()` functions.
+        and deprecate `color.hwb()` functions
+      - Specify updates to global `rgb()` functions
+  - time: 2022-08-10T14:45:22-06:00
+    log: |
+      - Organize and document open issues
+      - Define `hsl()`/`hsla()` functions
+      - Remove any out-of-gamut channel clamping and adjustments
+      - Ensure channels are returned as-specified when inspecting
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -54,16 +60,19 @@ we have started to implement
 {% endnote %}
 
 {% warn %}
-We may delay support
-for explicit `none` channel/alpha values,
-if the open CSS issues have not been resolved
-in time for us to ship.
+There is an open CSS issue around
+[converting colors with missing channels](https://github.com/w3c/csswg-drafts/issues/7536),
+which may force us to delay implementation
+of the `none` keyword
+in our initial release of color-spaces.
 {% endwarn %}
 
 ## Table of Contents
 
-{% note 'ToDo' %}
-See auto-generated TOC in header.
+{% note %}
+See
+[auto-generated TOC](#toc-details)
+in header.
 {% endnote %}
 
 ## Background
@@ -171,12 +180,6 @@ destination color space. Chroma reduction helps avoid more noticeable shifts in
 `lightness` and `hue`, while the final clamping helps avoid dramatic `chroma`
 shifts when a more subtle movement is possible.
 
-{% note %}
-Improvements to the proposed algorithm
-are being discussed
-[on GitHub](https://github.com/w3c/csswg-drafts/issues/7135#issuecomment-1066121795)
-{% endnote %}
-
 ### Browser Support
 
 WebKit/Safari is already shipping support for all these new color spaces,
@@ -230,6 +233,9 @@ We have attempted to match this behavior.
 
 ### Color
 
+> Note that channel values are stored as specified, maintaining precision where
+> possible, even when the values are out-of-gamut for the given [color space][].
+
 A *color* is an object with several parts:
 
 * A string [*color space*](#color-space)
@@ -242,6 +248,7 @@ A *color* is an object with several parts:
 * A boolean *is-legacy* to indicate a [legacy color][].
 
 [legacy color]: #legacy-color
+[color space]: #color-space
 
 ### Legacy Color
 
@@ -271,12 +278,9 @@ range given.
 > several channels that are technically unbounded. However, some channels
 > (marked below) are percentage-mapped without a clear boundary for scaling.
 
-[Legacy colors](#legacy-color) are converted to `srgb` internally, with any
-missing channels (specified using the `none` keyword) set to `0`.
-
 The color spaces and their channels are:
 
-* `srgb` (RGB):
+* `rgb` (RGB):
   * `red` (bounded [0,1] or [0,255], depending on host syntax)
   * `green` (bounded [0,1] or [0,255], depending on host syntax)
   * `blue` (bounded [0,1] or [0,255], depending on host syntax)
@@ -288,6 +292,10 @@ The color spaces and their channels are:
   * `hue` (polar angle)
   * `saturation` (bounded percentage)
   * `lightness` (bounded percentage)
+* `srgb` (RGB):
+  * `red` (bounded [0,1])
+  * `green` (bounded [0,1])
+  * `blue` (bounded [0,1])
 * `srgb-linear` (RGB):
   1. `red` (bounded [0,1])
   2. `green` (bounded [0,1])
@@ -343,6 +351,7 @@ The color spaces and their channels are:
 
 The _predefined RGB spaces_ are:
 
+* `srgb`
 * `srgb-linear`
 * `display-p3`
 * `a98-rgb`
@@ -362,6 +371,12 @@ alpha values). Missing components are represented by the keyword `none`. When
 interpolating between colors, the missing component is replaced by the value
 of that same component in the other color. In all other cases, the missing
 value is treated as `0`.
+
+{% warn %}
+This feature is at-risk,
+pending the resolution of a CSS specification issue.
+See https://github.com/w3c/csswg-drafts/issues/7536
+{% endwarn %}
 
 ### Powerless Components
 
@@ -389,8 +404,9 @@ result of color-space conversion, then that value is considered to be
   * If the `lightness` value is `0%`, then both the `a` and `b` channels are
     powerless.
 
-  > The current spec has an open issue to determine if high values of
-  > `lightness` (whites) should make the `a` and `b` values powerless.
+  > The current spec has an inline issue asking if high values of
+  > `lightness` (whites) should make the `a` and `b` values powerless:
+  > See: https://drafts.csswg.org/css-color-4/#issue-e05ac5c3
 
 * `lch`/`oklch`:
 
@@ -399,8 +415,9 @@ result of color-space conversion, then that value is considered to be
   * If the `lightness` value is `0%`, then both the `hue` and `chroma` channels
     are powerless.
 
-  > The current spec has an open issue to determine if high values of
+  > The current spec has an inline issue asking if high values of
   > `lightness` (whites) should make the `hue` and `chroma` values powerless.
+  > See: https://drafts.csswg.org/css-color-4/#issue-1813c844
 
 ### Color Gamuts
 
@@ -413,8 +430,10 @@ or described in a given color space. The predefined RGB gamuts are:
 * `prophoto-rgb`
 * `rec2020`
 
-There are several color spaces that are associated with the `srgb` gamut:
+There are several additional color spaces that are associated with the
+`srgb` gamut:
 
+* `rgb`
 * `srgb-linear`
 * `hwb`
 * `hsl`
@@ -475,8 +494,12 @@ color conversion are defined in the [CSS Color Level 4][color-4]
 specification. Each algorithm takes a color `origin-color`, and a string
 `target-space`, and returns a color `output-color`.
 
-> Note the [open issue](https://github.com/w3c/csswg-drafts/issues/7536) about
-> how to properly handle `none` values while converting a color.
+{% warn %}
+There's an open issue about
+how to properly handle `none` values while
+converting a color.
+See https://github.com/w3c/csswg-drafts/issues/7536
+{% endwarn %}
 
 [color-space]: #color-space
 
@@ -936,6 +959,10 @@ These new functions are part of the built-in `sass:color` module.
 
 ### `color.channel()`
 
+> Note that channel values are stored as specified, even if those values are
+> out-of-gamut for the [color space][] used. Similarly, this color-channel
+> inspection function may return out-of-gamut channel values.
+
 * ```
   channel($color, $channel, $space)
   ```
@@ -967,6 +994,9 @@ These new functions are part of the built-in `sass:color` module.
 
 These functions are now deprecated. Authors should use global `hwb()` instead.
 
+> Channel clamping and scaling have been removed from the global function,
+> since we now allow out-of-gamut color-channels to be stored as specified.
+
 * ```
   hwb($channels)
   ```
@@ -979,9 +1009,6 @@ These functions are now deprecated. Authors should use global `hwb()` instead.
 
   * Return the result of calling the global function
     `hwb($hue $whiteness $blackness / $alpha)`.
-
-  > The new logic allows for `none` as well as clamping of `whiteness` &
-  > `blackness` values outside the `0-100%` range.
 
 ### `color.mix()`
 
@@ -1035,22 +1062,11 @@ These new CSS functions are provided globally.
   * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
     `convert-none` set to `false`.
 
-  * For each `channel` of `whiteness` and `blackness`, if `channel` is not `none`:
+  * For either of `whiteness` and `blackness` doesn't have unit `%`, throw an
+    error.
 
-    * If `channel` doesn't have unit `%`, throw an error.
-
-    * Set `channel` to the result of clamping `channel` between `0%` and `100%`
-      (inclusive).
-
-  > Clamping happens before relative scaling
-
-  * If `whiteness + blackness > 100%` with values of `none` treated as `0`:
-
-    * If `whiteness` is not none, set `whiteness` to
-      `whiteness / (whiteness + blackness) * 100%`.
-
-    * If `blackness` is not none, set `blackness` to
-      `blackness / (whiteness + blackness) * 100%`.
+    > Channel clamping and scaling have been removed, since we now allow
+    > out-of-gamut color-channels to be stored as specified.
 
   * Return a [legacy color][] in the `hwb` space, with the given `hue`,
     `whiteness`, and `blackness` channels, and `alpha` value.
@@ -1190,8 +1206,7 @@ These new CSS functions are provided globally.
     * If `channel` is a percentage, set `channel` to the result of
       `channel / 100%`.
 
-    * If `space` is a [predefined RGB space][predefined], set `channel` to the
-      result of clamping `channel` between `0` and `1`.
+    > Channels are not clamped, since out-of-gamut values are allowed
 
   * Return a color in the `space` [color space][], with the given `channels`
     and `alpha` value.
@@ -1206,18 +1221,21 @@ to behave as alias functions for their appropriately updated counterparts.
 > Note that the new logic preserves decimal values in color channels, as well
 > as preserving the initial color-space used in defining a color.
 
-### `rgb()`
+### `rgb()` and `rgba()`
+
+The `rgba()` function is identical to `rgb()`, except that if it would return a
+plain CSS function named `"rgb"` that function is named `"rgba"` instead.
 
 * ```
-  rgb($red, $green, $blue, $alpha)
+  rgb($red, $green, $blue, $alpha: 1)
   ```
 
-  * If any argument is a [special number], return a plain CSS function
+  * If any argument is a [special number][], return a plain CSS function
     string with the name `"rgb"` and the arguments `$red`, `$green`, `$blue`,
     and `$alpha`.
 
-  * If any of `$red`, `$green`, `$blue`, or `$alpha` aren't numbers, throw an
-    error.
+  * If any of `$red`, `$green`, `$blue`, or `$alpha` aren't numbers or the
+    keyword `none`, throw an error.
 
   * Let `red`, `green`, and `blue` be the result of [percent-converting][]
     `$red`, `$green`, and `$blue`, respectively, with a `max` of 255.
@@ -1266,8 +1284,67 @@ to behave as alias functions for their appropriately updated counterparts.
   * Return the result of calling `rgb()` with `$color`'s red, green, and blue
     channels as unitless number arguments, and `$alpha` as the final argument.
 
-{% note 'ToDo' %}
-- `rgba()`
-- `hsl()`/`hsla()`
-- Allow rgb inspection to return out-of-gamut values
-{% endnote %}
+### `hsl()` and `hsla()`
+
+The `hsla()` function is identical to `hsl()`, except that if it would return a
+plain CSS function named `"hsl"` that function is named `"hsla"` instead.
+
+* ```
+  hsl($hue, $saturation, $lightness, $alpha: 1)
+  ```
+
+  * If any argument is a [special number][], return a plain CSS function
+    string with the name `"hsl"` and the arguments `$hue`, `$saturation`,
+    `$lightness`, and `$alpha`.
+
+  * If any of `$hue`, `$saturation`, `$lightness`, or `$alpha` aren't numbers
+    or the keyword `none`, throw an error.
+
+  * Let `hue` be the result of [normalizing](#normalizing-hue) `$hue`, with
+    `convert-none` set to `false`.
+
+  * If `$saturation` and `$lightness` don't have unit `%`, throw an error.
+
+  > Clamping and conversion to rgb have been removed.
+
+  * Let `alpha` be the result of [percent-converting][] `$alpha` with a `max` of 1.
+
+  * Return a [legacy color][] in the `hsl` space, with the given `hue`,
+    `$saturation`, and `$lightness` channels, and `alpha` value.
+
+* ```
+  hsl($hue, $saturation, $lightness)
+  ```
+
+  * If any argument is a [special number][], return a plain CSS function string
+    with the name `"hsl"` and the arguments `$hue`, `$saturation`, and
+    `$lightness`.
+
+  * Otherwise, return the result of calling `hsl()` with `$hue`, `$saturation`,
+    `$lightness`, and `1`.
+
+* ```
+  hsl($hue, $saturation)
+  ```
+
+  * If either argument is a [special variable string][], return a plain CSS
+    function string with the name `"hsl"` and the same arguments.
+
+  * Otherwise, throw an error.
+
+* ```
+  hsl($channels)
+  ```
+
+  * Let `components` be the result of [parsing] `$channels` with an `hsl` space.
+
+  * If `components` is null, return a plain CSS function string with the name
+    `"hsl"` and the argument `$channels`.
+
+  * Let `channels` be the first element and `alpha` the second element of
+    `components`.
+
+  * Let `hue`, `saturation`, and `lightness` be the three elements of `channels`.
+
+  * Return the result of calling `hsl()` with `hue`, `saturation`, `lightness`,
+    and `alpha` as arguments.

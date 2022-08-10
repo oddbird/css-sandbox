@@ -32,7 +32,7 @@ date: Last Modified
     {% if not raw_md %}
       <h1>{{ title | mdInline | safe }}</h1>
       {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
-        <details class="toc-details">
+        <details id="toc-details">
           <summary class="toc-summary">Table of Contents</summary>
           {{ content | toc | safe }}
         </details>
@@ -51,19 +51,17 @@ date: Last Modified
   {% if changes and not (raw_md or is_log) %}
     <aside id="changelog-feed" class="changelog">
       <h2>Log of Major Page Changes</h2>
-      <ul>
-        {% for change in changes %}
-          <li class="change-item">
-            <time datetime="{{ change.time }}">
-              {{ change.time | date('long') }}
+      <a href="/feed.xml">Subscribe to site changes feed »</a>
+      {% for change in changes %}
+        <article>
+          <h3>
+            <time datetime="{{ change.time | date('iso') }}">
+              {{ change.time | date('DATETIME_FULL') }}
             </time> »
-            {{ change.log }}
-          </li>
-        {% endfor %}
-      </ul>
-      <p>
-        <a href="/feed.xml">Subscribe to changes feed</a>
-      </p>
+          </h3>
+          {{ change.log | md | safe }}
+        </article>
+      {% endfor %}
     </aside>
   {% endif %}
 

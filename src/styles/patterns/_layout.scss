@@ -27,7 +27,7 @@ body {
 }
 
 header,
-.toc-details,
+[id='toc-details'],
 footer {
   font-size: 0.8rem;
 }
@@ -64,14 +64,19 @@ footer {
 
 header {
   grid-area: header;
-}
 
-[datetime] {
-  font-style: italic;
-  margin-top: 0.5rem;
+  [datetime] {
+    display: block;
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
 }
 
 // toc
+#toc-details {
+  margin-top: 0.5rem;
+}
+
 .toc-summary {
   font-style: italic;
 }
@@ -84,10 +89,6 @@ main {
 // changes
 .changelog {
   grid-area: changes;
-}
-
-.change-item time {
-  text-transform: lowercase;
 }
 
 // footer
