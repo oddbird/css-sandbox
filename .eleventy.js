@@ -3,25 +3,10 @@ const hljs = require('@11ty/eleventy-plugin-syntaxhighlight');
 const pluginRss = require("@11ty/eleventy-plugin-rss");
 const toc = require('eleventy-plugin-toc');
 const yaml = require('js-yaml');
-const _ = require('lodash');
+const ghSlug = require('github-slugger').slug;
 
+const time = require('./filters/time');
 const type = require('./filters/type');
-
-const getChangelog = (collection) => {
-  return _.flatMap(
-    _.filter(collection, 'data.changes'),
-    (page) => {
-      const pageData = _.get(page, 'data.changes');
-      return pageData.map((change) => {
-        const date = new Date(change.time);
-        change.date = date.toLocaleDateString('en-US');
-        change.url = page.url;
-        change.source = page.data.title;
-        return change;
-      })
-    }
-  ).sort((a, b) => b.time - a.time);
-};
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(hljs);
@@ -39,7 +24,16 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('md', type.render);
   eleventyConfig.addFilter('mdInline', type.inline);
 
-  eleventyConfig.addFilter('getChangelog', getChangelog);
+  eleventyConfig.addFilter('date', time.date);
+
+  // Get the first `n` elements of a collection.
+  eleventyConfig.addFilter('slice', (array, n) => {
+    if (n < 0) {
+      return array.slice(n);
+    }
+
+    return array.slice(0, n);
+  });
 
   // config
   eleventyConfig.setLibrary('md', type.mdown);
@@ -63,24 +57,32 @@ module.exports = function (eleventyConfig) {
         post.data.changes
           .sort((a, b) => b.time - a.time)
           .forEach((change, i) => {
+            const date = change.time;
             changes.push({
               post,
-              date: change.time,
+              date,
+              url: post.url,
               log: change.log,
               latest: i === 0,
             });
           });
       }
 
+      const date = post.data.created || post.date;
       changes.push({
         post,
-        date: post.data.created || post.date,
+        date,
         log: 'New page added',
         latest: post.data.changes ? false : true,
+        creation: true,
       });
     });
 
-    return changes.sort((a, b) => b.date - a.date);
+    return changes.map((item) => {
+      item.url = `/changelog${item.post.url}${ghSlug(time.date(item.date, 'iso'))}/`;
+      item.date_group = time.date(item.date, 'long');
+      return item;
+    }).sort((a, b) => b.date - a.date);
   });
 
   return {

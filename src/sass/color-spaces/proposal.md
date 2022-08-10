@@ -58,7 +58,7 @@ We may delay support
 for explicit `none` channel/alpha values,
 if the open CSS issues have not been resolved
 in time for us to ship.
-{% endnote %}
+{% endwarn %}
 
 ## Table of Contents
 

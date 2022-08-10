@@ -1,0 +1,29 @@
+---
+title: Full Site Changelog
+created: 2021-10-20
+is_log: true
+eleventyNavigation:
+  key: changes
+  title: Full Site Changelog
+  parent: resources
+---
+
+<div class="h-feed">
+{% for date, changes in collections.changes | groupby('date_group') %}
+  <h2><time>{{ date }}</time></h2>
+
+  {% for change in changes %}
+    <article class="change h-entry">
+      <h3 class="p-name">
+        <a href="{{ change.post.url }}">{{ change.post.data.title or "Needs Title" }}</a>:
+      </h3>
+
+      <div class="p-summary">
+        {{ change.log | md | safe }}
+      </div>
+
+      <a href="{{ change.url }}" class="u-url u-uid" hidden></a>
+    <article>
+  {% endfor %}
+{% endfor %}
+</div>

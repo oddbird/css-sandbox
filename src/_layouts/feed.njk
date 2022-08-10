@@ -1,15 +1,76 @@
+{%- set changes = collections.changes | slice(15) -%}
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{{ feed.title }}</title>
   <subtitle>{{ feed.subtitle }}</subtitle>
-  <link href="{{ feed.feedUrl }}" rel="self"/>
-  <link href="{{ feed.url }}"/>
-  <updated>{{ collections.changes[0].date | dateToRfc3339 }}</updated>
   <id>{{ feed.url }}</id>
+  <link href="{{ page.url | absoluteUrl(feed.url) }}" rel="self"/>
+  <link href="{{ feed.url }}"/>
+  <updated>{{ changes[0].date | dateToRfc3339 }}</updated>
+  <rights>© {{ none | date('year') }} {{ feed.author.name }}</rights>
+  <icon>{{ '/favicon.svg' | absoluteUrl(feed.url) }}</icon>
+  <generator>Eleventy</generator>
   <author>
     <name>{{ feed.author.name }}</name>
     <email>{{ feed.author.email }}</email>
   </author>
+  {%- for change in changes -%}
+  {%- set absolutePostUrl = (change.post.url if change.creation else change.url) | absoluteUrl(feed.url) -%}
+  <entry>
+    <link href="{{ absolutePostUrl }}"/>
+    <updated>{{ change.date | dateToRfc3339 }}</updated>
+    <id>{{ absolutePostUrl }}</id>
+
+    {%- if change.creation -%}
+      <title>
+        New page: {{ change.post.data.title }}
+      </title>
+    {%- else -%}
+      <title>
+        Changes to: {{ change.post.data.title }}
+      </title>
+    {%- endif -%}
+
+    {%- set feedSummary -%}
+      <blockquote>
+        {{ change.log | md | safe }}
+      </blockquote>
+
+      <p>
+        <a href="{{ change.post.url }}">
+          {{ change.post.data.title or 'See latest' }} »
+        </a>
+      </p>
+    {%- endset -%}
+
+    {%- set feedContent -%}
+      {%- if change.latest -%}
+        {{- change.post.templateContent -}}
+      {%- else -%}
+        <p>This page has more recent changes available. For more details, see:</p>
+        <ul>
+          <li>The <a href="{{ absolutePostUrl }}#changelog-feed">current status on css.oddbird.net</a></li>
+          <li>The <a href="{{ absolutePostUrl }}#changelog-feed">log of major changes</a></li>
+          <li>The <a href="{{ [github.history, page.inputPath] | join }}">github commit history</a></li>
+        </ul>
+      {%- endif -%}
+    {%- endset -%}
+
+    <summary type="html">
+      {{- feedSummary | htmlToAbsoluteUrls(absolutePostUrl) -}}
+    </summary>
+
+    <content type="html">
+      {{- feedSummary | htmlToAbsoluteUrls(absolutePostUrl) -}}
+      {{ '<hr />' }}
+      {{- feedContent | htmlToAbsoluteUrls(absolutePostUrl) -}}
+    </content>
+  </entry>
+  {%- endfor %}
+</feed>
+
+{# <feed xmlns="http://www.w3.org/2005/Atom">
+
   {%- for change in collections.changes %}
   {%- set post = change.post %}
   {% set absolutePostUrl %}{{ post.url | url | absoluteUrl(feed.url) }}{% endset %}
@@ -33,4 +94,4 @@
     {{ feedContent | htmlToAbsoluteUrls(absolutePostUrl) | safe }}</content>
   </entry>
   {%- endfor %}
-</feed>
+</feed> #}

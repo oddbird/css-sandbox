@@ -55,7 +55,7 @@ date: Last Modified
         {% for change in changes %}
           <li class="change-item">
             <time datetime="{{ change.time }}">
-              {{ change.time.toLocaleString('en-US', {'dateStyle': 'short', 'timeStyle': 'short'}) }}
+              {{ change.time | date('long') }}
             </time> »
             {{ change.log }}
           </li>

@@ -43,6 +43,7 @@
     "@11ty/eleventy-plugin-rss": "^1.1.2",
     "@11ty/eleventy-plugin-syntaxhighlight": "^4.0.0",
     "lodash": "^4.17.21",
+    "luxon": "^3.0.1",
     "sass": "^1.50.1",
     "typogr": "^0.6.8"
   }

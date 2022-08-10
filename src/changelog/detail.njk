@@ -1,0 +1,20 @@
+---
+pagination:
+  data: collections.changes
+  size: 1
+  alias: change
+permalink: '{{ change.url }}'
+eleventyComputed:
+  title: 'Changes to _{{ change.post.data.title or "Needs Title" }}_ on {{ change.date | date("short") }}'
+eleventyExcludeFromCollections: true
+---
+
+<blockquote>
+  {{ change.log | md | safe }}
+</blockquote>
+
+<p>
+  <a href="{{ change.post.url }}">
+    {{ change.post.data.title or "Needs Title" }} »
+  </a>
+</p>
