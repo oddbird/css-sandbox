@@ -45,7 +45,7 @@
 
     {%- set feedContent -%}
       {%- if change.latest -%}
-        {{- change.post.templateContent -}}
+        {{- change.post.templateContent | safe -}}
       {%- else -%}
         <p>This page has more recent changes available. For more details, see:</p>
         <ul>
