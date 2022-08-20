@@ -38,6 +38,8 @@ changes:
       - Define `hsl()`/`hsla()` functions
       - Remove any out-of-gamut channel clamping and adjustments
       - Ensure channels are returned as-specified when inspecting
+  - time: 2022-08-19T17:59:57-06:00
+    log: Define logic for `color.alpha()` and `color.change()`.
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -259,9 +261,9 @@ A *color* is an object with several parts:
 
 Colors that are defined using the CSS color names, hex syntax, `rgb()`,
 `rgba()`, `hsl()`, `hsla()`, or `hwb()` -- along with colors that result from
-legacy interpolation -- are considered *legacy colors*. All legacy colors use
-the `srgb` color space, with `red`, `green`, and `blue` channels. The output of
-a [legacy color][] is not required to match the input syntax.
+legacy interpolation -- are considered *legacy colors*. All legacy colors are
+in the `srgb` gamut. The output of a legacy color is not required to match the
+input [color space][].
 
 ### Color Space
 
@@ -278,17 +280,20 @@ range given.
 > several channels that are technically unbounded. However, some channels
 > (marked below) are percentage-mapped without a clear boundary for scaling.
 
+Colors specified using a CSS color keyword, or the hex notation are considered
+part of the `rgb` space.
+
 The color spaces and their channels are:
 
-* `rgb` (RGB):
+* `rgb` (RGB, legacy):
   * `red` (bounded [0,1] or [0,255], depending on host syntax)
   * `green` (bounded [0,1] or [0,255], depending on host syntax)
   * `blue` (bounded [0,1] or [0,255], depending on host syntax)
-* `hwb` (RGB):
+* `hwb` (RGB, legacy):
   * `hue` (polar angle)
   * `whiteness` (bounded percentage)
   * `blackness` (bounded percentage)
-* `hsl` (RGB):
+* `hsl` (RGB, legacy):
   * `hue` (polar angle)
   * `saturation` (bounded percentage)
   * `lightness` (bounded percentage)
@@ -1020,21 +1025,104 @@ mix($color1, $color2,
   * Return the result [interpolating](#interpolating-colors) between `$color1`
     and `$color2` with the specified `$weight` and `$method`.
 
+### `color.alpha()`
+
+* ```
+  alpha($color)
+  ```
+
+  * If `$color` is not a color, call the other overload and return its result.
+
+  * Return the alpha channel of `$color` as a unitless number.
+
+* ```
+  alpha($args...)
+  ```
+
+  > This overload exists to support Microsoft's proprietary [`alpha()`
+  > function][].
+
+  [`alpha()` function]: https://blogs.msdn.microsoft.com/ie/2010/08/17/ie9-opacity-and-alpha/
+
+  * If `$args` is empty, throw an error.
+
+  * If `$args` has any keyword arguments, throw an error.
+
+  * Unless all arguments of `$args` are unquoted strings that begin with a
+    sequence of ASCII letters, followed by one or more spaces, followed by `=`
+    throw an error.
+
+  * Return a plain CSS function string with the name `"alpha"` and the arguments
+    `$args`.
+
+### `color.change()`
+
+```
+change($color, $args...)
+```
+
+This function is also available as a global function named `change-color()`.
+
+* If `$color` is not a color, throw an error.
+
+* If any item in `$args` is not a keyword argument, throw an error.
+
+* Let `space` be the value of the keyword argument `'space'` if specified in
+  `$args`, and the result of calling `space($color)` otherwise.
+
+* If `space` is not a valid [color space][], throw an error.
+
+* Let `is-legacy` be `true` if `$color` is a legacy color and `space` is a
+  legacy color space, and `false` otherwise.
+
+* Let `components` be a map of any remaining keyword arguments and values in
+  `$args`, not including the `'space'` keyword argument.
+
+* If any key in the `components` map is not either `'alpha'` or the name of a
+  channel in [color space][] `space`, throw an error.
+
+* Let `color` be the result of calling `to-space()` with `$color` and `space`
+  as arguments.
+
+* If there is an `'alpha'` key in `components`, let `alpha` be the result of
+  calling `map.get()` with `components` and `'alpha'` as arguments.
+
+* Otherwise, let `alpha` be the result of calling `colors.alpha()` with `color`
+  as an argument.
+
+* Let `channels` be an empty list.
+
+* For each `channel` in [color space][] `space`:
+
+  * If there is a key in `components` with the same name as `channel`, let
+    `value` be the result of calling `map.get()` with `components` and
+    `channel` as arguments.
+
+  * Otherwise, let `value` be the result of calling `colors.channel()` with
+    `color` and `channel` as arguments.
+
+  * Append `value` to the list of `channels`.
+
+* If `space` is a [predefined color space](#predefined-color-spaces):
+
+  * Return the result of calling `color(space channels... / alpha)`.
+
+* Otherwise:
+
+  * Return the result of calling `meta.call(space, channels... / alpha)`.
+
 ### ToDo
 
 {% note 'ToDo' %}
 - `adjust()`
-- `change()`
 - `scale()` (any channel with clear boundaries)
 - `complement()` (perform hue adjustment in the proper space)
 - `invert()` (perform inversion in the proper space)
 - `grayscale()` (perform inversion in the proper space)
-- `alpha()`
 - `ie-hex-str()`? DEPRECATE, meantime gamut-map.
 
 For manipulating `none` (missing) channels:
 
-- `change()` overrides
 - `adjust()`/`scale()` throw errors (or assume 0???)
 - `channel()` returns `none`
 {% endnote %}
