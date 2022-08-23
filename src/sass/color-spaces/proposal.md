@@ -40,6 +40,15 @@ changes:
       - Ensure channels are returned as-specified when inspecting
   - time: 2022-08-19T17:59:57-06:00
     log: Define logic for `color.alpha()` and `color.change()`.
+  - time: 2022-08-22T18:16:56-06:00
+    log: |
+      - Define color spaces and channels more clearly,
+        and update to reflect latest spec.
+      - Define 'channel normalization' in a reusable procedure,
+        and include is as part of the color component parsing procedure.
+      - Use channel normalization to simplify color function overloads.
+      - Define logic for `color.adjust()` and `color.scale()`, treating
+        the `none` keyword as a value of `0`.
 eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
@@ -272,83 +281,94 @@ has a name, and an ordered list of associated channels that can be accessed and
 manipulated in that space. Each channel value can be any number, or the keyword
 `none`.
 
-_Bounded_ channels have a clearly-defined range that can be mapped to
-percentage values and scaled, even if those channels are not clamped to the
-range given.
+Values outside a _bounded gamut_ range are valid, and remain un-clamped, but
+are considered _out of gamut_ for the given color space. Unbounded channels
+that accept both number and percentage values can still provide a reference
+range for mapping between the two value types. If the channel is bounded, or
+has a reference range with a lower-boundary of zero, then the channel is
+considered _scalable_.
 
 > This follows the CSS specification, which defines percentage-mapping onto
-> several channels that are technically unbounded. However, some channels
-> (marked below) are percentage-mapped without a clear boundary for scaling.
+> several channels that are technically unbounded. Note that some mappings
+> have a lower boundary of `-100%` rather than `0`.
 
-Colors specified using a CSS color keyword, or the hex notation are considered
-part of the `rgb` space.
+Colors specified using a CSS color keyword, or the hex notation are converted
+to `rgb` and serialized as part of the `rgb` color space.
 
 The color spaces and their channels are:
 
 * `rgb` (RGB, legacy):
-  * `red` (bounded [0,1] or [0,255], depending on host syntax)
-  * `green` (bounded [0,1] or [0,255], depending on host syntax)
-  * `blue` (bounded [0,1] or [0,255], depending on host syntax)
+  * `red`, `green`, `blue`:
+    * gamut: bounded
+    * number: [0,255]
+    * percentage: [0%,100%]
+
 * `hwb` (RGB, legacy):
-  * `hue` (polar angle)
-  * `whiteness` (bounded percentage)
-  * `blackness` (bounded percentage)
+  * `hue`: polar angle
+  * `whiteness`, `blackness`:
+    * gamut: bounded
+    * percentage: [0%,100%]
+
 * `hsl` (RGB, legacy):
-  * `hue` (polar angle)
-  * `saturation` (bounded percentage)
-  * `lightness` (bounded percentage)
-* `srgb` (RGB):
-  * `red` (bounded [0,1])
-  * `green` (bounded [0,1])
-  * `blue` (bounded [0,1])
-* `srgb-linear` (RGB):
-  1. `red` (bounded [0,1])
-  2. `green` (bounded [0,1])
-  3. `blue` (bounded [0,1])
-* `display-p3` (RGB):
-  1. `red` (bounded [0,1])
-  2. `green` (bounded [0,1])
-  3. `blue` (bounded [0,1])
-* `a98-rgb` (RGB):
-  1. `red` (bounded [0,1])
-  2. `green` (bounded [0,1])
-  3. `blue` (bounded [0,1])
-* `prophoto-rgb` (RGB):
-  1. `red` (bounded [0,1])
-  2. `green` (bounded [0,1])
-  3. `blue` (bounded [0,1])
-* `rec2020` (RGB):
-  1. `red` (bounded [0,1])
-  2. `green` (bounded [0,1])
-  3. `blue` (bounded [0,1])
-* `xyz`:
-  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-* `xyz-d50`:
-  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-* `xyz-d65`:
-  1. `x` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  2. `y` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  3. `z` (percentage-mapped `0% = 0.0, 100% = 1.0`)
+  * `hue`: polar angle
+  * `saturation`, `lightness`:
+    * gamut: bounded
+    * percentage: [0%,100%]
+
+* `srgb`, `srgb-linear`, `display-p3`, `a98-rgb`, `prophoto-rgb`,
+  `rec2020` (RGB):
+  * `red`, `green`, `blue`:
+    * gamut: bounded
+    * number: [0,1]
+    * percentage: [0%,100%]
+
+* `xyz`, `xyz-d50`, `xyz-d65`:
+  * `x`, `y`, `z`:
+    * gamut: un-bounded, scalable
+    * number: [0,1]
+    * percentage: [0%,100%]
+
 * `lab`:
-  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 100.0`)
-  2. `a` (percentage-mapped `-100% == -125, 100% == 125`)
-  3. `b` (percentage-mapped `-100% == -125, 100% == 125`)
+  * `lightness`:
+    * gamut: un-bounded, scalable
+    * number: [0,100]
+    * percentage: [0%,100%]
+  * `a`, `b`:
+    * gamut: un-bounded
+    * number: [-125,125]
+    * percentage: [-100%,100%]
+
 * `lch`:
-  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 100.0`)
-  2. `chroma` (percentage-mapped `0% = 0, 100% = 150`)
-  3. `hue` (polar angle)
+  * `lightness`:
+    * gamut: un-bounded, scalable
+    * number: [0,100]
+    * percentage: [0%,100%]
+  * `chroma`:
+    * gamut: un-bounded, scalable
+    * number: [0,150]
+    * percentage: [0%,100%]
+  * `hue`: polar angle
+
 * `oklab`:
-  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  2. `a` (percentage-mapped `-100% = -0.4, 100% = 0.4`)
-  3. `b` (percentage-mapped `-100% = -0.4, 100% = 0.4`)
+  * `lightness`:
+    * gamut: un-bounded, scalable
+    * number: [0,1]
+    * percentage: [0%,100%]
+  * `a`, `b`:
+    * gamut: un-bounded
+    * number: [-0.4,0.4]
+    * percentage: [-100%,100%]
+
 * `oklch`:
-  1. `lightness` (percentage-mapped `0% = 0.0, 100% = 1.0`)
-  2. `chroma` (percentage-mapped `0% = 0.0, 100% = 0.4`)
-  3. `hue` (polar angle)
+  * `lightness`:
+    * gamut: un-bounded, scalable
+    * number: [0,1]
+    * percentage: [0%,100%]
+  * `chroma`:
+    * gamut: un-bounded, scalable
+    * number: [0,0.4]
+    * percentage: [0%,100%]
+  * `hue`: polar angle
 
 ### Predefined Color Spaces
 
@@ -427,7 +447,11 @@ result of color-space conversion, then that value is considered to be
 ### Color Gamuts
 
 A _color gamut_ is a range of colors that can be displayed by a given device,
-or described in a given color space. The predefined RGB gamuts are:
+or can be described in a given [color space][]. A color is considered _out of
+gamut_ if any channel value is outside a bounded range defined by the given
+channel in the given color space.
+
+The predefined RGB gamuts are:
 
 * `srgb`
 * `display-p3`
@@ -558,9 +582,9 @@ space.
 This procedure accepts an `input` parameter to parse, along with a `space`
 parameter representing the [color space][], if known. It throws common parse
 errors if necessary, and returns either `null` (if the `input` contains special
-CSS values), or a list of parsed values. The return value is in the format
-`<color-space>? (<channel>+) / <alpha>`, where the color space is included in
-the return value if it was not passed in initially.
+CSS values), or a list of parsed and normalized values. The return value is in
+the format `<color-space>? (<channel>+) / <alpha>`, where the color space is
+included in the return value if it was not passed in initially.
 
 > This supports both the known color formats like `hsl()` and `rgb()`, where
 > the space is determined by the function, as well as the syntax of `color()`,
@@ -667,10 +691,12 @@ The procedure is:
     > Once special values have been handled, any colors remaining should have
     > exactly the expected number of channels.
 
-  * If `include-space` is true, let `parsed` be an unbracketed space-separated
-    list with `space` as the first element, and `channels` as the second.
+  * Set `normal` to the result of [normalizing][] `channels` in `space`.
 
-  * Otherwise, let `parsed` be the value of `channels`.
+  * If `include-space` is true, let `parsed` be an unbracketed space-separated
+    list with `space` as the first element, and `normal` as the second.
+
+  * Otherwise, let `parsed` be the value of `normal`.
 
   * Return an unbracketed slash-separated list with `parsed` as the first
     element, and `alpha` as the second.
@@ -684,23 +710,53 @@ The procedure is:
 [special number string]: ../spec/functions.md#special-number-string
 [percent-converting]: #percent-converting-a-number
 
-### Normalizing Hue
+### Normalizing Color Channels
 
-This process accepts a `hue` angle, and boolean `convert-none` arguments. It
-returns the hue normalized to degrees when possible, and converting `none` to
-`0` when requested. Otherwise it throws an error for invalid `hue`.
+[normalizing]: #normalizing-color-channels
 
-* If the value of `hue` is `none`:
+This process accepts an ordered list `channels` to validate, and a string
+`space` to normalize against. It throws an error if any channel is invalid for
+the [color space][] `space`, or returns a normalized list of valid channels.
 
-  * If `convert-none` is `true`, return `0`.
+* Let `normal` be an empty list.
 
-  * Otherwise, return `hue` without changes.
+* For each `channel` in `channels`:
 
-* Return the result of converting `hue` to `deg` allowing unitless.
+  * If `channel` is not a number or the keyword `'none'`, throw an error.
 
-> Normalizing the result into a half-open range of `[0,360)` would be a lossy
-> transformation, since some forms of [hue interpolation][hue-method] require
-> the specified hue values.
+  * If `channel` is the keyword `'none'`, append `channel` as the next item in
+    `normal`.
+
+  * Otherwise:
+
+    * Let `valid` be the corresponding channel defined by the [color space][]
+      `space`.
+
+    * If `valid` is a polar-angle `hue`:
+
+      * Let `normal-channel` be the result converting `channel` to `deg`
+        allowing unitless.
+
+      * Append `normal-channel` as the next item in `normal`.
+
+      > Normalizing the result into a half-open range of `[0,360)` would be a
+      > lossy transformation, since some forms of [hue interpolation][hue-method]
+      > require the specified hue values.
+
+    * Otherwise:
+
+      * If `channel` is a number with units other than `%`, throw an error.
+
+      * If `valid` requires a percentage, and `channel` is a number without
+        units, throw an error.
+
+      * Append `channel` as the next item in `normal`.
+
+* Return `normal`.
+
+{% note 'Question' %}
+Should we also percent-convert non-hue values?
+{% endnote %}
 
 ### Interpolating Colors
 
@@ -995,6 +1051,13 @@ These new functions are part of the built-in `sass:color` module.
 
 ## Modified Color Module Functions
 
+{% note 'ToDo' %}
+- `complement()` (perform hue adjustment in the proper space)
+- `invert()` (perform inversion in the proper space)
+- `grayscale()` (perform inversion in the proper space)
+- `ie-hex-str()`? DEPRECATE, meantime gamut-map.
+{% endnote %}
+
 ### `color.hwb()`
 
 These functions are now deprecated. Authors should use global `hwb()` instead.
@@ -1067,65 +1130,153 @@ This function is also available as a global function named `change-color()`.
 
 * If any item in `$args` is not a keyword argument, throw an error.
 
-* Let `space` be the value of the keyword argument `'space'` if specified in
-  `$args`, and the result of calling `space($color)` otherwise.
+* Let `space` be `$color`'s [color space][].
 
-* If `space` is not a valid [color space][], throw an error.
+* If the keyword argument `$space` is specified in `$args`:
 
-* Let `is-legacy` be `true` if `$color` is a legacy color and `space` is a
+    * If `$space` is not a known [color space][], throw an error.
+
+    * Set `space` to the value of `$space`.
+
+    * Let `color` be the result of [converting][] `$color` to `space`.
+
+* Otherwise, let `color` be the value of `$color`.
+
+* Let `legacy` be `true` if `$color` is a legacy color and `space` is a
   legacy color space, and `false` otherwise.
 
-* Let `components` be a map of any remaining keyword arguments and values in
-  `$args`, not including the `'space'` keyword argument.
+* Let `alpha` be `color`'s alpha property.
 
-* If any key in the `components` map is not either `'alpha'` or the name of a
-  channel in [color space][] `space`, throw an error.
+* If the keyword argument `$alpha` is specified in `$args`:
 
-* Let `color` be the result of calling `to-space()` with `$color` and `space`
-  as arguments.
+    * If `$alpha` is not a unitless number between `-1` and `1` (inclusive),
+      throw an error.
 
-* If there is an `'alpha'` key in `components`, let `alpha` be the result of
-  calling `map.get()` with `components` and `'alpha'` as arguments.
+    * Set `alpha` to the value of `$alpha + alpha` clamped between 0 and 1.
 
-* Otherwise, let `alpha` be the result of calling `colors.alpha()` with `color`
-  as an argument.
+* Let `channel-args` be the remaining keyword arguments in `$args`, not
+  including `$space` or `$alpha` arguments.
 
-* Let `channels` be an empty list.
+* Let `channels` be a list of the `color`'s channels.
 
-* For each `channel` in [color space][] `space`:
+* For each keyword `new` in `channel-args`:
 
-  * If there is a key in `components` with the same name as `channel`, let
-    `value` be the result of calling `map.get()` with `components` and
-    `channel` as arguments.
+  * If `new` is not the name of a channel in `channels`, throw an error.
 
-  * Otherwise, let `value` be the result of calling `colors.channel()` with
-    `color` and `channel` as arguments.
+  * Set the corresponding `channel` in `channels` to `new`.
 
-  * Append `value` to the list of `channels`.
+* Let `normal` be the result of [normalizing][] `channels`.
 
-* If `space` is a [predefined color space](#predefined-color-spaces):
+* Return a color in the `space` [color space][], with `normal` channels, an
+  alpha value of `alpha`, and a legacy value of `legacy`.
 
-  * Return the result of calling `color(space channels... / alpha)`.
+### `color.adjust()`
 
-* Otherwise:
+```
+adjust($color, $args...)
+```
 
-  * Return the result of calling `meta.call(space, channels... / alpha)`.
+This function is also available as a global function named `adjust-color()`.
 
-### ToDo
+* If `$color` is not a color, throw an error.
 
-{% note 'ToDo' %}
-- `adjust()`
-- `scale()` (any channel with clear boundaries)
-- `complement()` (perform hue adjustment in the proper space)
-- `invert()` (perform inversion in the proper space)
-- `grayscale()` (perform inversion in the proper space)
-- `ie-hex-str()`? DEPRECATE, meantime gamut-map.
+* If any item in `$args` is not a keyword argument, throw an error.
 
-For manipulating `none` (missing) channels:
+* Let `space` be `$color`'s [color space][].
 
-- `adjust()`/`scale()` throw errors (or assume 0???)
-- `channel()` returns `none`
-{% endnote %}
+* If the keyword argument `$space` is specified in `$args`:
+
+    * If `$space` is not a known [color space][], throw an error.
+
+    * Set `space` to the value of `$space`.
+
+    * Let `color` be the result of [converting][] `$color` to `space`.
+
+* Otherwise, let `color` be the value of `$color`.
+
+* Let `legacy` be `true` if `$color` is a legacy color and `space` is a
+  legacy color space, and `false` otherwise.
+
+* Let `alpha` be `color`'s alpha property.
+
+* If the keyword argument `$alpha` is specified in `$args`:
+
+    * If `$alpha` is not a unitless number between `-1` and `1` (inclusive),
+      throw an error.
+
+    * Set `alpha` to the value of `$alpha + alpha` clamped between 0 and 1.
+
+* Let `channel-args` be the remaining keyword arguments in `$args`, not
+  including `$space` or `$alpha` arguments.
+
+* Let `channels` be a list of the `color`'s channels.
+
+* For each keyword `adjust` in `channel-args`:
+
+  * If `adjust` is not the name of a channel in `channels`, throw an error.
+
+  * Set the corresponding `channel` in `channels` to `channel + adjust`,
+    treating any `'none'` keyword as a value of `0`.
+
+* Let `normal` be the result of [normalizing][] `channels`.
+
+* Return a color in the `space` [color space][], with `normal` channels, an
+  alpha value of `alpha`, and a legacy value of `legacy`.
+
+### `color.scale()`
+
+```
+scale($color, $args...)
+```
+
+This function is also available as a global function named `scale-color()`.
+
+* If `$color` is not a color, throw an error.
+
+* If any item in `$args` is not a keyword argument, throw an error.
+
+* Let `space` be `$color`'s [color space][].
+
+* If the keyword argument `$space` is specified in `$args`:
+
+    * If `$space` is not a known [color space][], throw an error.
+
+    * Set `space` to the value of `$space`.
+
+    * Let `color` be the result of [converting][] `$color` to `space`.
+
+* Otherwise, let `color` be the value of `$color`.
+
+* Let `legacy` be `true` if `$color` is a legacy color and `space` is a
+  legacy color space, and `false` otherwise.
+
+* Let `alpha` be `color`'s alpha property.
+
+* If the keyword argument `$alpha` is specified in `$args`:
+
+    * If `$alpha` is not a unitless number between `-1` and `1` (inclusive),
+      throw an error.
+
+    * Set `alpha` to the result of [scaling][] `alpha` by `$alpha` with `max` 1,
+      treating any `'none'` keyword as a value of `0`.
+
+* Let `channel-args` be the remaining keyword arguments in `$args`, not
+  including `$space` or `$alpha` arguments.
+
+* Let `channels` be a list of the `color`'s channels.
+
+* For each keyword `scale` in `channel-args`:
+
+  * If `scale` is not the name of a bounded or percentage-mapped channel in
+    `channels`, throw an error.
+
+  * Set the corresponding `channel` in `channels` to the result of [scaling][]
+    `channel` by `scale` with a `max` defined by the channel boundary.
+
+* Let `normal` be the result of [normalizing][] `channels`.
+
+* Return a color in the `space` [color space][], with `normal` channels, an
+  alpha value of `alpha`, and a legacy value of `legacy`.
 
 ## New Global Functions
 
@@ -1146,12 +1297,6 @@ These new CSS functions are provided globally.
     `components`.
 
   * Let `hue`, `whiteness`, and `blackness` be the three elements of `channels`.
-
-  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
-    `convert-none` set to `false`.
-
-  * For either of `whiteness` and `blackness` doesn't have unit `%`, throw an
-    error.
 
     > Channel clamping and scaling have been removed, since we now allow
     > out-of-gamut color-channels to be stored as specified.
@@ -1177,11 +1322,6 @@ These new CSS functions are provided globally.
 
   * Let `lightness`, `a`, and `b` be the three elements of `channels`.
 
-  * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
-    throw an error.
-
-  * If `lightness` is a number less than `0`, set `lightness` to `0%`.
-
   * Return a color in the `lab` [color space][], with the given `lightness`,
     `a`, and `b` channels, and `alpha` value.
 
@@ -1200,15 +1340,6 @@ These new CSS functions are provided globally.
     `components`.
 
   * Let `lightness`, `chroma`, and `hue` be the three elements of `channels`.
-
-  * If `chroma` or `lightness` is a number with a unit other than `%`, throw an
-    error.
-
-  * For each `channel` in `chroma` and `lightness`, if `channel` is a number
-    less than `0`, set `channel` to `0%`.
-
-  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
-    `convert-none` set to `false`.
 
   * Return a color in the `lch` [color space][], with the given `lightness`,
     `chroma`, and `hue` channels, and `alpha` value.
@@ -1229,11 +1360,6 @@ These new CSS functions are provided globally.
 
   * Let `lightness`, `a`, and `b` be the three elements of `channels`.
 
-  * If any of `lightness`, `a`, or `b` is a number with a unit other than `%`,
-    throw an error.
-
-  * If `lightness` is a number less than `0`, set `lightness` to `0%`.
-
   * Return a color in the `oklab` [color space][], with the given `lightness`,
     `a`, and `b` channels, and `alpha` value.
 
@@ -1252,15 +1378,6 @@ These new CSS functions are provided globally.
     `components`.
 
   * Let `lightness`, `chroma`, and `hue` be the three elements of `channels`.
-
-  * If `chroma` or `lightness` is a number with a unit other than `%`, throw an
-    error.
-
-  * For each `channel` in `chroma` and `lightness`, if `channel` is a number
-    less than `0`, set `channel` to `0%`.
-
-  * Set `hue` to the result of [normalizing](#normalizing-hue) `hue` with
-    `convert-none` set to `false`.
 
   * Return a color in the `oklch` [color space][], with the given `lightness`,
     `chroma`, and `hue` channels, and `alpha` value.
@@ -1286,15 +1403,6 @@ These new CSS functions are provided globally.
   * If `space` is not a [predefined color space][predefined], throw an error,.
 
     > Custom spaces have already been output as CSS functions.
-
-  * For each `channel` element of `channels`, if `channel` is a number:
-
-    * If `channel` has a unit other than `%`, throw an error.
-
-    * If `channel` is a percentage, set `channel` to the result of
-      `channel / 100%`.
-
-    > Channels are not clamped, since out-of-gamut values are allowed
 
   * Return a color in the `space` [color space][], with the given `channels`
     and `alpha` value.
@@ -1322,13 +1430,12 @@ plain CSS function named `"rgb"` that function is named `"rgba"` instead.
     string with the name `"rgb"` and the arguments `$red`, `$green`, `$blue`,
     and `$alpha`.
 
-  * If any of `$red`, `$green`, `$blue`, or `$alpha` aren't numbers or the
-    keyword `none`, throw an error.
+  * If `$alpha` is not a number, throw an error.
 
-  * Let `red`, `green`, and `blue` be the result of [percent-converting][]
-    `$red`, `$green`, and `$blue`, respectively, with a `max` of 255.
+  * Let `alpha` be the result of [percent-converting][] `alpha` with a max of 1.
 
-  * Let `alpha` be the result of percent-converting `$alpha` with a `max` of 1.
+  * Let `red`, `green`, and `blue` be the three elements returned by
+    [normalizing][] `($red, $green, $blue)` in `rgb` color space.
 
   * Return a [legacy color][] in the `rgb` space, with the given `red`,
     `green`, and `blue` channels, and `alpha` value.
@@ -1385,20 +1492,17 @@ plain CSS function named `"hsl"` that function is named `"hsla"` instead.
     string with the name `"hsl"` and the arguments `$hue`, `$saturation`,
     `$lightness`, and `$alpha`.
 
-  * If any of `$hue`, `$saturation`, `$lightness`, or `$alpha` aren't numbers
-    or the keyword `none`, throw an error.
+  * If `$alpha` is not a number, throw an error.
 
-  * Let `hue` be the result of [normalizing](#normalizing-hue) `$hue`, with
-    `convert-none` set to `false`.
+  * Let `alpha` be the result of [percent-converting][] `alpha` with a max of 1.
 
-  * If `$saturation` and `$lightness` don't have unit `%`, throw an error.
+  * Let `hue`, `saturation`, and `lightness` be the three elements returned
+    by [normalizing][] `($hue, $saturation, $lightness)` in `hsl` color space.
 
   > Clamping and conversion to rgb have been removed.
 
-  * Let `alpha` be the result of [percent-converting][] `$alpha` with a `max` of 1.
-
   * Return a [legacy color][] in the `hsl` space, with the given `hue`,
-    `$saturation`, and `$lightness` channels, and `alpha` value.
+    `saturation`, and `lightness` channels, and `alpha` value.
 
 * ```
   hsl($hue, $saturation, $lightness)
@@ -1434,5 +1538,6 @@ plain CSS function named `"hsl"` that function is named `"hsla"` instead.
 
   * Let `hue`, `saturation`, and `lightness` be the three elements of `channels`.
 
-  * Return the result of calling `hsl()` with `hue`, `saturation`, `lightness`,
-    and `alpha` as arguments.
+  * Return a [legacy color][] in the `hsl` space, with the given `hue`,
+    `saturation`, and `lightness` channels, and `alpha` value.
+
