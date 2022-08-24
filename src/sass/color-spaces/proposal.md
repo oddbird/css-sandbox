@@ -49,7 +49,17 @@ changes:
       - Use channel normalization to simplify color function overloads.
       - Define logic for `color.adjust()` and `color.scale()`, treating
         the `none` keyword as a value of `0`.
-eleventyNavigation:
+  - time: 2022-08-24T17:44:03-06:00
+    log: |
+      This is a complete first draft of the color proposal, including all the
+      proposed new & modified functions. However, there are still some
+      questions to resolve in the editing & review process.
+
+      - Draft logic for `color.complement()`, `color.invert()`, and
+        `color.ie-hex-string()`.
+      - Update logic for `color.mix()` and color interpolation to better
+        match standards in CSS Colors 4 and 5.
+ eleventyNavigation:
   key: color spaces-proposal
   title: Color Spaces Proposal
   parent: sass
@@ -62,6 +72,7 @@ This proposal adds Sass support for several new CSS color spaces defined in
 colors outside the sRGB gamut.
 
 [color-4]: https://www.w3.org/TR/css-color-4/
+[color-5]: https://www.w3.org/TR/css-color-5/
 
 {% note %}
 In order to test the logic of the following
@@ -754,46 +765,36 @@ the [color space][] `space`, or returns a normalized list of valid channels.
 
 * Return `normal`.
 
-{% note 'Question' %}
-Should we also percent-convert non-hue values?
-{% endnote %}
-
 ### Interpolating Colors
 
-This procedure accepts two color arguments (`color1` and `color2`), an
-optional [color interpolation method][] `method`, and a percentage `weight`
-for `color1` in the mix. It returns a new color `mix` that represents the
-appropriate mix of input colors.
+This procedure accepts two color arguments (`color1` and `color2`), a
+[color interpolation method][] `method`, and a percentage `weight` for `color1`
+in the mix. It returns a new color `mix` that represents the appropriate mix of
+input colors.
 
 * If either `color1` or `color2` is not a color, throw an error.
 
 * If `weight` is undefined, set `weight` to `50%`.
 
-* If `weight` doesn't have unit `%` or isn't between `0%` and `100%`
-  (inclusive), throw an error.
+* Set `weight` to the result of [percent-converting][] `weight` with a max of 1.
 
-* If `method` is undefined:
-
-  * Let `interpolation-space` be `srgb` if `is-legacy`, and `oklab` otherwise.
-
-    > This default behavior is defined in [CSS Color Level 4][color-4].
+* If `method` is undefined, throw an error.
 
 * Otherwise:
 
   * If `method` is not a [color interpolation method][color-method], throw an
     error.
 
-  * Let `interpolation-space` be the [color space][] specified in `method`.
+  * Let `space` be the [color space][] specified in `method`.
 
-  * If `interpolation-space` is a [PolarColorSpace][color-method]:
+  * If `space` is a [PolarColorSpace][color-method]:
 
-    * Let `interpolation-arc` be the `HueInterpolationMethod` specified in
-      `method`, or `shorter` if no hue interpolation is specified.
+    * Let `hue-arc` be the `HueInterpolationMethod` specified in `method`, or
+      `shorter` if no hue interpolation is specified.
 
 * For each `color` of `color1` and `color2`:
 
-  * Set `color` to the results of [converting][] `color` into
-    `interpolation-space`.
+  * Set `color` to the results of [converting][] `color` into `space`.
 
   * If any `component` of `color` is `none`, set that `component` to the value
     of the corresponding component in the other color.
@@ -803,25 +804,26 @@ appropriate mix of input colors.
 
   * Set `color` to the result of [premultiplying] `color`.
 
-* Let `mix` be a new color in the `interpolation-space` [color space][],
-  with `none` for alpha and all channel values.
+* Let `mix` be a new color in the `space` [color space][], with `none` for
+  alpha and all channel values.
 
-  * For each `channel` of `mix`:
+* For each `channel` of `mix`:
 
-    * Let `channel1` and `channel2` be the corresponding channel values in
-      `color11` and `color2` respectively.
+  * Let `channel1` and `channel2` be the corresponding channel values in
+    `color1` and `color2` respectively.
 
-    * If `channel` represents a hue angle, set `channel1` and `channel2`
-      respectively to the results of [hue interpolation][hue-method] with
-      `channel1` as `hue1`, `channel2` as `hue2`, using the `interpolation-arc`
-      method.
+  * If `channel` represents a hue angle, set `channel1` and `channel2`
+    respectively to the results of [hue interpolation][hue-method] with
+    `channel1` as `hue1`, `channel2` as `hue2`, using the `hue-arc` method.
 
-    * Set `channel` to the result of calculating
-      `(channel1 * weight1) + (channel2 * weight2)`.
+  * Set `channel` to the result of calculating
+    `(channel1 * weight) + (channel2 * (1 - weight))`.
 
-    * If `is-legacy`, set `channel` to the result of rounding `channel`.
+    > Channel rounding has been removed, since it is a lossy transform.
 
-* Return the color `mix`.
+* Return `mix`.
+
+  > It's possible
 
 [premultiplying]: #premultiply-transparent-colors
 [un-premultiplying]: #premultiply-transparent-colors
@@ -875,8 +877,9 @@ adjusted according to the given `method`. When no hue interpolation `method` is
 specified, the default is `shorter`.
 
 The process for each [hue interpolation method][hue-interpolation] is defined
-in [CSS Color Level 4][color-4]. Unless the `menthod` is the value `specified`,
-both angles need to be constrained to `[0, 360)` prior to interpolation.
+in [CSS Color Level 4][color-4]. If the `method` is not the value
+`'specified'`, both angles need to be constrained to `[0, 360)` prior to
+interpolation.
 
 * [shorter](https://www.w3.org/TR/css-color-4/#shorter)
 
@@ -1014,9 +1017,11 @@ These new functions are part of the built-in `sass:color` module.
 
   * If `target-space` is not a valid [color space][], throw an error.
 
-  * Return the result of [gamut mapping](#gamut-mapping) with `$color` as the
-    `origin` color, `origin-space` as the `origin color space`, and
-    `target-space` as the `destination` color space.
+  * Return the result of [gamut mapping][] with `$color` as the
+    origin color, `origin-space` as the origin color space, and
+    `target-space` as the destination color space.
+
+[gamut mapping]: #gamut-mapping
 
 ### `color.channel()`
 
@@ -1051,13 +1056,6 @@ These new functions are part of the built-in `sass:color` module.
 
 ## Modified Color Module Functions
 
-{% note 'ToDo' %}
-- `complement()` (perform hue adjustment in the proper space)
-- `invert()` (perform inversion in the proper space)
-- `grayscale()` (perform inversion in the proper space)
-- `ie-hex-str()`? DEPRECATE, meantime gamut-map.
-{% endnote %}
-
 ### `color.hwb()`
 
 These functions are now deprecated. Authors should use global `hwb()` instead.
@@ -1082,11 +1080,42 @@ These functions are now deprecated. Authors should use global `hwb()` instead.
 
 ```
 mix($color1, $color2,
-  $weight: 50%, $method: null)
+  $weight: 50%,
+  $method: null)
 ```
 
-  * Return the result [interpolating](#interpolating-colors) between `$color1`
-    and `$color2` with the specified `$weight` and `$method`.
+* If `$method` undefined:
+
+  * If `$color1` and `$color2` are both legacy colors, let `method` be `rgb`.
+
+  * Otherwise, throw an error.
+
+    > Method is required for non-legacy colors. This matches the `color-mix()`
+    > function defined in [Colors Level 5][color-5], and allows us to add
+    > additional default behavior in the future.
+
+* Otherwise:
+
+  * If `method` is not a [color interpolation method][color-method], throw an
+    error.
+
+  * Let `method` be the value of `$method`.
+
+  * Let `space` be the [color space][] specified in `method`.
+
+* Set `color1` to the result of [converting][] and [gamut mapping][] `$color1`
+  into `space`.
+
+* Set `color2` to the result of [converting][] and [gamut mapping][] `$color2`
+  into `space`.
+
+  > The interpolation procedure does not do gamut mapping on the input colors
+  > by default. In order to match the behavior of the [Colors Level 5][color-5]
+  > `color-mix()` function, we do that gamut mapping in advance. This also
+  > ensures that the resulting mix will be in the gamut requested.
+
+* Return the result of [interpolating](#interpolating-colors) between `color1`
+  and `color2` with the specified `$weight` and `method`.
 
 ### `color.alpha()`
 
@@ -1277,6 +1306,171 @@ This function is also available as a global function named `scale-color()`.
 
 * Return a color in the `space` [color space][], with `normal` channels, an
   alpha value of `alpha`, and a legacy value of `legacy`.
+
+### `color.complement()`
+
+```
+complement($color, $space)
+```
+
+This function is also available as a global function named `complement()`.
+
+* If `$color` is not a color, throw an error.
+
+* If `$space` is undefined:
+
+  * If `$color` is a legacy color, let `space` be `hsl`.
+
+  * Otherwise, throw an error.
+
+* Otherwise:
+
+  * If `$space` is not a [color space][] with a polar-angle hue channel, throw
+    an error.
+
+    > This currently allows `hsl`, `hwb`, `lch`, and `oklch`. We could also
+    > map some cubic spaces with matching gamuts e.g. (`oklab` -> `oklch`),
+    > but that adds implicit complexity, while still excluding color spaces.
+
+  * Let `space` be the value of `$space`.
+
+* Return the result of calling `color.adjust()` with `$color`, a $hue of
+  `180deg`, and a $space of `space`.
+
+### `color.invert()`
+
+```
+invert($color, $space)
+```
+
+This function is also available as a global function named `invert()`.
+
+* If `$color` is not a color, throw an error.
+
+* If `$space` is undefined:
+
+  * If `$color` is a legacy color, let `space` be `hsl`.
+
+  * Otherwise, throw an error.
+
+* Otherwise:
+
+  * If `$space` is not a [color space][], throw an error.
+
+  * If `$space` is 'xyz', 'xyz-d50', or 'xyz-d65', throw an error.
+
+    > It might be possible to define these inversions, but I'm not clear on
+    > the algorithm at this point.
+
+  * If `$space` is 'lab', let `space` be `lch`.
+
+  * Otherwise, if `$space` is 'oklab', let `space` be `oklch`.
+
+  * Otherwise, let `space` be the value of `$space`.
+
+* Let `color` be the result of [converting][] and [gamut mapping][] `$color`
+  into the color space `space`.
+
+* If `space` is a color space with a lightness channel and polar-angle hue:
+
+  * Let `light` be the value of `color`'s lightness channel as a percentage,
+    and let `hue` be be the value of `color`'s hue channel.
+
+  * Let `light-output` be the result of `100% - light`.
+
+  * Let `hue-output` be the result of `(hue + 180deg) % 360deg`.
+
+  * Let `invert` be the result of calling `color.change()` with `color`, a $hue
+    argument of `hue-output`, and a lightness of `light-output`.
+
+  * If `$space` is defined and not equal to `space`, return the result of
+    [converting][] `color` into `$space`.
+
+    > This only applies to `lab`/`oklab` and `lch`/`oklch` pairings.
+
+  * Otherwise, return `color`.
+
+* Otherwise, if `space` is 'hwb':
+
+  * Let `hue`, `whiteness` and `blackness` be the three elements of `color`'s
+    channels.
+
+  * Let `hue-output` be the result of `(hue + 180deg) % 360deg`.
+
+  * Let `gray` be the result of `whiteness + blackness`.
+
+  * Return the result of calling `color.change()` with `color`, a $hue of `hue`,
+    $whiteness of `gray - whiteness`, and $blackness of `gray - blackness`.
+
+* Otherwise:
+
+  > Inversion for RGB color spaces.
+
+  * Let `invert` be the value of `color`.
+
+  * For each `channel` element in `color`'s channels:
+
+    * Let `max` be the maximum bounded value of `channel` in `space`, in the
+      same unit as `channel`.
+
+    * Set the corresponding channel of `invert` to be `max - channel`.
+
+  * Return `invert`.
+
+### `color.invert()`
+
+```
+grayscale($color)
+```
+
+> No space argument is provided, since the results should always be in gamut.
+
+This function is also available as a global function named `grayscale()`.
+
+* If `$color` is not a color, throw an error.
+
+* If `$color` is a legacy color:
+
+  * Return the result of [converting][] `$color` to 'hsl', and changing the
+    'saturation' channel to 0.
+
+* Otherwise:
+
+  * Let `origin` be `$color`'s [color space].
+
+  * Let `color` be the result of [converting][] `$color` to 'oklch', and
+    setting the 'chroma' channel to 0.
+
+  * Return the result of [converting][] `color` to `origin`.
+
+### `color.ie-hex-str()`
+
+This function is also available as a global function named `ie-hex-str()`. Both
+functions are deprecated.
+
+```
+ie-hex-str($color)
+```
+
+* If `$color` is not a color, throw an error.
+
+* Let `rgb` be the result of [converting][] `$color` to 'rgb'.
+
+* Let `hex-list` be an empty list.
+
+* For each `channel` in `rgba`'s channels, as numbers:
+
+  * Let `hex-channel` be the hexadecimal representation of `channel`'s value.
+
+  * Append `hex-channel` as the next item in `hex-list`.
+
+* Let `alpha` be `rgb`'s alpha value.
+
+* Let `hex-alpha` be the hexadecimal representation of `alpha * 255`.
+
+* Append `hex-alpha` as the next item in `hex-list`.
+
+* Return the result of concatenating `hex-list` into a string.
 
 ## New Global Functions
 
