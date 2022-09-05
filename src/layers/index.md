@@ -14,7 +14,6 @@ eleventyNavigation:
   key: layers
   title: Cascade Layers
   parent: home
-warn: false
 ---
 
 While Cascade Origins help to balance styling concerns across stakeholders --

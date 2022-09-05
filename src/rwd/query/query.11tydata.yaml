@@ -1,9 +1,18 @@
 status:
   type: warn
   text: |
-    Work on this feature has moved to an
-    [Editor's Draft specification](https://drafts.csswg.org/css-contain-3/)
+    See the
+    [Editor's Draft](https://drafts.csswg.org/css-contain-3/)
+    or published
+    [Working Draft](https://www.w3.org/TR/css-contain-3/)
+    for the latest updates.
 warn: |
-  While there is a working prototype,
-  there are still some
-  [syntax changes likely](/rwd/query/containers/)
+  Container Size Queries
+  and units are now shipping
+  in Chromium & Webkit browsers.
+  Much of the related content on this site
+  is out-of-date,
+  since any changes are being made in the
+  [Editor's Draft](https://drafts.csswg.org/css-contain-3/)
+  and published
+  [Working Draft](https://www.w3.org/TR/css-contain-3/).

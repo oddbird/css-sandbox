@@ -1,0 +1,83 @@
+title: Sass Color Spaces Proposal
+created: 2022-03-11
+eleventyNavigation:
+  key: color spaces-proposal
+  title: Color Spaces Proposal
+  parent: sass
+status:
+  type: warn
+  text: |
+    See the
+    [Sass Pull Request](https://github.com/sass/sass/pull/2832)
+    for the latest updates.
+warn: |
+  This document is no longer being maintained.
+  All future changes will be made
+  in the [Sass Pull Request](https://github.com/sass/sass/pull/2832)
+  and Sass GitHub repository.
+changes:
+  - time: 2022-04-04T15:56:51-06:00
+    log: Defining color terms, procedures, and functions
+  - time: 2022-05-25T13:47:45-06:00
+    log: |
+      Define color parsing, missing/powerless components,
+      and channel boundaries
+  - time: 2022-06-01T13:35:32-06:00
+    log: Define gamut-mapping, and allow spaces to represent gamuts
+  - time: 2022-06-06T17:10:38-06:00
+    log: |
+      Improve parsing logic, and flesh out hwb() function
+      based on [sample code](https://github.com/oddbird/sass-colors-sample)
+  - time: 2022-06-28T17:34:49-06:00
+    log: |
+      Define hwb, (ok)lab, and (ok)lch functions,
+      and update todo lists.
+  - time: 2022-07-03T12:31:55-06:00
+    log: Add support for color-spaces in color component parsing
+  - time: 2022-07-08T18:13:39-06:00
+    log: Parser support for color() syntax, and all new functions defined
+  - time: 2022-08-09T17:10:33-06:00
+    log: |
+      - Finalize color interpolation logic, and `color.mix()` function
+      - Note potential issues with missing (`none`) channels in conversion
+      - Deprecate individual channel inspection functions in favor of
+        `color.channel()`
+      - Organize global and color-module function groups
+      - Complete specification of global `hwb()` function,
+        and deprecate `color.hwb()` functions
+      - Specify updates to global `rgb()` functions
+  - time: 2022-08-10T14:45:22-06:00
+    log: |
+      - Organize and document open issues
+      - Define `hsl()`/`hsla()` functions
+      - Remove any out-of-gamut channel clamping and adjustments
+      - Ensure channels are returned as-specified when inspecting
+  - time: 2022-08-19T17:59:57-06:00
+    log: Define logic for `color.alpha()` and `color.change()`.
+  - time: 2022-08-22T18:16:56-06:00
+    log: |
+      - Define color spaces and channels more clearly,
+        and update to reflect latest spec.
+      - Define 'channel normalization' in a reusable procedure,
+        and include is as part of the color component parsing procedure.
+      - Use channel normalization to simplify color function overloads.
+      - Define logic for `color.adjust()` and `color.scale()`, treating
+        the `none` keyword as a value of `0`.
+  - time: 2022-08-24T17:44:03-06:00
+    log: |
+      This is a complete first draft of the color proposal, including all the
+      proposed new & modified functions. However, there are still some
+      questions to resolve in the editing & review process.
+
+      - Draft logic for `color.complement()`, `color.invert()`, and
+        `color.ie-hex-string()`.
+      - Update logic for `color.mix()` and color interpolation to better
+        match standards in CSS Colors 4 and 5.
+  - time: 2022-09-05T16:58:31-06:00
+    log: |
+      Update this document to reflect
+      the latest changes in the
+      [Sass Pull Request](https://github.com/sass/sass/pull/2832),
+      and add a deprecation notice.
+      All future updates will be made
+      in the Sass repository.
