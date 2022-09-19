@@ -45,6 +45,6 @@ Chromium/Blink:
 - [Chromium release notes](https://blog.chromium.org/)
 - [Chrome platform status](https://chromestatus.com/features)
 - [Chrome release schedule](https://chromiumdash.appspot.com/schedule)
-- [Chrome release notes](https://chromereleases.googleblog.com/)
+- [Chrome release notes](https://developer.chrome.com/)
 - [Edge platform status](https://developer.microsoft.com/en-us/microsoft-edge/status/)
 - [Edge release notes](https://docs.microsoft.com/en-us/deployedge/microsoft-edge-relnote-stable-channel)

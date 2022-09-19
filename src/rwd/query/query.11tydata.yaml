@@ -13,6 +13,7 @@ warn: |
   Much of the related content on this site
   is out-of-date,
   since any changes are being made in the
-  [Editor's Draft](https://drafts.csswg.org/css-contain-3/)
-  and published
   [Working Draft](https://www.w3.org/TR/css-contain-3/).
+  See my article
+  [_Use the Right Container Query Syntax_](https://www.oddbird.net/2022/08/18/cq-syntax/)
+  for the latest updates.

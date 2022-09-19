@@ -1,26 +1,21 @@
 ---
 title: Use-Cases for Style Queries
 created: 2022-08-09T17:17:31-06:00
+warn: false
 eleventyNavigation:
   key: query-style-cases
   title: Use-Cases for Style Queries
   parent: container-queries
 ---
 
-Browsers are preparing to ship
-[size-based container queries](https://caniuse.com/css-container-queries)
-and related
-[container query units](https://caniuse.com/css-container-query-units).
-However,
-implementors have continued to raise questions
-about the utility of
-[style queries](https://drafts.csswg.org/css-contain-3/#style-container).
-
-{% note %}
 When people talk about container queries,
 they are often referring specifically to '_size queries_' --
 which allow us to query and respond to
 the computed size of an ancestor container.
+Browsers have already started to ship
+[size-based container queries](https://caniuse.com/css-container-queries)
+and related
+[container query units](https://caniuse.com/css-container-query-units).
 
 _Style queries_ allow us to also respond
 in a similar way
@@ -28,31 +23,36 @@ to the computed values of any property
 on an ancestor container --
 such as the container
 `background-color`, or `font-weight`.
-{% endnote %}
 
-While it's fine for browsers to ship
-size queries without style queries,
-we need to ensure that the syntax we ship
-makes sense with all the planned future additions --
-including at least `style` and likely `state` queries.
-
+However,
+implementors have continued to raise questions
+about the utility of
+[style queries](https://drafts.csswg.org/css-contain-3/#style-container).
 There has been
 [significant discussion](https://github.com/w3c/csswg-drafts/issues/7066)
-around this.
+around this,
 with many requests
 that we show in more detail
 the expected use-cases for style queries,
 along with potential alternative solutions.
 
 {% note %}
-Chrome has started to implement
-a prototype of _style queries_,
-which may soon give us a better testing ground
-for exploring use-cases.
+Chrome & Edge Canary (v107+)
+support style queries for custom properties
+behind the 'Experimental Web Platform Features' flag.
+To test the feature:
+
+- Download either Canary browser.
+- Navigate to `about://flags/#enable-experimental-web-platform-features`.
+- Set it to `Enabled`.
+- Restart the browser.
+
+I put together a basic
+[button theme demo on code pen](https://codepen.io/miriamsuzanne/pen/abGBNNx).
 {% endnote %}
 
 {% note %}
-Several of the demos below
+Several of the use cases below
 come from other sources:
 
 - Una Kravet,
