@@ -356,8 +356,8 @@ but adding a lower boundary:
 ```
 
 I think that's a good place to start.
-In my mind, the first ("from") clause should be required,
-and may not need explicit labeling.
+
+In my mind, the first ("from") clause may not need explicit labeling.
 It would accept a single (complex) selector
 (or selector list?):
 
@@ -411,6 +411,34 @@ Existing tools would still be able to
 provide syntax sugar for single-file components --
 automatically generating the from/to clauses --
 but move the primary functionality into CSS.
+
+Finally, we could allow `@scope` without any selector clauses, which would scope the styles to the parent of the stylesheet's owner node (or the containing tree for constructable stylesheets with no owner node).
+
+```html
+<div>
+  <style>
+    @scope {
+      p { color: red; }
+    }
+  </style>
+  <p>this is red</p>
+</div>
+<p>not red</p>
+```
+
+That would be equivalent to:
+
+```html
+<div id="foo">
+  <style>
+    @scope (#foo) {
+      p { color: red; }
+    }
+  </style>
+  <p>this is red</p>
+</div>
+<p>not red</p>
+```
 
 ### The (existing) `:scope` pseudo-class
 
