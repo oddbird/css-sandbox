@@ -10,6 +10,11 @@ date: Last Modified
   <title>{{ title }}</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{{ '/css/style.css' | url }}" />
+
+  {% if redirect -%}
+    <meta http-equiv="refresh" content="0; URL={{ redirect.to }}" />
+    <meta name="robots" content="noindex">
+  {%- endif %}
 </head>
 <body>
   <aside data-status="{{ status.type }}">

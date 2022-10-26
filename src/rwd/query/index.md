@@ -27,6 +27,7 @@ of elements within the document
 ## Specification
 
 - [Editor's Draft](https://drafts.csswg.org/css-contain-3/)
+- [Working Draft](https://www.w3.org/TR/css-contain-3/)
 
 ## Issues
 

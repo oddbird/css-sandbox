@@ -2,10 +2,11 @@
 title: Use-Cases for Style Queries
 created: 2022-08-09T17:17:31-06:00
 warn: false
+permalink: /rwd/query/style-cases/
 eleventyNavigation:
   key: query-style-cases
   title: Use-Cases for Style Queries
-  parent: container-queries
+  parent: style-queries
 ---
 
 When people talk about container queries,
@@ -37,7 +38,7 @@ the expected use-cases for style queries,
 along with potential alternative solutions.
 
 {% note %}
-Chrome & Edge Canary (v107+)
+Chromium Canary (Chrome/Edge v107+)
 support style queries for custom properties
 behind the 'Experimental Web Platform Features' flag.
 To test the feature:

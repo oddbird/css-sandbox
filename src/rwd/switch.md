@@ -7,10 +7,23 @@ changes:
 eleventyNavigation:
   key: switch-function
   title: Switch Function
-  parent: rwd
+  parent: container-queries
+warn: |
+  This feature was
+  proposed by Brian Kardell,
+  and considered as an
+  [alternative](/rwd/compare/switch-query/)
+  to the `@container` rule,
+  which is now
+  [shipping in multiple browsers](/2022/08/18/cq-syntax/).
+  There are no plans
+  to continue work on a `switch()` function
+  at this point.
 ---
 
-The `switch()` function would provide conditional logic in CSS values,
+The `switch()` function
+([proposed by Brian Kardell](#resources))
+would provide conditional logic in CSS values,
 similar to the Sass `if()` function,
 but with access to some essential client-side values for comparison.
 The initial proposal resolves around `available-inline-size`,

@@ -7,7 +7,7 @@ changes:
 eleventyNavigation:
   key: switch-container
   title: Comparing Switch & Container
-  parent: rwd
+  parent: container-queries
 ---
 
 I began by pursuing both of these approaches,
