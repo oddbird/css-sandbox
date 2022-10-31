@@ -11,22 +11,64 @@ Style queries are a subset of 'container queries',
 but rather than querying conditions of the _container size_,
 we can query the _computed value_
 of any CSS properties on the container.
-For example, when the container has a dark background,
-we can set our links to a lighter color:
+This allows low-level enhancements,
+such as applying non-font-style `em` styles
+when the parent element is already italic:
 
 ```css
-html,
-.colors-dark,
-.colors-light {
-  container-name: color-scheme;
-}
+em {
+  font-style: italic;
 
-@container color-scheme (background: black) {
-  a:any-link {
-    color: powderblue;
+  @container style(font-style: italic) {
+    background: powderblue;
   }
 }
 ```
+
+It could also be used to allow
+[querying high level custom properties](https://github.com/w3c/csswg-drafts/issues/5624).
+For example,
+when the root color scheme changes
+we can set a custom property,
+and query the value
+to adjust our components:
+
+```css
+html {
+  --current-scheme: light;
+  container-name: color-scheme;
+  color-scheme: light dark;
+
+  @media (prefers-color-scheme: dark) { --current-scheme: light; }
+  /* value can also be updated by explicit user interface, if desired */
+}
+
+body {
+  @container color-scheme (--current-scheme: light) {
+    /* light mode tokens/styles */
+  }
+
+  @container color-scheme (--current-scheme: dark) {
+    /* dark mode tokens/styles */
+  }
+}
+
+.component { /* or `@scope (.component)` */
+  @container color-scheme (--current-scheme: light) {
+    /* light mode component tokens/styles */;
+  }
+
+  @container color-scheme (--current-scheme: dark) {
+    /* dark mode component tokens/styles */;
+  }
+}
+```
+
+{% note %}
+Nested at-rules are part of the CSS nesting syntax,
+which is under active development.
+The concept is the same if you remove that syntax sugar.
+{% endnote %}
 
 ## My Notes
 

@@ -68,14 +68,16 @@ module.exports = function (eleventyConfig) {
           });
       }
 
-      const date = post.data.created || post.date;
-      changes.push({
-        post,
-        date,
-        log: 'New page added',
-        latest: post.data.changes ? false : true,
-        creation: true,
-      });
+      if (!post.data.draft) {
+        const date = post.data.created || post.date;
+        changes.push({
+          post,
+          date,
+          log: 'New page added',
+          latest: post.data.changes ? false : true,
+          creation: true,
+        });
+      }
     });
 
     return changes.map((item) => {

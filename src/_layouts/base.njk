@@ -28,8 +28,8 @@ date: Last Modified
   <header>
     {% include "nav.njk" %}
     {% if not (page.url == '/') %}
-      <time datetime="{{ page.date.toISOString() }}">
-        {% set latest = changes[0].time or page.date %}
+      {% set latest = changes[0].time or draft or page.date %}
+      <time datetime="{{ latest.toISOString() }}">
         Updated {{ latest.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
       </time>
     {% endif %}
