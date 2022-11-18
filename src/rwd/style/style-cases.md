@@ -56,7 +56,7 @@ I put together a basic
 Several of the use cases below
 come from other sources:
 
-- Una Kravet,
+- Una Kravets,
   [Style query demos](https://codepen.io/una/pen/abqKvXW)
 - Lea Verou & others,
   [Higher level custom properties](https://github.com/w3c/csswg-drafts/issues/5624)

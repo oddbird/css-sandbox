@@ -853,6 +853,12 @@ doesn't yet support queries on non-custom properties:
 - [Light/dark/invert themes with style queries](https://codepen.io/miriamsuzanne/pen/xxzXdJQ)
 - [List outdent with style queries](https://codepen.io/miriamsuzanne/pen/LYrOgwM?editors=1100)
 
+### Other use-cases to consider
+
+- https://lea.verou.me/2020/10/the-var-space-hack-to-toggle-multiple-values-with-one-custom-property/
+- https://github.com/propjockey/css-sweeper#css-is-a-programming-language-thanks-to-the-space-toggle-trick
+- https://css-tricks.com/the-css-custom-property-toggle-trick/
+
 ## Detailed design discussion & alternatives
 
 ### Alternatives to an at-rule syntax
