@@ -42,6 +42,7 @@ Currently open CSSWG issues:
 
 - [Should style() queries allow !important flag? #7413](https://github.com/w3c/csswg-drafts/issues/7413)
 - [Move style queries of standard properties to level 4 #7185](https://github.com/w3c/csswg-drafts/issues/7185)
+- [Add ability to test for at-rule preludes #6966](https://github.com/w3c/csswg-drafts/issues/6966)
 
 Deferred issues for level 4:
 
@@ -445,21 +446,412 @@ always query the nearest 'theme' container:
 
 ## Key scenarios
 
-{% warn 'ToDo' %}
-Compile use-cases from:
+### Setting parameters in web components
 
-- [CSSWG issues][higher-level]
-- [Style use-case notes](/rwd/query/style-cases/)
-- [CodePen collection](https://codepen.io/collection/NqaPkL)
+One of the primary use-cases
+mentioned by Lea Verou
+in her [request for higher level custom properties][higher-level],
+is that web component authors
+can expose parameters to
+consumers of those components,
+without needing to rely on custom attributes.
 
-Some uses of the 'space toggle hack' might convert well:
+Given a `media-object` component
+with the following HTML structure:
 
-- https://css-tricks.com/dry-switching-with-css-variables-the-difference-of-one-declaration/
-- https://lea.verou.me/2020/10/the-var-space-hack-to-toggle-multiple-values-with-one-custom-property/
-- https://github.com/propjockey/css-sweeper#css-is-a-programming-language-thanks-to-the-space-toggle-trick
-- https://css-tricks.com/the-css-custom-property-toggle-trick/
+```html
+<template>
+  <article>
+    <div part="img">
+      <slot name="img">…</slot>
+    </div>
+    <div part="content">
+      <slot name="title">…</slot>
+      <slot name="content">…</slot>
+    </div>
+  </article>
+</template>
+```
 
-{% endwarn %}
+We can use the `:host` element
+as a container that accepts
+various parameters:
+
+```css
+:host {
+  container: media-host / inline-size;
+  --media-location: before;
+  --media-style: square;
+  --theme: light;
+}
+```
+
+Elements inside the component
+can query the parameters
+set on the `media-host` container:
+
+```css
+  article {
+    display: grid;
+    grid-template: var(--default-template);
+  }
+
+  @container media-host style(--media-location: after) {
+    article {
+      grid-template: var(--reverse-template);
+    }
+  }
+
+  @container media-host style(--theme: fancy) {
+    article {
+      background:
+        linear-gradient(to bottom right, #FFC0CBBB, #EEEC, #B0E0E6BB),
+        conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+      color: var(--media-color--dark);
+      border: medium solid mediumvioletred;
+      border-top-left-radius: 70% 60%;
+      border-top-right-radius: 30% 40%;
+      border-bottom-right-radius: 30% 60%;
+      border-bottom-left-radius: 70% 40%;
+      padding: 3em;
+    }
+  }
+
+  @container media-host style(--media-style: round) {
+    [part='media'] {
+      border-radius: 100%;
+    }
+  }
+```
+
+See the
+[web component style query parameters demo](https://codepen.io/miriamsuzanne/pen/abKVaoo?editors=1000)
+on CodePen.
+
+### Contextual configuration without custom elements
+
+While custom elements
+helpfully provide a wrapping element
+that can be used as a container --
+the same general approach can be used
+to establish contextual parameters
+with normal light-DOM elements.
+We can do that either with more generally-applied
+(or even 'global') configuration.
+
+If we rely on inheritance
+for the contextual parameters,
+there's no need to establish a container at all:
+
+```css
+main {
+  --theme: blue;
+  background: #223;
+  color: snow;
+}
+
+@container style(--theme: blue) {
+  .card {
+    background: royalblue;
+    border-color: navy;
+    color: white;
+  }
+
+  a:any-link {
+    color: powderblue;
+  }
+
+  button {
+    border-color: navy;
+    background-color: dodgerblue;
+    color: white;
+  }
+}
+```
+
+Or we can add wrapper elements
+by hand, when necessary.
+Since this is required
+for dimensional queries in relation
+to grid and flexbox tracks,
+the same wrappers can often be reused:
+
+```css
+.card-container {
+  container: card / inline-size;
+}
+
+@container card style(--theme: blue) {
+  .card { /* dark theme card styles */ }
+}
+
+@container card (inline-size > 30em) {
+  .card { /* larger space card styles */ }
+}
+```
+
+There are various codepen demos
+that explore use-cases along these lines:
+
+- [Style query test -- card themes](https://codepen.io/una/pen/abGXjJZ?editors=1100)
+  by Una Kravets
+- [Style query button themes](https://codepen.io/miriamsuzanne/pen/abGBNNx)
+  by Miriam Suzanne
+- [Light/dark/invert themes with style queries](https://codepen.io/miriamsuzanne/pen/xxzXdJQ)
+
+### Parameters for generated content
+
+Much like custom elements,
+pseudo-elements
+such as `::before` and `::after`
+also come with a built-in container --
+the element on which they are generated.
+When using a pseudo-element to create
+an 'arrow' on a tooltip,
+we can use style queries to
+set the style and position of the arrow:
+
+```css
+.bubble {
+  --arrow-position: end end;
+  container: bubble;
+  border: medium solid green;
+  position: relative;
+}
+
+.bubble::after {
+  content: "";
+  border: 1em solid transparent;
+  position: absolute;
+}
+
+@container bubble style(--arrow-position: end end) {
+  .bubble::after {
+    border-block-start-color: inherit;
+    inset-block-start: 100%;
+    inset-inline-end: 1em;
+  }
+}
+
+@container bubble style(--arrow-position: start end) {
+  .bubble::after {
+    border-block-start-color: inherit;
+    inset-block-start: 100%;
+    inset-inline-start: 1em;
+  }
+}
+```
+
+We can also combine queries
+to avoid repeated properties:
+
+```css
+@container bubble style(--arrow-position: start start) or style(--arrow-position: end start) {
+  .bubble::after {
+    border-block-end-color: inherit;
+    inset-block-end: 100%;
+  }
+}
+
+@container bubble style(--arrow-position: start end) or style(--arrow-position: end end) {
+  .bubble::after {
+    border-block-start-color: inherit;
+    inset-block-start: 100%;
+  }
+}
+
+@container bubble style(--arrow-position: start start) or style(--arrow-position: start end) {
+  .bubble::after {
+    inset-inline-start: 1em;
+  }
+}
+
+@container bubble style(--arrow-position: end start) or style(--arrow-position: end end) {
+  .bubble::after {
+    inset-inline-end: 1em;
+  }
+}
+```
+
+See the
+[queries with pseudo-classes demo](https://codepen.io/miriamsuzanne/pen/vYjMjGd?editors=0100)
+on CodePen.
+
+### Simple value cycles
+
+One of the common use-cases
+seems to come with the best alternative solution,
+at least in it's simplest form.
+This is cycling one property-value
+based on the value of the same property on the parent.
+
+For example,
+we can cycle the `font-style`
+between `italic` and `normal` values
+as we nest:
+
+```css
+em, i, q {
+  font-style: italic;
+}
+
+@container style(font-style: italic) {
+  em, i, q {
+    font-style: normal;
+  }
+}
+```
+
+Now our `em`, `i`, and `q` tags
+will be italic by default,
+but will revert to normal when nested
+inside an italic parent --
+for example an `em` inside a `q`.
+
+However, there's an
+[existing proposal & spec](https://drafts.csswg.org/css-values-5/#funcdef-toggle)
+for handling this use-case
+with a function,
+currently called `toggle()`:
+
+```css
+em, i, q {
+  font-style: toggle(italic, normal);
+}
+```
+
+### Complex value adjustments
+
+In a case where the cycled styles
+are limited to a single property,
+the `toggle()` function is clearly a simpler solution.
+But it has pretty strict limitations:
+
+- One property cannot cycle
+  based on the inherited value of another property.
+- When multiple properties are involved,
+  each has to be handled individually.
+
+Instead of simply cycling between
+italic and normal values,
+we may want to give the nested version
+a new background color,
+or underline,
+or other styles that make it stand out,
+besides simply toggling the italics.
+
+This is not possible with the functional approach,
+but it becomes trivial with style queries:
+
+```css
+@container style(font-style: italic) {
+  em, i, q {
+    background: lightpink;
+  }
+}
+```
+
+Queries also allow us to use
+multiple property conditions:
+
+```css
+@container style((font-style: italic) and (--color-mode: light)) {
+  em, i, q {
+    background: lightpink;
+  }
+}
+```
+
+Or apply the same query condition to multiple properties:
+
+```css
+@container style(font-style: italic) {
+  em, i, q {
+    /* clipped gradient text */
+    background: var(--feature-gradient);
+    background-clip: text;
+    box-decoration-break: clone;
+    color: transparent;
+    text-shadow: none;
+  }
+}
+```
+
+None of those variations are possible
+using the proposed `toggle()` function.
+
+### Querying non-inherited properties
+
+There are various use-cases
+that involve querying non-inherited properties.
+
+### Using `var()` in container queries
+
+Light/dark themes are a consistently useful
+example of contextual styling
+that may depend on multiple inputs.
+A few examples might include
+querying the background-color of a container
+to determine if the context has a light or dark theme:
+
+```css
+main, aside {
+  container: theme;
+}
+
+main {
+  background: var(--bg-dark);
+}
+
+aside {
+  background: var(--bg-light);
+}
+
+@container theme style(background-color: var(--bg-dark)) {
+  /* styles for our dark theme */
+  a:any-link { color: powderblue; }
+}
+
+@container theme style(background-color: var(--bg-light)) {
+  /* styles for our light theme */
+  a:any-link { color: navy; }
+}
+```
+
+Given the code above,
+links in the `aside` and `main` elements
+will respond contextually
+to the background colors established in each.
+
+Another example might involve
+lists and other ideally-outdented content
+to query available padding
+on any typesetting container that they are in:
+
+```css
+body {
+  container: typeset;
+  padding: var(--gap-small);
+}
+
+/* This would ideally use a range query in the future */
+@container typeset style(padding: var(--gap-large)) {
+  ul {
+    padding-inline-start: 0;
+    color: green;
+  }
+}
+```
+
+There are several CodePen demos
+showing this sort of behavior,
+although they currently require an extra
+custom property,
+since the Chromium prototype
+doesn't yet support queries on non-custom properties:
+
+- [Light/dark/invert themes with style queries](https://codepen.io/miriamsuzanne/pen/xxzXdJQ)
+- [List outdent with style queries](https://codepen.io/miriamsuzanne/pen/LYrOgwM?editors=1100)
 
 ## Detailed design discussion & alternatives
 
@@ -746,9 +1138,10 @@ we haven't found any clear need for it.
 
 - Chromium : Positive --
   There is already a partial (custom properties only)
-  prototype implementation behind a feature flag.
-- Gecko : No signals
-- Webkit : No signals
+  prototype implementation in v107+ behind the
+  'experimental web platform features' flag.
+- Gecko : [No signals](https://github.com/mozilla/standards-positions/issues/686)
+- Webkit : [No signals](https://github.com/WebKit/standards-positions/issues/57)
 
 ## References & acknowledgements
 
@@ -760,7 +1153,7 @@ Many of the goals and use-cases
 are based on the work of Lea Verou
 and others in the CSSWG-drafts Github issues,
 along with [Una Kravets](https://codepen.io/una/pen/abqKvXW)
-(Chrome Developer Relations).
+and others linked above.
 
 It has also been helpful
 to have the Chromium prototype for experimentation,
