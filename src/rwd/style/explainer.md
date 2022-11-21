@@ -48,20 +48,21 @@ Initial CSSWG issues:
 
 Currently open CSSWG issues:
 
+- [Higher level custom properties that control multiple declarations #5624][higher-level]
 - [Should style() queries allow !important flag? #7413](https://github.com/w3c/csswg-drafts/issues/7413)
 - [Move style queries of standard properties to level 4 #7185](https://github.com/w3c/csswg-drafts/issues/7185)
 - [Add ability to test for at-rule preludes #6966](https://github.com/w3c/csswg-drafts/issues/6966)
 
+[higher-level]: https://github.com/w3c/csswg-drafts/issues/5624
+
 Deferred issues for level 4:
 
 - [Extend style query syntax? #7068](https://github.com/w3c/csswg-drafts/issues/7068)
-
-Related CSSWG issues:
-
-- [Higher level custom properties that control multiple declarations #5624][higher-level]
 - [Define a syntax for state-based container queries #6402](https://github.com/w3c/csswg-drafts/issues/6402)
 
-[higher-level]: https://github.com/w3c/csswg-drafts/issues/5624
+Request for TAG review:
+
+- https://github.com/w3ctag/design-reviews/issues/787
 
 ## Introduction
 
