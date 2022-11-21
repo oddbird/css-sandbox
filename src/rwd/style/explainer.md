@@ -60,9 +60,10 @@ Deferred issues for level 4:
 - [Extend style query syntax? #7068](https://github.com/w3c/csswg-drafts/issues/7068)
 - [Define a syntax for state-based container queries #6402](https://github.com/w3c/csswg-drafts/issues/6402)
 
-Request for TAG review:
+Related links:
 
-- https://github.com/w3ctag/design-reviews/issues/787
+- [Request for TAG review](https://github.com/w3ctag/design-reviews/issues/787)
+- [Article & Use-Cases by Una Kravets](https://una.im/style-queries/)
 
 ## Introduction
 
