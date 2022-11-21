@@ -12,6 +12,14 @@
     - [Default containers for inherited properties](#default-containers-for-inherited-properties)
     - [Named containers for non-inherited properties](#named-containers-for-non-inherited-properties)
 - [Key scenarios](#key-scenarios)
+  - [Setting parameters in web components](#setting-parameters-in-web-components)
+  - [Contextual configuration without custom elements](#contextual-configuration-without-custom-elements)
+  - [Parameters for generated content](#parameters-for-generated-content)
+  - [Simple value cycles](#simple-value-cycles)
+  - [Complex value adjustments](#complex-value-adjustments)
+  - [Querying non-inherited properties](#querying-non-inherited-properties)
+  - [Using `var()` in container queries](#using-var-in-container-queries)
+  - [Replacing the 'variable space toggle' hack](#replacing-the-variable-space-toggle-hack)
 - [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
   - [Alternatives to an at-rule syntax](#alternatives-to-an-at-rule-syntax)
     - [Inline conditional functions](#inline-conditional-functions)
@@ -853,11 +861,30 @@ doesn't yet support queries on non-custom properties:
 - [Light/dark/invert themes with style queries](https://codepen.io/miriamsuzanne/pen/xxzXdJQ)
 - [List outdent with style queries](https://codepen.io/miriamsuzanne/pen/LYrOgwM?editors=1100)
 
-### Other use-cases to consider
+### Replacing the 'variable space toggle' hack
+
+The 'variable space toggle' hack
+has gained some attention
+as a workaround for simple true/false value conditions.
+See, for example:
 
 - https://lea.verou.me/2020/10/the-var-space-hack-to-toggle-multiple-values-with-one-custom-property/
 - https://github.com/propjockey/css-sweeper#css-is-a-programming-language-thanks-to-the-space-toggle-trick
 - https://css-tricks.com/the-css-custom-property-toggle-trick/
+
+In many cases,
+a container style query could be used
+to provide similar functionality.
+Some of these have already been demonstrated above.
+However, the restriction against self-querying
+can sometimes complicate those use-cases:
+
+- https://codepen.io/miriamsuzanne/pen/wvXyMZx
+
+If declaration-level conditional functions
+are able to work around that limitation,
+authors would have more options
+for balancing the limitations of each approach.
 
 ## Detailed design discussion & alternatives
 
@@ -869,19 +896,18 @@ as [higher-level controls][higher-level].
 
 #### Inline conditional functions
 
-There has been significant
-discussion around various
-[inline conditional functions](https://github.com/w3c/csswg-drafts/issues/5009#issuecomment-626072319)
-that would provide different
-sorts of control.
-Many of these seem useful,
+[Inline conditional functions](https://github.com/w3c/csswg-drafts/issues/5009#issuecomment-626072319)
+would provide a declaration-level control.
+There are several proposals,
 most notably Lea Verou's
 [inline `if()`](https://drafts.csswg.org/css-conditional-values-1/#if)
-proposal.
+proposal,
+which seem useful to pursue
+in parallel to this rule-block level feature.
 
-However, inline functions
+Inline functions
 have some limitations that can only be addressed
-with an at-rule or selector-level feature:
+at this higher level:
 
 - When controlling multiple properties
   based on a shared condition,
@@ -896,9 +922,8 @@ with an at-rule or selector-level feature:
   the cascade has already completed.
   Any fallbacks need to be defined inline as well.
 
-While inline conditions would be useful to pursue,
-they provide a more limited feature-set
-than a higher block-level approach.
+We don't see these as competing approaches,
+but features that would complement each other.
 
 #### Global constants
 
