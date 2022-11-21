@@ -1167,7 +1167,7 @@ we haven't found any clear need for it.
 
 ## Stakeholder Feedback / Opposition
 
-- Chromium : Positive --
+- Chromium : Positive —
   There is already a partial (custom properties only)
   prototype implementation in v107+ behind the
   'experimental web platform features' flag.
@@ -1179,14 +1179,14 @@ we haven't found any clear need for it.
 The CSS Containment spec is co-authored
 by Tab Atkins and Florian Rivoal.
 Elika Etimad was also involved
-in specifying style queries specifically.
+in specifying style queries.
 Many of the goals and use-cases
 are based on the work of Lea Verou
 and others in the CSSWG-drafts Github issues,
-along with [Una Kravets](https://codepen.io/una/pen/abqKvXW)
-and others linked above.
+along with Una Kravets and others linked above.
 
 It has also been helpful
 to have the Chromium prototype for experimentation,
-and feedback from the browser engineers involved:
+with feedback from Nicole Sullivan,
+and the browser engineers involved:
 Rune Lillesveen, and Anders Hartvoll Ruud.

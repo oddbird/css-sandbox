@@ -1,10 +1,7 @@
-draft: 2022-10-31
 title: Container Style Query Explainer
 raw_md: true
+created: 2022-11-21
 eleventyNavigation:
   key: style-query-explainer
-  title: Style Query Explainer [WIP]
+  title: Style Query Explainer
   parent: style-queries
-warn: |
-  This document is
-  a work-in-progress draft.
