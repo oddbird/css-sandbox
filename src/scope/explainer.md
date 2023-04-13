@@ -594,35 +594,31 @@ and then again in relation to proximity.
 
 #### Scope Specificity
 
-The current proposal
-is designed to match CSS Nesting
-when it comes to specificity.
-We can do that by
-applying the scope-root specificity
-to the overall specificity of each selector --
-as though de-sugared to `:is(<scope-start>)`.
-The following examples
-would all have a specificity of `[1, 0, 1]`:
+While 'scope' and 'specificity'
+have some overlap --
+and both impact on the priority
+of a declaration --
+we believe they should be handled separately
+in the cascade.
+Scope selectors are used for the purpose of scoping,
+and should not have their specificity added
+to the selectors that they scope.
+
+A small amount of (class-level) specificity
+can be added with explicit use of `:scope`,
+and the full weight of the scoping selectors
+can be added via the `&` selector:
 
 ```css
-@scope (#footer, footer) {
-  a { /* :is(#footer, footer) a */ }
-  :scope a { /* :is(#footer, footer) a */ }
+@scope (#media) {
+  img { /* [0, 0, 1] */ }
+  :scope img { /* [0, 1, 1] */ }
+  & img { /* [1, 0, 1] */ }
 }
 ```
 
-This matches the behavior of `&`
-in nested selectors,
-as well as ensuring the same specificity
-with or without the explicit use of `:scope`.
-
-While `:scope` has historically had a class-level specificity,
-that can be maintained in contexts where:
-
-- `:scope` is being used by JS APIs on a document fragment,
-  which has no inherent specificity of it's own.
-- `:scope` is referencing the document root,
-  and can be thought of as `:is(:root)`.
+This provides flexibility for authors
+without increasing specificity by default.
 
 Some [alternative approaches](#alternative-approaches-to-specificity)
 are discussed below.
@@ -1361,8 +1357,9 @@ achieve donut scope
 by appending a single attribute
 to each selector.
 If we wanted to match that behavior,
-we could give `:scope`/`:in()`
-the normal pseudo-class weight.
+we could give `:scope`
+the normal pseudo-class weight --
+even when implicitly added.
 Given the following code:
 
 ```css
@@ -1370,20 +1367,11 @@ Given the following code:
   img { /* implied :scope ancestor */ }
   :scope img { /* explicit :scope ancestor */ }
 }
-
-img:in(#media / .content) { /* donut selector */ }
 ```
 
 This approach would result in
 a specificity of `[0, 1, 1]`
 for each selector.
-
-Another option
-would be to remove scope from specificity entirely –
-for a final weight of `[0, 0, 1]`.
-That would "simplify" the impact of scope on the cascade,
-but at the expense of some clarity
-about the relationships.
 
 [Sara Soueidan has also proposed][scope-id]
 giving `@scope` the selector-weight of an `#ID`.
@@ -1394,6 +1382,37 @@ it seems less-intuitive & less flexible
 than the alternatives.
 
 [scope-id]: https://twitter.com/sarasoueidan/status/1351248295969103873?s=21
+
+The original proposal
+was designed to match CSS Nesting
+when it comes to specificity.
+We can do that by
+applying the scope-root specificity
+to the overall specificity of each selector --
+as though de-sugared to `:is(<scope-start>)`.
+The following examples
+would all have a specificity of `[1, 0, 1]`:
+
+```css
+@scope (#footer, footer) {
+  a { /* :is(#footer, footer) a */ }
+  :scope a { /* :is(#footer, footer) a */ }
+}
+```
+
+This matches the behavior of `&`
+in nested selectors,
+as well as ensuring the same specificity
+with or without the explicit use of `:scope`.
+
+However,
+the group has resolved in favor
+of scope not having any impact on specificity.
+While specificity is often
+the way authors think about managing priority,
+scope is a different concern
+(like layers or shadow context)
+and there is no reason to muddy the water.
 
 ## Spec History & Context
 
@@ -1510,6 +1529,10 @@ thanks for valuable feedback and advice from:
 - Yu Han
 
 ## Change log
+
+### 2023.04.13
+
+- Update the sections on specificity.
 
 ### 2023.03.21
 
