@@ -1,9 +1,9 @@
 ---
 draft: 2023-04-17
-title: Overflow Extensions Proposal & Explainer
+title: Overflow Extensions Proposal & Explainer [partial draft]
 eleventyNavigation:
   key: overflow-explainer
-  title: Proposal & Explainer
+  title: Proposal & Explainer [partial draft]
   parent: overflow
 ---
 
@@ -80,9 +80,43 @@ that could help authors
 flesh out the details of each pattern more elegantly,
 consistently, and accessibly.
 
-Some of the more common patterns
-could then be captured in
-new HTML elements, if needed.
+### Overlapping patterns
+
+The terms 'carousel' and 'tabs'
+are not clearly distinct in practice,
+but fall along a continuum
+of paged overflow.
+
+- On one end,
+  media-scroller carousels
+  (like the Netflix video selection interface)
+  are similar to horizontal overflow
+  with scroll-snapping,
+  and the occasional use of 'next/previous'
+  page-scrolling navigation.
+- Slide-show style carousels
+  often add small 'scroll-markers' (like dots)
+  that represent either
+  the individual items listed,
+  or the viewable pages
+  (if multiple items appear at once).
+- Product-image carousels will often
+  replace the dots with thumbnail image scroll-markers,
+  and only show one item per 'page'.
+  In this case general mouse scrolling
+  is often removed,
+  relying entirely on navigation controls
+  and (sometimes) touch-gesture based scrolling.
+- Tabs take that pattern even further,
+  often using header-like text for the scroll-markers,
+  enforcing the single-item-at-a-time view,
+  and often removing scroll-controls entirely.
+
+Rather than thinking of these
+as distinct patterns,
+we want to understand the underlying set of controls
+that are combined to create
+any given variation of the interface.
 
 ### Overflow changes based on context
 
@@ -143,6 +177,30 @@ handling content overflow presentation in HTML and CSS,
 rather than providing a generic solution
 to the 'tabs' interface design pattern.
 
+### Auto-advancing Carousels
+
+The term 'carousel'
+has a strong negative connotation
+in some circles,
+thanks to the poor user-experience
+of auto-advancing carousels
+often used on home pages
+to display 'recent' or 'featured' content.
+
+In this use-case,
+users rarely interact with the pattern,
+and generally don't see content
+beyond the first page of the carousel.
+While they can be forced
+to see additional pages
+via auto-advancement,
+it is very hard to interact with content
+that moves and changes unexpectedly.
+
+### Virtual lists & cyclic scrolling
+
+[defer for later]
+
 ## Proposed Solutions
 
 Rather than providing a single unified solution,
@@ -152,31 +210,89 @@ to CSS overflow and layout
 which would help authors
 better address the specific needs of their content.
 
+### Generating `::scroll-marker`s
+
+Requirements:
+- Do we need a property on the parent scroller
+  that generates the scroll-markers?
+  `[[item | fragment | snap] marker || paged] | normal`
+- Or are they generated via `content` on the marker itself?
+  If so, can markers be generated for multiple things?
+- Can generated elements be interactive controls?
+- Style the active marker
+  as a 'descendant' of the snapped fragment or item?
+  Does this require `@container state(snapped)` or similar?
+
+```css
+carousel:fragment::scroll-marker {
+  grid-area: markers;
+  content: '';
+  background: element();
+}
+```
+
+### Semantic item scroll-markers / tabs
+
+Requirements:
+- An attribute (or property?) for assigning scroll-marker behavior.
+- A way to 'hoist' the element into a parent grid context
+  (see layout )
+
+```html
+<tabs>
+  <section>
+    <h2 marker>tab label</h2>
+    <div class='panel'>tab panel</div>
+  </section>
+  …
+</tabs>
+```
+
+### Layout of scroll-markers / tabs
+
+Requirements
+- [[css-grid] Flow multiple elements together into same grid area][flow-items]
+- [[css-grid] grid area as element][flow-element]
+- [[css-grid] Decorative grid-cell pseudo-elements][style-area]
+
+### Previous/next fragment navigation
+
+Requirements:
+- Options for next item or fragment?
+- Generated or DOM-created or both?
+
+### Styling an overflow `:fragment()`
+
+[do we need this?]
+
 ## Key scenarios
 
+[TBD]
 
 ## Detailed design discussion & alternatives
 
+[TBD]
 
 ## Prior Art & Context
 
+- [`::scroll-marker` proposal](https://github.com/argyleink/ScrollSnapExplainers/tree/main/css-scroll-marker) from Una Kravets
 
 ## Stakeholder Feedback / Opposition
 
-TBD
+[TBD]
 
 ## References & Acknowledgements
 
 Much of this work is based on
 the research and proposals
-compiled by
-Brian Kardell,
-Dave Rupert,
-Jon Neal and others
-in the OpenUI Community Group --
-along with feedback to that process
-from accessibility specialists
-such as
-Sarah Higley and
-Scott O'Hara.
+compiled by others:
 
+- Una Kravets
+- Adam Argyle
+- Brian Kardell,
+  Dave Rupert,
+  Jon Neal,
+  Sarah Higley,
+  Scott O'Hara,
+  and others
+  in the OpenUI Community Group.
