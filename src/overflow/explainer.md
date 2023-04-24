@@ -177,42 +177,58 @@ handling content overflow presentation in HTML and CSS,
 rather than providing a generic solution
 to the 'tabs' interface design pattern.
 
-### Auto-advancing Carousels
+### Auto-advancing & Cyclic Home Page Carousels
 
 The term 'carousel'
 has a strong negative connotation
-in some circles,
+in web design circles,
 thanks to the poor user-experience
-of auto-advancing carousels
-often used on home pages
-to display 'recent' or 'featured' content.
+of home page carousels
+used to display an endless cycle of
+'featured' content.
 
-In this use-case,
-users rarely interact with the pattern,
+Readers rarely interact with this pattern,
 and generally don't see content
-beyond the first page of the carousel.
-While they can be forced
-to see additional pages
-via auto-advancement,
-it is very hard to interact with content
-that moves and changes unexpectedly.
+beyond the first page of the carousel,
+unless forced by auto-advancement,
+which causes a whole new list
+of accessibility and usability issues.
 
-### Virtual lists & cyclic scrolling
+While that makes us hesitant
+to use the term 'carousel' here,
+there are a range of much more essential use-cases
+that fall under the term --
+and it's helpful to understand
+the somewhat fluid and overlapping nature of
+scroll/carousel/tab/accordion patterns.
+
+### Virtual lists
 
 [defer for later]
 
 ## Proposed Solutions
 
-Rather than providing a single unified solution,
-we think there are a variety of
-improvements that can be made
-to CSS overflow and layout
-which would help authors
-better address the specific needs of their content.
+While previous proposals
+have started with a new element
+(eg `tabs` or `spicy-sections`),
+we want to start by addressing the core HTML/CSS
+layout and overflow issues
+that make such an element difficult to implement.
+This should provide a stepping-stone
+for both authors and browser vendors
+to explore and develop more narrowly defined
+web-components or HTML elements
+where they make sense.
+
+### The overflow `::fragment()`
+
+- Would it be useful to have something
+  like `overflow: paged`?
+- What does it actually mean
+  to select and style one fragment of the overflow?
 
 ### Generating `::scroll-marker`s
 
-Requirements:
 - Do we need a property on the parent scroller
   that generates the scroll-markers?
   `[[item | fragment | snap] marker || paged] | normal`
@@ -224,7 +240,7 @@ Requirements:
   Does this require `@container state(snapped)` or similar?
 
 ```css
-carousel:fragment::scroll-marker {
+.carousel::fragment::scroll-marker {
   grid-area: markers;
   content: '';
   background: element();
@@ -233,10 +249,9 @@ carousel:fragment::scroll-marker {
 
 ### Semantic item scroll-markers / tabs
 
-Requirements:
-- An attribute (or property?) for assigning scroll-marker behavior.
+- An attribute (or property?) for assigning scroll-marker behavior
 - A way to 'hoist' the element into a parent grid context
-  (see layout )
+  (see layout section)
 
 ```html
 <tabs>
@@ -250,7 +265,6 @@ Requirements:
 
 ### Layout of scroll-markers / tabs
 
-Requirements
 - [[css-grid] Flow multiple elements together into same grid area][flow-items]
 - [[css-grid] grid area as element][flow-element]
 - [[css-grid] Decorative grid-cell pseudo-elements][style-area]
@@ -260,10 +274,6 @@ Requirements
 Requirements:
 - Options for next item or fragment?
 - Generated or DOM-created or both?
-
-### Styling an overflow `:fragment()`
-
-[do we need this?]
 
 ## Key scenarios
 
@@ -275,6 +285,8 @@ Requirements:
 
 ## Prior Art & Context
 
+- [spicy-sections](https://daverupert.com/2021/10/native-html-tabs/)
+  from OpenUI
 - [`::scroll-marker` proposal](https://github.com/argyleink/ScrollSnapExplainers/tree/main/css-scroll-marker) from Una Kravets
 
 ## Stakeholder Feedback / Opposition
