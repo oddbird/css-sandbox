@@ -1,11 +1,21 @@
 ---
 draft: 2023-04-17
-title: Overflow Extensions Proposal & Explainer [partial draft]
+title: Overflow Extensions Explainer
 eleventyNavigation:
   key: overflow-explainer
-  title: Proposal & Explainer [partial draft]
+  title: Explainer
   parent: overflow
 ---
+
+{% warn %}
+This is a high-level draft explainer
+exploring issues with
+(and possible extensions to) CSS overflow/layout --
+especially in relation to common UX patterns
+like tabs, carousels, and accordions.
+This is not a complete proposal,
+but a starting place for further conversation.
+{% endwarn %}
 
 ## Authors
 
@@ -51,49 +61,89 @@ when necessary.
 There are many overlapping
 user-interface design patterns
 that can be used --
-from scrolling to accordions,
+from (standard, continuous) scrolling
+to accordions,
 tabs, slideshows, carousels,
-and so on.
+and various hybrid approaches.
 The lines between these patterns
 are often somewhat blurry:
 
-- A slideshow is one kind of carousel
-- A carousel can often be scrolled and snapped into position
-- Carousel with 'markers' for each view
-  are similar to tabs
-- An accordion behaves similar to deconstructed tabs
+- CSS currently supports several overflow values,
+  but the only available overflow-access interface
+  is the continuous scrolling container.
+  That can be extended with features
+  such as scroll-animation,
+  scroll-behavior, scroll-snapping,
+  and so on.
+- At the other end of a spectrum,
+  most tab and accordion patterns
+  are highly structured & sectioned overflow.
+  Each section has an interactive label
+  that can be used to show or hide
+  the section contents (often one-at-a-time).
+- In-between those two extremes,
+  there are a wide range of patterns
+  that get referred to as 'carousels'.
+  These are not limited to the (problematic)
+  infinite-auto-advancing home-page widgets,
+  but range from video-streaming
+  media selection,
+  to slide shows,
+  and e-commerce product-image viewers.
 
-While there's a lot of important minutia
-that can get lost in such a simplified list,
-the essential similarity
-is that all these patterns involve
-more control and careful management of 'overflow'
-beyond simple scrolling.
+There have been many attempts
+over the years
+to define new tab or carousel components --
+but they are often held up by:
+
+- The complexity of
+  use-case mixing and matching
+  patterns from scrollers, carousels,
+  tabs, and accordions
+- The need to work around many
+  underlying features
+  that are missing from the web platform
+- The fact that 'overflow'
+  is a presentational concern
+  tightly coupled with device/media/size conditions
+  (and therefor part of CSS),
+  but also requires interactive controls
+  generally left to HTML components or JavaScript.
 
 ## Goals
 
-The goal of this proposal
-is not to provide a one-size-fits-all solution
-for all overflowing UI,
+The goal of this explainer
+is not to propose yet another component,
+or provide a one-size-fits-all solution
+for all overflowing UI --
 but to consider some baseline improvements to CSS overflow
 that could help authors
 flesh out the details of each pattern more elegantly,
 consistently, and accessibly.
+This could also help form the scaffolding
+for future components, as needed.
+
+In some cases,
+we're able to propose a path forward --
+and in other cases,
+we simply document the problem
+and some of the tradeoffs
+with different approaches.
 
 ### Overlapping patterns
 
-The terms 'carousel' and 'tabs'
-are not clearly distinct in practice,
-but fall along a continuum
-of paged overflow.
+The patterns we're looking at
+fall along a continuum
+of scrolled and paged overflow:
 
 - On one end,
   media-scroller carousels
   (like the Netflix video selection interface)
   are similar to horizontal overflow
   with scroll-snapping,
-  and the occasional use of 'next/previous'
-  page-scrolling navigation.
+  and the occasional use of 'next/previous' navigation
+  that is sometimes linked to items
+  and sometimes to 'pages' of overflow.
 - Slide-show style carousels
   often add small 'scroll-markers' (like dots)
   that represent either
@@ -104,19 +154,20 @@ of paged overflow.
   replace the dots with thumbnail image scroll-markers,
   and only show one item per 'page'.
   In this case general mouse scrolling
-  is often removed,
-  relying entirely on navigation controls
-  and (sometimes) touch-gesture based scrolling.
-- Tabs take that pattern even further,
-  often using header-like text for the scroll-markers,
-  enforcing the single-item-at-a-time view,
-  and often removing scroll-controls entirely.
+  (and visible scroll-bars)
+  are often removed in favor of tab controls,
+  while sometimes leaving gesture-based scrolling intact.
+- Tabs are similar,
+  but may often removing scroll-controls entirely.
 
 Rather than thinking of these
 as distinct patterns,
 we want to understand the underlying set of controls
 that are combined to create
-any given variation of the interface.
+any given variation.
+Primarily: paged overflow
+and interactive scroll markers
+in a variety of forms.
 
 ### Overflow changes based on context
 
@@ -137,11 +188,11 @@ semantics do play a clear role in
 what patterns make sense
 (the difference between a carousel and tabs
 often comes down to how content is sectioned),
-and different types of 'overflow' always require
+and different types of 'overflow' require
 different interactions.
 Any solutions provided here
 have to account for changes in overflow
-based on context --
+based on device/media/container context --
 and help authors access the proper interactions
 and accessible roles
 for each type of overflow.
@@ -151,7 +202,8 @@ for each type of overflow.
 ### Application-Level Tabs
 
 The 'tabs' interface pattern
-has two common use-cases:
+has two common
+and somewhat distinct use-cases:
 
 1. Managing display of sectioned content
    within a single document
@@ -204,9 +256,10 @@ scroll/carousel/tab/accordion patterns.
 
 ### Virtual lists
 
-[defer for later]
+Virtual lists are tightly related to overflow,
+but outside the scope of this document.
 
-## Proposed Solutions
+## Possible solutions
 
 While previous proposals
 have started with a new element
@@ -220,14 +273,119 @@ to explore and develop more narrowly defined
 web-components or HTML elements
 where they make sense.
 
-### The overflow `::fragment()`
+### Paged overflow, in the browser
 
-- Would it be useful to have something
-  like `overflow: paged`?
-- What does it actually mean
-  to select and style one fragment of the overflow?
+Simple carousels (or 'media-scrollers')
+are often built with scrollable overflow
+and scroll-snap targets.
+What makes it a 'carousel' is the addition
+of 'paged' navigation options:
 
-### Generating `::scroll-marker`s
+- next/previous page arrows
+- page markers (often dots)
+  to show the number of pages
+  and current active position
+
+Paged overflow isn't a new idea in CSS.
+While implementations have not always been
+complete or consistent,
+paged overflow is already well-defined for print,
+and has a number of
+[other use-cases](https://rachelandrew.co.uk/archives/2020/04/07/making-things-better/)
+if it were available in the browser.
+
+Establishing paged overflow on an element
+would generate `::page` pseudo-element
+[fragmentainers](https://developer.mozilla.org/en-US/docs/Glossary/Fragmentainer)
+for descendant elements & content to flow through.
+
+- pages are created as-needed
+  based on the amount of content,
+  and the size available to each page.
+- by default, a page could be the size
+  of the containing box (not including overflow),
+  so that scrolling the view 100%
+  would bring a new 'page' fully into view.
+- Pages could be resized,
+  which would impact how much content
+  fits in a given page,
+  how many pages are visible without scrolling,
+  and how many pages are needed
+  for the flow of content.
+- Individual pages could be targeted
+  using a syntax similar to `nth-child`
+
+It's not immediately clear
+what syntax would be best
+for invoking this sort of paged overflow.
+While this behavior is related to both `overflow`
+and (in some ways) `display`,
+neither property seems like a particularly good fit.
+
+Paged use-cases (e.g. carousels)
+might involve scrolling between pages,
+while others (e.g. multicol wrapping) may not.
+So pagination is not necessarily alternative to scrolled overflow.
+Even if paged overflow had an `auto`-like scroll behavior,
+to allow scrolling and non-scrolling pages,
+single-axis paged overflow(`-x`/`-y`) doesn't make much sense.
+
+Authors will also need a mechanism
+for handling the layout of
+elements within pages
+(and the layout of the pages themselves) --
+both of which require display values.
+It's possible the pagination and layout controls
+could be combined in a single property
+(e.g. `display: paged grid`)
+if it makes sense for them to cascade together.
+Since display is a shorthand for
+inside and outside values,
+pagination would either need to be added
+to one of those properties
+or a third new display sub-property.
+
+### Styling paged overflow
+
+As mentioned above,
+authors will need a way to provide
+`display` values for both
+
+1. the layout of `::page` elements themselves
+2. the layout of child contents
+  flowing through those pages
+
+I would expect the overflowing/paginated parent element
+to handle the layout of pages,
+in which case
+a new (`::page-contents`?) could be used
+for the layout of content flowing through pages
+(or vice versa).
+An additional wrapping pseudo-element
+like this might only support a limited subset of
+CSS properties or pseudo-classes.
+
+In some cases,
+an author would style all `::page` elements,
+but it would often be useful
+to target specific pages
+with e.g. `::page:nth-child(even)`
+(or `::page(even)`).
+However,
+there might be recursion issues
+with other combinations,
+such as `::page:nth-last-child(even)`
+or `::page:focus-within`,
+if the styles applied
+could change the number of pages
+or placement of content in those pages.
+
+{% note %}
+Could these pseudo-classes be used for paged
+(e.g. print) media as well?
+{% endnote %}
+
+### Generating markers with `::scroll-marker`
 
 - Do we need a property on the parent scroller
   that generates the scroll-markers?
@@ -240,7 +398,7 @@ where they make sense.
   Does this require `@container state(snapped)` or similar?
 
 ```css
-.carousel::fragment::scroll-marker {
+.carousel::page::scroll-marker {
   grid-area: markers;
   content: '';
   background: element();
@@ -287,7 +445,7 @@ Requirements:
 
 - [spicy-sections](https://daverupert.com/2021/10/native-html-tabs/)
   from OpenUI
-- [`::scroll-marker` proposal](https://github.com/argyleink/ScrollSnapExplainers/tree/main/css-scroll-marker) from Una Kravets
+- [`::scroll-marker` proposal](https://github.com/argyleink/ScrollSnapExplainers/tree/main/css-scroll-marker) from Una Kravets & Adam Argyle
 
 ## Stakeholder Feedback / Opposition
 
@@ -299,6 +457,7 @@ Much of this work is based on
 the research and proposals
 compiled by others:
 
+- Rachel Andrew
 - Una Kravets
 - Adam Argyle
 - Brian Kardell,
@@ -308,3 +467,10 @@ compiled by others:
   Scott O'Hara,
   and others
   in the OpenUI Community Group.
+
+{% note %}
+- document snapping approach
+- scroll markers are tabs (aria)
+- focus groups
+- gestures vs mouse (mouse fling?)
+{% endnote %}
