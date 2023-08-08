@@ -1,5 +1,5 @@
 ---
-draft: 2023-06-22
+draft: 2023-08-08
 title: CSS Mixins and Functions
 eleventyNavigation:
   key: mixins-functions
@@ -341,9 +341,7 @@ in the CSS Working Group issue tracker.
 Since then,
 the proposal has gone through
 several revisions and updates.
-A long the way,
-a few issues/goals have come up
-that are worth noting:
+Note that:
 
 - Functions would be resolved
   at the same time as variable substitution
@@ -353,13 +351,11 @@ that are worth noting:
 - This would be a declarative version
   of the more full-featured Houdini JS feature
 
-The current state of the proposal
-looks something like this
-(to produce a fluid typography value
-based on viewport widths):
+The current (2023-08-08) proposal
+uses these examples,
+for clamped fluid typography:
 
 ```css
-/* line breaks for readability only */
 @custom-function --fluid-ratio(
   --min-width "<length>",
   --max-width "<length>"
@@ -382,4 +378,113 @@ p {
   browsers would also need to implement
   [unit-division in math functions](https://drafts.csswg.org/css-values/#calc-type-checking)
   for this use-case.
+{% endnote %}
+
+And for generating a checkerboard:
+
+```css
+@custom-function --checkerboard(--size "<length>") {
+   result: linear-gradient(
+        45deg,
+        silver 25%,
+        transparent 25%,
+        transparent 75%,
+        silver 75%
+      )
+      0px 0px / var(--size) var(--size),
+    linear-gradient(
+        45deg,
+        silver 25%,
+        transparent 25%,
+        transparent 75%,
+        silver 75%
+      )
+      calc(var(--size) / 2) calc(var(--size) / 2) / var(--size) var(--size);
+}
+
+.used {
+  background: --checkerboard(32px);
+}
+```
+
+In addition to some bike-shedding of the syntax,
+there are several open questions in the thread:
+
+- Can authors provide a fallback output
+  when invalid arguments are provided?
+- Would it be helpful to include parameter fallbacks
+  in the function definition
+  (this is already possible in the `var()` syntax,
+  when applying the parameters)?
+- Can authors define internal custom properties,
+  in order to break apart the internal logic?
+- Can authors use conditional at-rules
+  inside the function logic?
+- Can functions expose a parameter
+  that accepts bare calculations (without `calc()` syntax)
+  similar to `clamp()` etc?
+- Can functions perform recursive function calls?
+- Can functions be called with named
+  (rather than positional) arguments?
+
+I hope to expand on this proposal,
+and explore some of those questions along the way.
+
+### Defining a function: the `@function` rule
+
+In order to define a custom function,
+we need several bits of information:
+
+- A required `function-name`
+- An optional ordered parameter list, where each `parameter` includes:
+  - A required `parameter-name`
+  - An optional(?) `parameter-syntax`
+  - An optional `parameter-default-value`
+- Some amount of internal logic using `nested-rules`
+- A returned `result` value
+
+The proposed syntax
+(with a few adjustments)
+could look something like:
+
+```
+@function <function-name> [( <parameter>* )]? {
+  <nested-rules>
+
+  @return <result>;
+}
+```
+
+The `function-name` is a dashed-ident.
+If multiple functions have the same name,
+then functions in a higher cascade layer take priority,
+and functions defined later have priority
+within a given layer.
+
+The `nested-rules` can include custom property declarations
+(which are scoped to the function),
+as well as conditional at-rules
+(which may contain further nested `@return` rules).
+Element-specific conditions (such as container queries)
+are resolved for each element that calls the function.
+
+I like the `@return` at-rule syntax
+(rather than a `result` property)
+simply because it helps distinguish
+the final resulting value
+from other internal logic
+and nested rules.
+The `result` itself can be any valid value
+allowed in CSS custom properties.
+When multiple `@return` rules are defined,
+the first valid return value is used.
+
+{% note %}
+  Using the first return is more consistent with other languages,
+  but not consistent with other aspects of CSS.
+  However, it doesn't seem like
+  the usual CSS last-takes-precedence behavior
+  would provide much benefit in this situation.
+  Implicit support fallbacks are unreliable
+  when the output syntax is not well defined.
 {% endnote %}
