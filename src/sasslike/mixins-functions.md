@@ -321,20 +321,16 @@ The ability to declare this logic in CSS
 rather than a pre-processor
 would provide several benefits:
 
-- Reduce the external dependencies and build steps
+- _Reduce the external dependencies_ and build steps
   required in order to generate the code
-- Reduce the file size delivered from the server
+- _Reduce the file size delivered_ from the server
   (though this may be negligible after compression &
   increased client-side processing)
-
-But the primary and most powerful benefit
-would be the ability to
-_use custom properties as arguments_ --
-so that the mixins or functions
-could respond to changes in the cascade.
-Replicating that behavior
-in a CSS pre-processor
-is nearly impossible.
+- _use custom properties as arguments_
+  so that the mixins or functions
+  could respond to changes in the cascade
+- _use media/container/support conditions_
+  as part of the internal logic
 
 ## Proposal: Basic Custom Functions
 
