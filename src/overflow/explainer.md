@@ -312,10 +312,10 @@ dynamically generating all of the required components:
 
 ```css
 carousel {
-  grid-template-columns: [previous] auto [scroller] 1fr [next] auto;
-  grid-template-rows: 
-    [carousel] 1fr 
-    [markers] auto;
+  grid-template: 
+    'previous scroller next' 1fr
+    '. markers .' auto
+    / auto 1fr auto;
   
   > li {
     /* Flow into scroller area */
