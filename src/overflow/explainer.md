@@ -286,7 +286,7 @@ for authors to get right.
 
 ### Carousel example
 
-![Carousel boxes](carousel-boxes.svg)
+![Carousel boxes](../carousel-boxes.svg)
 
 As a strawman example,
 a developer should be able to use the following HTML
