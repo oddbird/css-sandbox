@@ -312,42 +312,48 @@ dynamically generating all of the required components:
 
 ```css
 carousel {
+  display: grid;
   grid-template: 
     'previous scroller next' 1fr
     '. markers .' auto
     / auto 1fr auto;
-  
+
   > li {
-    /* Flow into scroller area */
+    /* Flow into scroller grid-flow defined below */
     grid-flow: --scroller;
   }
-  
-  &::grid-flow(scroller) {
+
+  &::grid-flow(--scroller) {
+    grid-area: scroller;
     /* Paginate overflow? */
     overflow: paginate;
     scroll-snap-type: x mandatory;
-    
+
     &::page {
       /* style all pages */
       scroll-snap-align: center;
-      
+
       &:not(:active) {
         interactivity: inert;
         opacity: .5;
       }
-      
+
       /* Create markers for each page */
       ::marker {
-        /* Flow them into the markers area */
+        /* Flow them into the markers grid-flow */
         grid-flow: --markers;
       }
     }
   }
-  
+
+  &::grid-flow(--markers) {
+    grid-area: markers;
+  }
+
   &::next {
     grid-area: next;
   }
-  
+
   &::previous {
     grid-area: previous;
   }

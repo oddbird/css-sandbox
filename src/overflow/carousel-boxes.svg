@@ -9,6 +9,9 @@
    id="svg1"
    inkscape:version="1.3 (0e150ed, 2023-07-21)"
    sodipodi:docname="carousel-boxes.svg"
+   inkscape:export-filename="carousel-boxes.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,14 +28,15 @@
      inkscape:document-units="px"
      showborder="true"
      inkscape:zoom="1.1390603"
-     inkscape:cx="498.65665"
-     inkscape:cy="336.68103"
+     inkscape:cx="125.10312"
+     inkscape:cy="259.42437"
      inkscape:window-width="1216"
      inkscape:window-height="894"
      inkscape:window-x="708"
-     inkscape:window-y="1534"
+     inkscape:window-y="1506"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     inkscape:export-bgcolor="#ffffffff" />
   <defs
      id="defs1">
     <rect
@@ -56,7 +60,7 @@
     <rect
        x="14.046666"
        y="16.680416"
-       width="161.53658"
+       width="180.85072"
        height="24.581667"
        id="rect9" />
     <rect
@@ -122,8 +126,8 @@
     <rect
        x="14.046666"
        y="16.680416"
-       width="167.68199"
-       height="26.3375"
+       width="187.87404"
+       height="25.459583"
        id="rect44" />
     <rect
        x="14.046666"
@@ -166,6 +170,13 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none"
+       id="rect4"
+       width="250"
+       height="142.5"
+       x="0"
+       y="0" />
     <g
        id="g38"
        transform="translate(114.5)">
@@ -193,9 +204,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect38);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan2"><tspan
+             id="tspan8"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan1">::page</tspan></tspan></text>
+               id="tspan3">::page</tspan></tspan></text>
       </g>
       <g
          id="g33">
@@ -220,9 +231,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect39);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan5"><tspan
+             id="tspan16"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan4">&lt;li&gt;</tspan></tspan></text>
+               id="tspan12">&lt;li&gt;</tspan></tspan></text>
       </g>
       <g
          id="g35"
@@ -248,9 +259,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect40);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan7"><tspan
+             id="tspan20"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan6">&lt;li&gt;</tspan></tspan></text>
+               id="tspan18">&lt;li&gt;</tspan></tspan></text>
       </g>
       <g
          id="g37"
@@ -276,9 +287,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect41);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan10"><tspan
+             id="tspan25"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan9">&lt;li&gt;</tspan></tspan></text>
+               id="tspan22">&lt;li&gt;</tspan></tspan></text>
       </g>
     </g>
     <rect
@@ -302,9 +313,9 @@
        style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="14.046875"
          y="33.709884"
-         id="tspan13"><tspan
+         id="tspan48"><tspan
            style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-           id="tspan11">&lt;carousel&gt;</tspan></tspan></text>
+           id="tspan28">&lt;carousel&gt;</tspan></tspan></text>
     <g
        id="g14"
        transform="translate(12.5)">
@@ -325,8 +336,8 @@
       <rect
          style="fill:#eaecff;fill-opacity:1;stroke:#0002fe;stroke-width:1;stroke-dasharray:none;stroke-opacity:1"
          id="rect8"
-         width="42.674244"
-         height="8.5229931"
+         width="46.459103"
+         height="8.4820957"
          x="8"
          y="13" />
       <text
@@ -336,9 +347,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect9);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan15"><tspan
+           id="tspan50"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan14">::grid-flow(scroller)</tspan></tspan></text>
+             id="tspan49">::grid-flow(--scroller)</tspan></tspan></text>
     </g>
     <g
        id="g18">
@@ -363,9 +374,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect17);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan19"><tspan
+           id="tspan52"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan17">::previous</tspan></tspan></text>
+             id="tspan51">::previous</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
@@ -395,9 +406,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect21);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan23"><tspan
+           id="tspan54"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan21">::next</tspan></tspan></text>
+             id="tspan53">::next</tspan></tspan></text>
     </g>
     <g
        id="g29">
@@ -425,9 +436,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect13);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan26"><tspan
+             id="tspan56"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan24">::page</tspan></tspan></text>
+               id="tspan55">::page</tspan></tspan></text>
       </g>
       <g
          id="g23">
@@ -452,9 +463,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect23);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan29"><tspan
+             id="tspan58"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan27">&lt;li&gt;</tspan></tspan></text>
+               id="tspan57">&lt;li&gt;</tspan></tspan></text>
       </g>
       <g
          id="g25"
@@ -480,9 +491,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect26);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan31"><tspan
+             id="tspan60"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan30">&lt;li&gt;</tspan></tspan></text>
+               id="tspan59">&lt;li&gt;</tspan></tspan></text>
       </g>
       <g
          id="g28"
@@ -508,9 +519,9 @@
            style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect29);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="14.046875"
              y="33.709884"
-             id="tspan33"><tspan
+             id="tspan62"><tspan
                style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-               id="tspan32">&lt;li&gt;</tspan></tspan></text>
+               id="tspan61">&lt;li&gt;</tspan></tspan></text>
       </g>
     </g>
     <g
@@ -523,12 +534,12 @@
          x="20.630882"
          y="103.13088" />
       <rect
-         style="fill:#efffcf;fill-opacity:0.666667;stroke:#89d700;stroke-width:1.0123;stroke-dasharray:none;stroke-opacity:0.666667"
+         style="fill:#efffcf;fill-opacity:0.666667;stroke:#89d700;stroke-width:1.00282;stroke-dasharray:none;stroke-opacity:0.666667"
          id="rect43"
-         width="44.56348"
-         height="8.9877052"
-         x="20.506147"
-         y="103.00615" />
+         width="47.747177"
+         height="8.997179"
+         x="20.501411"
+         y="103.00141" />
       <text
          xml:space="preserve"
          transform="matrix(0.25000035,0,0,0.25,19.096594,100.53132)"
@@ -536,9 +547,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect44);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan35"><tspan
+           id="tspan64"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan34">::grid-flow(markers)</tspan></tspan></text>
+             id="tspan63">::grid-flow(--markers)</tspan></tspan></text>
     </g>
     <g
        id="g47"
@@ -564,9 +575,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect47);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan37"><tspan
+           id="tspan66"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan36">::marker</tspan></tspan></text>
+             id="tspan65">::marker</tspan></tspan></text>
     </g>
     <g
        id="g49"
@@ -592,9 +603,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect50);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan39"><tspan
+           id="tspan68"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan38">::marker</tspan></tspan></text>
+             id="tspan67">::marker</tspan></tspan></text>
     </g>
     <g
        id="g52"
@@ -620,9 +631,9 @@
          style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect53);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
            x="14.046875"
            y="33.709884"
-           id="tspan41"><tspan
+           id="tspan70"><tspan
              style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-             id="tspan40">::marker</tspan></tspan></text>
+             id="tspan69">::marker</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
@@ -631,9 +642,9 @@
        style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect54);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="14.046875"
          y="33.709884"
-         id="tspan43"><tspan
+         id="tspan72"><tspan
            style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-           id="tspan42">page 1</tspan></tspan></text>
+           id="tspan71">page 1</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.25000035,0,0,0.25,66.702948,121.38184)"
@@ -641,9 +652,9 @@
        style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect55);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="14.046875"
          y="33.709884"
-         id="tspan45"><tspan
+         id="tspan74"><tspan
            style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-           id="tspan44">page 2</tspan></tspan></text>
+           id="tspan73">page 2</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.25000035,0,0,0.25,91.702948,121.38184)"
@@ -651,8 +662,8 @@
        style="font-size:18.6667px;white-space:pre;shape-inside:url(#rect56);display:inline;fill:#deffdd;fill-opacity:1;stroke:#00971b;stroke-width:1.008;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="14.046875"
          y="33.709884"
-         id="tspan47"><tspan
+         id="tspan76"><tspan
            style="font-family:Roboto;-inkscape-font-specification:Roboto;fill:#000000;stroke:none"
-           id="tspan46">page 3</tspan></tspan></text>
+           id="tspan75">page 3</tspan></tspan></text>
   </g>
 </svg>
