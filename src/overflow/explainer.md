@@ -284,6 +284,82 @@ Below, we'll explore some of the features
 that are still missing or difficult
 for authors to get right.
 
+### Carousel example
+
+![Carousel boxes](../carousel-boxes.svg)
+
+As a strawman example,
+a developer should be able to use the following HTML
+to create the visualized carousel:
+
+```html
+<carousel>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+  <li></li>
+</carousel>
+```
+
+The visualized carousel
+can be constructed
+with the following style
+dynamically generating all of the required components:
+
+```css
+carousel {
+  display: grid;
+  grid-template: 
+    'previous scroller next' 1fr
+    '. markers .' auto
+    / auto 1fr auto;
+
+  > li {
+    /* Flow into scroller grid-flow defined below */
+    grid-flow: --scroller;
+  }
+
+  &::grid-flow(--scroller) {
+    grid-area: scroller;
+    /* Paginate overflow? */
+    overflow: paginate;
+    scroll-snap-type: x mandatory;
+
+    &::page {
+      /* style all pages */
+      scroll-snap-align: center;
+
+      &:not(:active) {
+        interactivity: inert;
+        opacity: .5;
+      }
+
+      /* Create markers for each page */
+      ::marker {
+        /* Flow them into the markers grid-flow */
+        grid-flow: --markers;
+      }
+    }
+  }
+
+  &::grid-flow(--markers) {
+    grid-area: markers;
+  }
+
+  &::next {
+    grid-area: next;
+  }
+
+  &::previous {
+    grid-area: previous;
+  }
+}
+```
+
 ### Paged overflow, in the browser
 
 Simple carousels (or 'media-scrollers')
