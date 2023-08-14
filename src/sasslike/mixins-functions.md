@@ -1,5 +1,5 @@
 ---
-draft: 2023-08-08
+draft: 2023-08-14
 title: CSS Mixins and Functions
 eleventyNavigation:
   key: mixins-functions
@@ -345,7 +345,7 @@ Note that:
 
 - Functions would be resolved
   at the same time as variable substitution
-- Function parameters defined with a CSSOM 'type'
+- Function parameters defined with a CSSOM 'syntax'
   can be validated at parse time
   (like `@property`-registered variables)
 - This would be a declarative version
@@ -412,7 +412,7 @@ there are several open questions in the thread:
 
 - Can authors provide a fallback output
   when invalid arguments are provided?
-- Would it be helpful to include parameter fallbacks
+- Would it be helpful to include default parameter values
   in the function definition
   (this is already possible in the `var()` syntax,
   when applying the parameters)?
@@ -448,7 +448,7 @@ The proposed syntax
 could look something like:
 
 ```
-@function <function-name> [( <parameter>* )]? {
+@function <function-name> [( <parameter-list> )]? {
   <nested-rules>
 
   @return <result>;
@@ -488,3 +488,155 @@ the first valid return value is used.
   Implicit support fallbacks are unreliable
   when the output syntax is not well defined.
 {% endnote %}
+
+Each `<parameter>`
+in the `<parameter-list>` needs to have a
+`<name>`, and `<syntax>` --
+along with an optional `<default-value>`
+(otherwise fall-back to the guaranteed-invalid value).
+There's no clearly established way
+to associate three parameter parts like this,
+but we do have an existing syntax
+for associating custom property names and values.
+By using that established declaration syntax
+with `:` between name and value,
+and `;` as the delimiter between parameters,
+we can allow any valid CSS values as defaults --
+even when commas are present in the default value.
+
+From that baseline,
+the primary question is where/how
+to capture the parameter `<syntax>`.
+Since the value-side of a declaration (right side)
+is extremely permissive,
+I would suggest adding syntax rules
+to the property/name (left) side of the colon.
+For example, neither space nor parenthesis characters
+are allowed in an ident token,
+and could be used to separate name from syntax rules:
+
+```css
+/* using parenthesis */
+@function --contrast(
+  /* if <syntax> is optional, accept name only */
+  --color;
+  --ratio;
+
+  /* name and syntax, no default value */
+  --color("<color>");
+  --ratio("<number>");
+
+  /* name <syntax>: default */
+  --color("<color>"): #222;
+  --ratio("<number>"): 7;
+) { /* … */ }
+
+/* using space */
+@function --contrast(
+  /* if <syntax> is optional, accept name only */
+  --color;
+  --ratio;
+
+  /* name and syntax, no default value */
+  --color "<color>";
+  --ratio "<number>";
+
+  /* name <syntax>: default */
+  --color "<color>": #222;
+  --ratio "<number>": 7;
+) { /* … */ }
+```
+
+Adapting the fluid ratio function above
+to my proposed syntax
+might looks like this:
+
+```css
+@function --fluid-ratio(
+  --min-width "<length>": 300px;
+  --max-width "<length>": 2000px;
+) {
+  --scale: calc(var(--max-width) - var(--min-width));
+  --current: calc(100vw - var(--min-width));
+  --fraction: calc(var(--position) / var(--scale));
+
+  @return clamp(
+    0%,
+    100% * var(--fraction),
+    100%
+  );
+}
+```
+
+My assumption here
+would be that custom properties
+defined inside the function
+are not available
+on elements where the function is used,
+and (maybe less obvious)
+custom properties defined or inherited on the element
+can not be referenced in the function
+(unless explicitly provided as arguments):
+
+```css
+.example {
+  /* these values are not available in the function */
+  --min-width: 200px;
+  --max-width: 960px;
+
+  /* default values are used for min and max width parameters */
+  font-size: mix(--fluid-ratio(), 1.5em, 3em);
+
+  /* arguments have to be passed in explicitly */
+  line-height: mix(
+    --fluid-ratio(var(--min-width), var(--max-width)),
+    1.4,
+    1.2
+  );
+}
+```
+
+## Detailed discussion and open questions
+
+### Can a parameter accept a `<calc-sum>` syntax?
+
+This question was raised
+by [Brandon McConnell](https://github.com/w3c/csswg-drafts/issues/7490#issuecomment-1256880496)
+in the 'Declarative Custom Functions' issue
+(see point 5, even though it's not specific to recursion).
+The goal is to provide custom functions
+that take raw calc expressions,
+without being explicitly wrapped in a nested
+`calc()` function,
+similar to the way other math functions work:
+
+```css
+.item {
+  width: min(100% - 1em, 30em);
+}
+```
+
+On the one hand,
+custom property substitution
+makes it trivial to declare bare math,
+and later call that math inside a `calc()` function.
+This already works:
+
+```css
+html {
+  --l: 100% - 50%;
+  background: hsl(0deg 100% calc(var(--l)));
+}
+```
+
+The only complexity here
+is how that logic interacts with
+a registered property syntax.
+The value `100% - 50%` is not a valid
+`<percentage>` value,
+while `calc(100% - 50%)` is.
+In order to define a parameter
+with a registered syntax
+that accepts a calculation,
+we would need to expose the `<calc-sum>`
+grammar as a valid syntax to use.
