@@ -1,5 +1,5 @@
 ---
-draft: 2023-08-14
+draft: 2023-08-15
 title: CSS Mixins and Functions
 eleventyNavigation:
   key: mixins-functions
@@ -332,7 +332,7 @@ would provide several benefits:
 - _use media/container/support conditions_
   as part of the internal logic
 
-## Proposal: Basic Custom Functions
+### Existing Proposal for Custom Functions
 
 In July of 2022,
 Johannes Odland proposed
@@ -430,7 +430,7 @@ there are several open questions in the thread:
 I hope to expand on this proposal,
 and explore some of those questions along the way.
 
-### Defining a function: the `@function` rule
+## Defining a function: the `@function` rule
 
 In order to define a custom function,
 we need several bits of information:
@@ -451,7 +451,7 @@ could look something like:
 @function <function-name> [( <parameter-list> )]? {
   <nested-rules>
 
-  @return <result>;
+  result: <result>;
 }
 ```
 
@@ -461,33 +461,136 @@ then functions in a higher cascade layer take priority,
 and functions defined later have priority
 within a given layer.
 
+### Return values
+
+The specified `<result>` value can
+accept the same broad CSS syntax as custom property values.
+At computed value time,
+that output can be resolved and validated
+against the property that called the function.
+
+On first glance,
+I like the alternative `@return` at-rule syntax
+rather than a `result` descriptor.
+
+- It helps distinguish
+  the final returned value from any internal logic
+  like custom properties and nested rules
+- Result is not a property,
+  but looks a lot like one
+
+However, the fallback behavior proposed below
+is more familiar in CSS properties/descriptors --
+and less common in imperative languages like Sass
+(which uses `@return`) or JS (which uses `return`).
+Still, either syntax should be able to support
+the same basic behavior,
+so we can bikeshed the details later.
+
+When multiple `result`s are returned,
+we need a way to determine which one is used.
+While many languages allow an 'eager'
+_first-takes-precedence_ function return,
+CSS often uses a _last-takes-precedence_ approach --
+both in the cascade of properties,
+and to resolve naming conflicts (e.g. keyframes).
+
+In the cascade,
+that approach serves another purpose:
+authors can provide fallback values first,
+and then override those values
+in any browser that supports the override:
+
+```css
+html {
+  background-color: #0f0;
+  /* browsers without p3 support will ignore this */
+  background-color: color(display-p3 0 1 0);
+}
+```
+
+But this fallback behavior is handled at _parse time_,
+and the unknown declaration
+is immediately discarded.
+That makes the same behavior impossible
+using custom properties,
+which only become _invalid at computed value time_
+(after the cascade has completed).
+By the time the variable is invalidated,
+the previous property has already been discarded:
+
+```css
+html {
+  --p3-green: color(display-p3 0 1 0);
+  /* this value is discarded at parse time */
+  background-color: #0f0;
+  /* this property is used even when p3 colors are not supported */
+  /* browsers without p3 support treat it as `unset` */
+  background-color: var(--p3-green);
+}
+```
+
+Custom functions may provide a workaround for this,
+by allowing fallback `result` values --
+all of which are validated at computed value time,
+without some being discarded at parse time:
+
+```css
+@function --try(
+  --ideal "*";
+  --fallback "*";
+) {
+  result: var(--fallback);
+  result: var(--ideal);
+}
+
+html {
+  background-color: --try(var(--p3-green), #0f0);
+}
+```
+
+Since custom functions are also resolved
+at computed value time,
+both possible results can be resolved
+as part of that process --
+and validated against the property calling the function
+(e.g. `background-color`).
+
+{% note %}
+  The CSS Working Group
+  [has already approved](https://github.com/w3c/csswg-drafts/issues/5055#issuecomment-1022425917)
+  a `first-valid()` function like this,
+  which has not been implemented.
+{% endnote %}
+
+In addition to browser support fallbacks,
+this behavior could also
+solve the earlier question
+about providing a fallback result
+when given invalid arguments.
+Authors could provide an initial `result`
+that does not rely on the arguments provided,
+and get that returned value
+when others fail.
+
+### Nested rules
+
 The `nested-rules` can include custom property declarations
 (which are scoped to the function),
 as well as conditional at-rules
-(which may contain further nested `@return` rules).
+(which may contain further nested
+custom properties and `@return` values).
 Element-specific conditions (such as container queries)
 are resolved for each element that calls the function.
 
-I like the `@return` at-rule syntax
-(rather than a `result` property)
-simply because it helps distinguish
-the final resulting value
-from other internal logic
-and nested rules.
-The `result` itself can be any valid value
-allowed in CSS custom properties.
-When multiple `@return` rules are defined,
-the first valid return value is used.
+Only custom properties and conditional rules
+are useful within a function.
+I would expect any other (non-custom property) declarations
+and (non-conditional) rules
+to be ignored and discarded
+without invalidating the entire function.
 
-{% note %}
-  Using the first return is more consistent with other languages,
-  but not consistent with other aspects of CSS.
-  However, it doesn't seem like
-  the usual CSS last-takes-precedence behavior
-  would provide much benefit in this situation.
-  Implicit support fallbacks are unreliable
-  when the output syntax is not well defined.
-{% endnote %}
+### Parameter lists
 
 Each `<parameter>`
 in the `<parameter-list>` needs to have a
@@ -560,7 +663,7 @@ might looks like this:
   --current: calc(100vw - var(--min-width));
   --fraction: calc(var(--position) / var(--scale));
 
-  @return clamp(
+  result: clamp(
     0%,
     100% * var(--fraction),
     100%
@@ -576,7 +679,7 @@ on elements where the function is used,
 and (maybe less obvious)
 custom properties defined or inherited on the element
 can not be referenced in the function
-(unless explicitly provided as arguments):
+unless explicitly provided as arguments:
 
 ```css
 .example {
@@ -595,6 +698,121 @@ can not be referenced in the function
   );
 }
 ```
+
+Since functions have no output
+besides their returned value,
+normal (non-custom) properties
+inside a function are ignored,
+and have no effect.
+Nested selectors and name-defining at-rules
+are similarly ignored,
+along with anything inside them.
+However, conditional rules are resolved
+as though nested
+in the location where the function is called.
+This allows adjusting the function logic
+based on conditions surrounding an element:
+
+```css
+@function --sizes(
+  --s "<length>": 1em;
+  --m "<length>": calc(1em + 0.5vw);
+  --l "<length>": calc(1.2em + 1vw);
+) {
+  @media (inline-size < 20em) {
+    result: var(--s);
+  }
+  @media (20em < inline-size < 50em) {
+    result: var(--m);
+  }
+  @media (50em < inline-size) {
+    result: var(--l);
+  }
+}
+```
+
+### Using parameters in conditional rules
+
+Authors may reasonably wish to take this farther
+and use parameters to define the media queries themselves:
+
+```css
+@function --media(
+  --breakpoint "<length>";
+  --below "*";
+  --above "*";
+) {
+  @media screen and (width < var(--breakpoint)) {
+    result: var(--below);
+  }
+  @media screen and (width >= var(--breakpoint)) {
+    result: var(--above);
+  }
+}
+```
+
+This is a very common use of mixins,
+and a common use-case proposed for inline `if()`
+and `media()` functions.
+
+As I understand it,
+that will not be possible as written above,
+for the same reasons `var()` is not currently allowed
+in media-query conditions.
+However,
+the issues are specific to cascaded values
+that need to be resolved at computed value time.
+Passing static arguments from a parameter
+should not pose the same problem.
+
+If we had a new way of accessing
+values passed in --
+I'll use `arg()` for the sake of argument --
+simple value substitution should be possible:
+
+```css
+@function --media(
+  --breakpoint "<length>";
+  --below "*";
+  --above "*";
+) {
+  @media screen and (width < arg(--breakpoint)) {
+    result: var(--below);
+  }
+  @media screen and (width >= arg(--breakpoint)) {
+    result: var(--above);
+  }
+}
+
+html {
+  padding: --media(40em, 0, var(--padding, 1em));
+  margin: --media(var(--break, 40em), 0, 1em);
+}
+```
+
+Unlike `var()`,
+the `arg()` function
+would be resolved eagerly,
+without needing to fully cascade and resolve
+custom properties.
+In the above example,
+the `padding` declaration
+would be valid
+since a static value
+can be passed along to the media query `arg()` --
+but the `margin` declaration would fail
+since it supplies a custom property
+to a media query condition.
+
+It's not clear to me
+if that behavior would also be useful/necessary
+to define as part of describing
+the parameter list initially.
+As proposed here,
+it would be up to function authors
+to document and communicate
+which parameters accept variables,
+and which do not.
 
 ## Detailed discussion and open questions
 
@@ -618,8 +836,8 @@ similar to the way other math functions work:
 
 On the one hand,
 custom property substitution
-makes it trivial to declare bare math,
-and later call that math inside a `calc()` function.
+makes it trivial to capture expressions,
+and later call them inside a `calc()` function.
 This already works:
 
 ```css
@@ -639,4 +857,5 @@ In order to define a parameter
 with a registered syntax
 that accepts a calculation,
 we would need to expose the `<calc-sum>`
-grammar as a valid syntax to use.
+grammar as a valid syntax
+for authors to use.
