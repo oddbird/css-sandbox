@@ -1,15 +1,32 @@
 ---
-draft: 2023-08-15
+created: 2023-08-21
 title: CSS Mixins and Functions
 eleventyNavigation:
   key: mixins-functions
   title: CSS Mixins and Functions
   parent: sasslike
-warn: This is still a partial draft
+note: >
+  This is a rough first-draft
+  to capture the goals and potential approaches
+  towards CSS-native mixins and functions.
 ---
 
-This is an exploration
-of the often-asked questions:
+Over the years,
+many features from Sass and other
+CSS pre-processors (Less, Stylus, PostCSS, etc)
+have made their way into browsers
+as part of CSS itself.
+Along the way,
+those features generally change --
+taking on different affordances and constraints
+appropriate for a declarative client-side language.
+
+However,
+there are several popular features
+that have not yet made the transition.
+This document explores
+some of those outstanding features,
+and asks:
 
 - Should CSS provide authors the ability
   to create custom 'mixins' and 'functions'
@@ -439,7 +456,7 @@ we need several bits of information:
 - An optional ordered parameter list, where each `parameter` includes:
   - A required `parameter-name`
   - An optional(?) `parameter-syntax`
-  - An optional `parameter-default-value`
+  - An optional `parameter-initial-value`
 - Some amount of internal logic using `nested-rules`
 - A returned `result` value
 
@@ -461,7 +478,7 @@ then functions in a higher cascade layer take priority,
 and functions defined later have priority
 within a given layer.
 
-### Return values
+### Returning values
 
 The specified `<result>` value can
 accept the same broad CSS syntax as custom property values.
@@ -581,143 +598,34 @@ as well as conditional at-rules
 (which may contain further nested
 custom properties and `@return` values).
 Element-specific conditions (such as container queries)
-are resolved for each element that calls the function.
+would be resolved for each element that calls the function.
 
-Only custom properties and conditional rules
-are useful within a function.
-I would expect any other (non-custom property) declarations
-and (non-conditional) rules
-to be ignored and discarded
-without invalidating the entire function.
-
-### Parameter lists
-
-Each `<parameter>`
-in the `<parameter-list>` needs to have a
-`<name>`, and `<syntax>` --
-along with an optional `<default-value>`
-(otherwise fall-back to the guaranteed-invalid value).
-There's no clearly established way
-to associate three parameter parts like this,
-but we do have an existing syntax
-for associating custom property names and values.
-By using that established declaration syntax
-with `:` between name and value,
-and `;` as the delimiter between parameters,
-we can allow any valid CSS values as defaults --
-even when commas are present in the default value.
-
-From that baseline,
-the primary question is where/how
-to capture the parameter `<syntax>`.
-Since the value-side of a declaration (right side)
-is extremely permissive,
-I would suggest adding syntax rules
-to the property/name (left) side of the colon.
-For example, neither space nor parenthesis characters
-are allowed in an ident token,
-and could be used to separate name from syntax rules:
-
-```css
-/* using parenthesis */
-@function --contrast(
-  /* if <syntax> is optional, accept name only */
-  --color;
-  --ratio;
-
-  /* name and syntax, no default value */
-  --color("<color>");
-  --ratio("<number>");
-
-  /* name <syntax>: default */
-  --color("<color>"): #222;
-  --ratio("<number>"): 7;
-) { /* … */ }
-
-/* using space */
-@function --contrast(
-  /* if <syntax> is optional, accept name only */
-  --color;
-  --ratio;
-
-  /* name and syntax, no default value */
-  --color "<color>";
-  --ratio "<number>";
-
-  /* name <syntax>: default */
-  --color "<color>": #222;
-  --ratio "<number>": 7;
-) { /* … */ }
-```
-
-Adapting the fluid ratio function above
-to my proposed syntax
-might looks like this:
-
-```css
-@function --fluid-ratio(
-  --min-width "<length>": 300px;
-  --max-width "<length>": 2000px;
-) {
-  --scale: calc(var(--max-width) - var(--min-width));
-  --current: calc(100vw - var(--min-width));
-  --fraction: calc(var(--position) / var(--scale));
-
-  result: clamp(
-    0%,
-    100% * var(--fraction),
-    100%
-  );
-}
-```
-
-My assumption here
+My assumption
 would be that custom properties
 defined inside the function
 are not available
 on elements where the function is used,
 and (maybe less obvious)
 custom properties defined or inherited on the element
-can not be referenced in the function
-unless explicitly provided as arguments:
+cannot be referenced in the function.
+Any passing of values between the two contexts
+would have to be explicit, via provided parameters.
 
-```css
-.example {
-  /* these values are not available in the function */
-  --min-width: 200px;
-  --max-width: 960px;
-
-  /* default values are used for min and max width parameters */
-  font-size: mix(--fluid-ratio(), 1.5em, 3em);
-
-  /* arguments have to be passed in explicitly */
-  line-height: mix(
-    --fluid-ratio(var(--min-width), var(--max-width)),
-    1.4,
-    1.2
-  );
-}
-```
-
+Only custom properties and conditional rules
+are useful inside a function definition.
 Since functions have no output
 besides their returned value,
-normal (non-custom) properties
-inside a function are ignored,
-and have no effect.
-Nested selectors and name-defining at-rules
-are similarly ignored,
-along with anything inside them.
-However, conditional rules are resolved
-as though nested
-in the location where the function is called.
-This allows adjusting the function logic
-based on conditions surrounding an element:
+no-custom properties, nested selectors, and non-conditional rules
+are not necessary or meaningful.
+They should be ignored and discarded.
+I don't think there's any need for these things
+to invalidate the entire function.
 
 ```css
 @function --sizes(
-  --s "<length>": 1em;
-  --m "<length>": calc(1em + 0.5vw);
-  --l "<length>": calc(1.2em + 1vw);
+  --s: 1em;
+  --m: calc(1em + 0.5vw);
+  --l: calc(1.2em + 1vw);
 ) {
   @media (inline-size < 20em) {
     result: var(--s);
@@ -731,16 +639,446 @@ based on conditions surrounding an element:
 }
 ```
 
+### Parameter lists
+
+Each `<parameter>`
+in the `<parameter-list>`
+must have a `<name>`, along with an
+optional `<syntax>` (default to universal syntax),
+and optional `<initial-value>`
+(default to the guaranteed-invalid value).
+This matches closely to the needs
+of global property registration --
+and I hope we could
+[find a compact solution](https://github.com/w3c/csswg-drafts/issues/9206)
+that works in both situations?
+
+In my mind, it would be great to build on
+the way authors currently define most variables --
+using the standard property/value declaration syntax.
+This would work for `name: initial-value;`
+or `name: syntax;` in a straight-forward way,
+but has several limitations
+when we want to capture both `initial-value` and `syntax`:
+
+- Value parsing is very broad and forgiving,
+  making it hard to combine anything with `initial-value`
+  on the right (value) side of a declaration
+- There's no precedent (yet!) for
+  adding more than a name
+  to the left (property) side of a declaration
+- It should be possible to define any combination
+  of `initial-value` and `syntax`
+  without requiring either one
+
+On the property side of the equation,
+it seems theoretically possible to extend the syntax
+with a new delimiter like a space, or parenthesis:
+
+```css
+/* in either case */
+@function --contrast(
+  /* name only, default value & syntax */
+  --color;
+  --ratio;
+) { /* … */ }
+
+/* using parenthesis */
+@function --contrast(
+  /* name and syntax, default value */
+  --color("<color>");
+  --ratio("<number>");
+
+  /* name, syntax, and value */
+  --color("<color>"): #222;
+  --ratio("<number>"): 7;
+) { /* … */ }
+
+/* using space */
+@function --contrast(
+  /* name and syntax, default value */
+  --color "<color>";
+  --ratio "<number>";
+
+  /* name, syntax, and value */
+  --color "<color>": #222;
+  --ratio "<number>": 7;
+) { /* … */ }
+```
+
+On the value side,
+it's a bit harder to combine optional
+`syntax` with an optional `initial-value`.
+It could be done with the `!` delimiter,
+which is reserved:
+
+```css
+@function (
+  --my-parameter: initial value !syntax("*");
+) { /* … */ }
+```
+
+Or, if syntax were instead required,
+it might be possible to make them positional:
+
+```css
+@function (
+  /* as with var(), any additional commas are part of the initial value */
+  --my-parameter: "*", initial value;
+) { /* … */ }
+```
+
+Another option might be
+allowing two forms --
+one inline for simple name-and-value descriptions,
+and the other with a block
+for providing more descriptors:
+
+```css
+/* this might need more clarity
+   to avoid parsing issues */
+@function (
+  --my-parameter: initial value;
+  --another-param {
+    initial: 2em,
+    syntax: "<length>",
+  }
+) { /* … */ }
+```
+
+As with other matters of syntax,
+we can bikeshed the details as necessary.
+For the sake of this document
+I will use the name-plus-parenthesis approach.
+
+### Putting it all together
+
+Adapting the fluid ratio function above
+to my proposed syntax:
+
+```css
+@function --fluid-ratio(
+  --min-width("<length>"): 300px;
+  --max-width("<length>"): 2000px;
+) {
+  --scale: calc(var(--max-width) - var(--min-width));
+  --current: calc(100vw - var(--min-width));
+  --fraction: calc(var(--position) / var(--scale));
+
+  result: clamp(
+    0%,
+    100% * var(--fraction),
+    100%
+  );
+}
+
+p {
+  font-size: mix(--fluid-ratio(375px, 1920px), 1rem, 1.25rem);
+  padding: mix(--fluid-ratio(375px, 700px), 1rem, 2rem);
+}
+```
+
+We could also consider moving the `mix()` logic
+into the function:
+
+```css
+@function --fluid-mix(
+  --min-value;
+  --max-value;
+  --min-width("<length>"): 375px;
+  --max-width("<length>"): 1920px;
+) {
+  --scale: calc(var(--max-width) - var(--min-width));
+  --current: calc(100vw - var(--min-width));
+  --fraction: calc(var(--position) / var(--scale));
+  --ratio: clamp(0%, 100% * var(--fraction), 100%);
+
+  result: mix(var(--ratio), var(--min-value), var(--max-value));
+}
+
+p {
+  font-size: --fluid-mix(1rem, 1.25rem);
+  padding: --fluid-mix(1rem, 2rem, 375px, 700px);
+}
+```
+
+If/when there is an ability
+for authors to define globally-available
+custom properties or environment variables,
+we could make the initial parameter values
+responsive to those global settings:
+
+```css
+@function --fluid-mix(
+  --min-value;
+  --max-value;
+  --min-width("<length>"): env(--fluid-min, 375px);
+  --max-width("<length>"): env(--fluid-max, 1920px);
+) { /* … */ }
+```
+
+## Defining a mixin: the `@mixin` rule
+
+The primary difference
+between a mixin and a function
+is the level at which they operate.
+Rather than returning a single value,
+mixins return entire declarations
+and potentially entire nested rule blocks.
+
+Much of the function syntax
+could be re-purposed,
+but the main change would be in how
+nested rules and output are handled.
+
+```
+@mixin <mixin-name> [( <parameter-list> )]? {
+  <nested-rules>
+}
+```
+
+### Nested rules and output
+
+The simplest approach
+to nested rules and output
+would be to treat the inside of a mixin definition
+the same as any rule-block nested context.
+Anything we can put inside a rule block
+can be put inside a mixin,
+and will be output where the mixin is called
+(with any parameters being replaced first).
+This will work for many simpler cases:
+
+```css
+@mixin --center-content {
+  display: grid;
+  place-content: center;
+}
+
+.page {
+  @apply --center-content;
+  /*
+    display: grid;
+    place-content: center;
+  */
+}
+```
+
+```scss
+@mixin --clearfix {
+  &::after {
+    display: block;
+    content: "";
+    clear: both;
+  }
+
+  @supports (display: flow-root) {
+    display: flow-root;
+
+    &::after { display: none; }
+  }
+}
+
+.float-container {
+  @apply --clearfix;
+  /*
+    &::after {
+      display: block;
+      content: "";
+      clear: both;
+    }
+
+    @supports (display: flow-root) {
+      display: flow-root;
+
+      &::after { display: none; }
+    }
+  */
+}
+```
+
+However,
+this approach doesn't allow
+the mixin to contain any internal logic
+scoped to the mixin itself.
+Mixins should be able to both
+use internally scoped custom properties,
+and output custom properties
+as part of the returned rule block.
+
+There are several approaches that might work here
+(all names are open to changing):
+
+1. Explicit `@output` rule blocks inside the mixin.
+   Anything outside that block is private to the mixin.
+2. An `!output` or `!private` flag
+   for declaring the availability of individual custom properties.
+3. Anything at the top level is private,
+   and anything in nested selectors will be output?
+   (see 'using mixins' below)
+
+As things stand,
+this doesn't seem relevant
+to anything other than custom properties.
+However, we may want to consider
+if there's a chance that would change down the road.
+
+### Applying mixins: the `@apply` rule
+
+In order to apply a mixin,
+authors can use the `@apply` rule.
+When the mixin is resolved,
+the output of the mixin
+is inserted where the apply rule was called:
+
+```css
+/* input */
+.float-container {
+  @apply --clearfix;
+}
+
+/* output */
+.float-container {
+  &::after {
+    display: block;
+    content: "";
+    clear: both;
+  }
+
+  @supports (display: flow-root) {
+    display: flow-root;
+
+    &::after { display: none; }
+  }
+}
+```
+
+Ideally,
+mixin output should be able to resolve
+early (parse-time),
+while leaving some values
+to resolve at computed-value time.
+
+There is an additional question
+about how to handle mixin output
+at the top level of the document
+(not nested inside a selector):
+
+```css
+@apply --center-content;
+```
+
+One potential advantage of option 3 above,
+is that it requires mixins always provide
+a selector rule block as part of their output.
+Even if that selector is simply
+the parent reference `&`,
+that has a well-defined behavior
+at the top level of documents --
+referring to the current `:scope`.
+
+The downside would be
+that browsers currently
+apply nested rules _after_
+bare declarations when nesting --
+so all mixin output would
+have higher cascade source-order priority
+than non-mixin declarations.
+
+### Passing nested content to mixins
+
+Another common feature of Sass mixins
+is the ability to pass nested content blocks
+into a mixin,
+and have the mixin place that content
+in a specific context.
+This seems like a feature
+that could be supported in CSS as well,
+but would require another mixin-specific at-rule
+(or similar placeholder).
+I'll call it `@nested` for now:
+
+```css
+@mixin --media-medium {
+  @media screen and (env(--small) < inline-size < env(--large)) {
+    @nested;
+  }
+}
+
+.grid {
+  @apply --media-medium {
+    padding: var(--padding-medium, 1em);
+  }
+}
+```
+
+The expected behavior would be
+the same as writing:
+
+```css
+.grid {
+  @media screen and (env(--small) < inline-size < env(--large)) {
+    padding: var(--padding-medium, 1em);
+  }
+}
+```
+
+## Detailed discussion and open questions
+
+### Argument conditions and loops
+
+With both mixins and functions
+it can be useful to have conditions
+based on the arguments passed in.
+For example, we might pass in
+one of several established keywords,
+and return a different value
+depending which keyword is used:
+
+```css
+@function --link(
+  --theme("dark | light"): dark;
+) {
+  @when (arg(--theme): light) {
+    result: env(--link-light);
+  } @else {
+    result: env(--link-dark);
+  }
+}
+```
+
+It's not clear to me
+if the proposed `@when`/`@else` features
+can be adapted to this use-case,
+or if it would need to be
+a distinct set of similar flow controls.
+
+Similarly,
+as we saw in the tint-shade example earlier,
+it can be useful to loop over
+a set number of repetitions (for loop)
+or a set list of items (each loop).
+
+While these would be helpful features for authors,
+they are not required for
+(or dependent on)
+an initial implementation of mixins or functions.
+They feel like distinct features
+that would go well together.
+
 ### Using parameters in conditional rules
 
+Above,
+I used an example with conditional output
+using media queries inside the function.
 Authors may reasonably wish to take this farther
 and use parameters to define the media queries themselves:
 
 ```css
 @function --media(
-  --breakpoint "<length>";
-  --below "*";
-  --above "*";
+  --breakpoint("<length>");
+  --below;
+  --above;
 ) {
   @media screen and (width < var(--breakpoint)) {
     result: var(--below);
@@ -751,9 +1089,9 @@ and use parameters to define the media queries themselves:
 }
 ```
 
-This is a very common use of mixins,
-and a common use-case proposed for inline `if()`
-and `media()` functions.
+This is a very common use of pre-processor mixins,
+and a common use-case for the proposed inline `if()`
+and `media()` functions as well.
 
 As I understand it,
 that will not be possible as written above,
@@ -772,9 +1110,9 @@ simple value substitution should be possible:
 
 ```css
 @function --media(
-  --breakpoint "<length>";
-  --below "*";
-  --above "*";
+  --breakpoint("<length>");
+  --below;
+  --above;
 ) {
   @media screen and (width < arg(--breakpoint)) {
     result: var(--below);
@@ -785,16 +1123,14 @@ simple value substitution should be possible:
 }
 
 html {
+  /* this works fine, since the argument is accessed with `var()` */
   padding: --media(40em, 0, var(--padding, 1em));
+
+  /* this errors, since the argument is accessed with `arg()` */
   margin: --media(var(--break, 40em), 0, 1em);
 }
 ```
 
-Unlike `var()`,
-the `arg()` function
-would be resolved eagerly,
-without needing to fully cascade and resolve
-custom properties.
 In the above example,
 the `padding` declaration
 would be valid
@@ -805,18 +1141,16 @@ since it supplies a custom property
 to a media query condition.
 
 It's not clear to me
-if that behavior would also be useful/necessary
-to define as part of describing
-the parameter list initially.
+if parameters used this way
+would need to be explicitly marked in advance
+for any reason?
 As proposed here,
 it would be up to function authors
 to document and communicate
-which parameters accept variables,
-and which do not.
+which parameters can accept cascading variables,
+and which can not.
 
-## Detailed discussion and open questions
-
-### Can a parameter accept a `<calc-sum>` syntax?
+### Can we allow the `<calc-sum>` syntax?
 
 This question was raised
 by [Brandon McConnell](https://github.com/w3c/csswg-drafts/issues/7490#issuecomment-1256880496)
@@ -859,3 +1193,10 @@ that accepts a calculation,
 we would need to expose the `<calc-sum>`
 grammar as a valid syntax
 for authors to use.
+
+It might also be worth considering
+what other syntax productions would be useful to expose --
+either for parameters specifically,
+or for property registration more generally.
+It seems ideal to me
+if those lists can be kept in alignment.
