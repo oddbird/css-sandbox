@@ -5,6 +5,9 @@ eleventyNavigation:
   key: mixins-functions
   title: CSS Mixins and Functions
   parent: sasslike
+changes:
+  - time: 2023-08-22T10:20:26-06:00
+    log: Document issues with function fallbacks
 note: >
   This is a rough first-draft
   to capture the goals and potential approaches
@@ -468,7 +471,7 @@ could look something like:
 @function <function-name> [( <parameter-list> )]? {
   <nested-rules>
 
-  result: <result>;
+  @return <result>;
 }
 ```
 
@@ -486,8 +489,7 @@ At computed value time,
 that output can be resolved and validated
 against the property that called the function.
 
-On first glance,
-I like the alternative `@return` at-rule syntax
+I like the `@return` at-rule syntax
 rather than a `result` descriptor.
 
 - It helps distinguish
@@ -496,10 +498,6 @@ rather than a `result` descriptor.
 - Result is not a property,
   but looks a lot like one
 
-However, the fallback behavior proposed below
-is more familiar in CSS properties/descriptors --
-and less common in imperative languages like Sass
-(which uses `@return`) or JS (which uses `return`).
 Still, either syntax should be able to support
 the same basic behavior,
 so we can bikeshed the details later.
@@ -512,83 +510,37 @@ CSS often uses a _last-takes-precedence_ approach --
 both in the cascade of properties,
 and to resolve naming conflicts (e.g. keyframes).
 
-In the cascade,
-that approach serves another purpose:
-authors can provide fallback values first,
-and then override those values
-in any browser that supports the override:
+Either approach should work here as well,
+though I would lean towards the latter
+for the sake of consistency.
 
-```css
-html {
-  background-color: #0f0;
-  /* browsers without p3 support will ignore this */
-  background-color: color(display-p3 0 1 0);
-}
-```
+### Invalid function fallbacks
 
-But this fallback behavior is handled at _parse time_,
-and the unknown declaration
-is immediately discarded.
-That makes the same behavior impossible
-using custom properties,
-which only become _invalid at computed value time_
-(after the cascade has completed).
-By the time the variable is invalidated,
-the previous property has already been discarded:
+Sadly,
+last-takes-precedence behavior doesn't provide
+the same benefit here
+that it has in the cascade --
+where invalid declarations
+can be discarded at parse time,
+falling back on previously declared values.
+In order to achieve that,
+we would need to limit functions
+so that they are the only value in a property.
+I don't think that tradeoff makes sense
+for the use-cases I've seen
+(often around specialized or repeated math).
 
-```css
-html {
-  --p3-green: color(display-p3 0 1 0);
-  /* this value is discarded at parse time */
-  background-color: #0f0;
-  /* this property is used even when p3 colors are not supported */
-  /* browsers without p3 support treat it as `unset` */
-  background-color: var(--p3-green);
-}
-```
+I'm also not sure it makes sense
+to provide function-defined fallback values
+to return when arguments provided are invalid.
+Instead, I would expect function fallbacks
+to be modeled after variable fallbacks --
+established where the function is called,
+rather than where it is defined.
 
-Custom functions may provide a workaround for this,
-by allowing fallback `result` values --
-all of which are validated at computed value time,
-without some being discarded at parse time:
-
-```css
-@function --try(
-  --ideal "*";
-  --fallback "*";
-) {
-  result: var(--fallback);
-  result: var(--ideal);
-}
-
-html {
-  background-color: --try(var(--p3-green), #0f0);
-}
-```
-
-Since custom functions are also resolved
-at computed value time,
-both possible results can be resolved
-as part of that process --
-and validated against the property calling the function
-(e.g. `background-color`).
-
-{% note %}
-  The CSS Working Group
-  [has already approved](https://github.com/w3c/csswg-drafts/issues/5055#issuecomment-1022425917)
-  a `first-valid()` function like this,
-  which has not been implemented.
-{% endnote %}
-
-In addition to browser support fallbacks,
-this behavior could also
-solve the earlier question
-about providing a fallback result
-when given invalid arguments.
-Authors could provide an initial `result`
-that does not rely on the arguments provided,
-and get that returned value
-when others fail.
+{% warn 'Todo' %}
+  Need to define a syntax for function fallbacks.
+{% endwarn %}
 
 ### Nested rules
 
@@ -628,13 +580,13 @@ to invalidate the entire function.
   --l: calc(1.2em + 1vw);
 ) {
   @media (inline-size < 20em) {
-    result: var(--s);
+    @return var(--s);
   }
   @media (20em < inline-size < 50em) {
-    result: var(--m);
+    @return var(--m);
   }
   @media (50em < inline-size) {
-    result: var(--l);
+    @return var(--l);
   }
 }
 ```
@@ -765,7 +717,7 @@ to my proposed syntax:
   --current: calc(100vw - var(--min-width));
   --fraction: calc(var(--position) / var(--scale));
 
-  result: clamp(
+  @return clamp(
     0%,
     100% * var(--fraction),
     100%
@@ -793,7 +745,7 @@ into the function:
   --fraction: calc(var(--position) / var(--scale));
   --ratio: clamp(0%, 100% * var(--fraction), 100%);
 
-  result: mix(var(--ratio), var(--min-value), var(--max-value));
+  @return mix(var(--ratio), var(--min-value), var(--max-value));
 }
 
 p {
