@@ -8,6 +8,10 @@ eleventyNavigation:
 changes:
   - time: 2023-08-22T10:20:26-06:00
     log: Document issues with function fallbacks
+  - time: 2023-08-22T13:11:04-06:00
+    log: >
+      Use semi-colon as argument delimiter,
+      and add named arguments
 note: >
   This is a rough first-draft
   to capture the goals and potential approaches
@@ -514,83 +518,6 @@ Either approach should work here as well,
 though I would lean towards the latter
 for the sake of consistency.
 
-### Invalid function fallbacks
-
-Sadly,
-last-takes-precedence behavior doesn't provide
-the same benefit here
-that it has in the cascade --
-where invalid declarations
-can be discarded at parse time,
-falling back on previously declared values.
-In order to achieve that,
-we would need to limit functions
-so that they are the only value in a property.
-I don't think that tradeoff makes sense
-for the use-cases I've seen
-(often around specialized or repeated math).
-
-I'm also not sure it makes sense
-to provide function-defined fallback values
-to return when arguments provided are invalid.
-Instead, I would expect function fallbacks
-to be modeled after variable fallbacks --
-established where the function is called,
-rather than where it is defined.
-
-{% warn 'Todo' %}
-  Need to define a syntax for function fallbacks.
-{% endwarn %}
-
-### Nested rules
-
-The `nested-rules` can include custom property declarations
-(which are scoped to the function),
-as well as conditional at-rules
-(which may contain further nested
-custom properties and `@return` values).
-Element-specific conditions (such as container queries)
-would be resolved for each element that calls the function.
-
-My assumption
-would be that custom properties
-defined inside the function
-are not available
-on elements where the function is used,
-and (maybe less obvious)
-custom properties defined or inherited on the element
-cannot be referenced in the function.
-Any passing of values between the two contexts
-would have to be explicit, via provided parameters.
-
-Only custom properties and conditional rules
-are useful inside a function definition.
-Since functions have no output
-besides their returned value,
-no-custom properties, nested selectors, and non-conditional rules
-are not necessary or meaningful.
-They should be ignored and discarded.
-I don't think there's any need for these things
-to invalidate the entire function.
-
-```css
-@function --sizes(
-  --s: 1em;
-  --m: calc(1em + 0.5vw);
-  --l: calc(1.2em + 1vw);
-) {
-  @media (inline-size < 20em) {
-    @return var(--s);
-  }
-  @media (20em < inline-size < 50em) {
-    @return var(--m);
-  }
-  @media (50em < inline-size) {
-    @return var(--l);
-  }
-}
-```
-
 ### Parameter lists
 
 Each `<parameter>`
@@ -600,10 +527,8 @@ optional `<syntax>` (default to universal syntax),
 and optional `<initial-value>`
 (default to the guaranteed-invalid value).
 This matches closely to the needs
-of global property registration --
-and I hope we could
-[find a compact solution](https://github.com/w3c/csswg-drafts/issues/9206)
-that works in both situations?
+of [global property registration](https://github.com/w3c/csswg-drafts/issues/9206),
+though working in a more restricted space.
 
 In my mind, it would be great to build on
 the way authors currently define most variables --
@@ -665,16 +590,17 @@ It could be done with the `!` delimiter,
 which is reserved:
 
 ```css
-@function (
+@function --example (
   --my-parameter: initial value !syntax("*");
 ) { /* … */ }
 ```
 
-Or, if syntax were instead required,
-it might be possible to make them positional:
+Or, if syntax were required,
+it might be possible to make them positional
+(though this comes with other risks):
 
 ```css
-@function (
+@function --example (
   /* as with var(), any additional commas are part of the initial value */
   --my-parameter: "*", initial value;
 ) { /* … */ }
@@ -689,7 +615,7 @@ for providing more descriptors:
 ```css
 /* this might need more clarity
    to avoid parsing issues */
-@function (
+@function --example (
   --my-parameter: initial value;
   --another-param {
     initial: 2em,
@@ -700,8 +626,94 @@ for providing more descriptors:
 
 As with other matters of syntax,
 we can bikeshed the details as necessary.
-For the sake of this document
+For this document
 I will use the name-plus-parenthesis approach.
+
+## Calling functions
+
+When calling functions,
+we may want to allow a similarly broad
+syntax for argument values.
+In order to achieve that,
+we would again use `;` as the argument delimiter:
+
+```css
+button {
+  background: --contrast(pink; 0.7);
+}
+```
+
+There is already precedent for this
+with built-in functions such as `mix()`
+that accept broad-syntax arguments.
+
+For more complex functions
+it can often be useful to use
+named parameters rather than a positional syntax.
+The most direct solution would be to allow
+the full declaration syntax here --
+though I'm not sure if that's viable:
+
+```css
+button {
+  background: --contrast(--color: pink; --ratio: 0.7);
+}
+```
+
+If positional and named arguments
+are allowed in the same function call,
+the common convention is to require
+all positional values come before any named values
+to avoid confusion.
+
+### Nested rules
+
+The `nested-rules` can include custom property declarations
+(which are scoped to the function),
+as well as conditional at-rules
+(which may contain further nested
+custom properties and `@return` values).
+Element-specific conditions (such as container queries)
+would be resolved for each element that calls the function.
+
+My assumption
+would be that custom properties
+defined inside the function
+are not available
+on elements where the function is used,
+and (maybe less obvious)
+custom properties defined or inherited on the element
+cannot be referenced in the function.
+Any passing of values between the two contexts
+would have to be explicit, via provided parameters.
+
+Only custom properties and conditional rules
+are useful inside a function definition.
+Since functions have no output
+besides their returned value,
+no-custom properties, nested selectors, and non-conditional rules
+are not necessary or meaningful.
+They should be ignored and discarded.
+I don't think there's any need for these things
+to invalidate the entire function.
+
+```css
+@function --sizes(
+  --s: 1em;
+  --m: calc(1em + 0.5vw);
+  --l: calc(1.2em + 1vw);
+) {
+  @media (inline-size < 20em) {
+    @return var(--s);
+  }
+  @media (20em < inline-size < 50em) {
+    @return var(--m);
+  }
+  @media (50em < inline-size) {
+    @return var(--l);
+  }
+}
+```
 
 ### Putting it all together
 
@@ -725,8 +737,8 @@ to my proposed syntax:
 }
 
 p {
-  font-size: mix(--fluid-ratio(375px, 1920px), 1rem, 1.25rem);
-  padding: mix(--fluid-ratio(375px, 700px), 1rem, 2rem);
+  font-size: mix(--fluid-ratio(375px; 1920px), 1rem, 1.25rem);
+  padding: mix(--fluid-ratio(375px; 700px), 1rem, 2rem);
 }
 ```
 
@@ -749,8 +761,8 @@ into the function:
 }
 
 p {
-  font-size: --fluid-mix(1rem, 1.25rem);
-  padding: --fluid-mix(1rem, 2rem, 375px, 700px);
+  font-size: --fluid-mix(1rem; 1.25rem);
+  padding: --fluid-mix(1rem; 2rem; 375px; 700px);
 }
 ```
 
@@ -976,6 +988,44 @@ the same as writing:
 ```
 
 ## Detailed discussion and open questions
+
+### Invalid function fallbacks
+
+Sadly,
+last-takes-precedence `@return` behavior
+doesn't provide the same benefit here
+that it has in the cascade --
+where invalid declarations
+can be discarded at parse time,
+falling back on previously declared values.
+In order to achieve that,
+we would need to limit functions
+so that they are the only value in a property.
+I don't think that tradeoff makes sense
+for the use-cases I've seen
+(often around specialized or repeated math).
+
+I'm also not sure it makes sense
+to provide function-defined fallback values
+to return when arguments provided are invalid.
+Instead, I would expect function fallbacks
+to be modeled after variable fallbacks --
+established where the function is called,
+rather than where it is defined.
+
+It's hard to see where this would fit
+in the proposed syntax,
+without using a built-in keyword parameter:
+
+```css
+button {
+  background: --contrast(pink; 0.7; fallback: black);
+}
+```
+
+I don't love that solution,
+and believe this
+deserves more bikeshedding.
 
 ### Argument conditions and loops
 
