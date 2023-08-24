@@ -801,6 +801,11 @@ nested rules and output are handled.
 }
 ```
 
+When there are multiple mixins
+that use the same name,
+the last mixin with that name
+takes precedence.
+
 ### Nested rules and output
 
 The simplest approach
@@ -916,12 +921,6 @@ is inserted where the apply rule was called:
   }
 }
 ```
-
-Ideally,
-mixin output should be able to resolve
-early (parse-time),
-while leaving some values
-to resolve at computed-value time.
 
 There is an additional question
 about how to handle mixin output
