@@ -12,10 +12,10 @@ changes:
     log: >
       Use semi-colon as argument delimiter,
       and add named arguments
-note: >
-  This is a rough first-draft
-  to capture the goals and potential approaches
-  towards CSS-native mixins and functions.
+  - time: 2023-09-12T18:56:01+02:00
+    log: >
+      Clarifications and updates
+      based on initial review and informal TPAC discussions
 ---
 
 Over the years,
@@ -36,10 +36,9 @@ some of those outstanding features,
 and asks:
 
 - Should CSS provide authors the ability
-  to create custom 'mixins' and 'functions'
-  similar to Sass?
+  to create custom 'mixins' and 'functions'?
 - If so, how would CSS 'mixins' and 'functions'
-  differ from Sass?
+  differ from pre-processors?
   What extra functionality or limitations
   come from providing these features
   in the browser?
@@ -79,11 +78,43 @@ caveats, and limitations:
 - Each 'function/mixin' and 'argument' is a custom property,
   which can only have a single resolved value per element
 - Arguments are substituted in the function/mixin
-  at 'time of definition' rather than 'time of use',
-  so the logic has to be redefined everywhere it's used
+  _before the computed value inherits_,
+  so the logic has to be redefined
+  on every element that should re-calculate a result
 
-Functions and mixins
-have a lot in common.
+{% note %}
+'Parameters' and 'arguments'
+are somewhat interchangeable terms,
+but here I am assuming that:
+- A 'parameter' is a variable that is
+  named and registered
+  _where the function/mixin is defined_.
+  A `darken()` function might expose
+  `color` and `amount` parameters.
+- An 'argument' is a value passed into
+  one of the registered parameters
+  _where the function/mixin is used_.
+  When calling the the `darken()` function,
+  we could pass `red` and `50%` arguments
+  to the `color` and `amount` parameters.
+{% endnote %}
+
+From a language perspective
+these mixins and functions are somewhat distinct --
+they live at different levels of the syntax,
+and come with different complications.
+It may make sense to
+handle them in different levels of a specification
+(likely functions-first)
+or even different specifications.
+However,
+they have a lot in common
+from the author perspective --
+so we should consider carefully
+what syntax can be shared,
+or where differences should be made clear.
+That's why I'm exploring them together.
+
 Both provide a way to capture and reuse
 some amount of logic.
 That can be used for the sake of
@@ -91,15 +122,16 @@ developer shorthands,
 and also as a way of ensuring maintainability
 by avoiding repetition.
 The difference between the two
-is only in the type of output
-they would provide in CSS:
+is where they can be used in CSS,
+based on the type of output
+they provide:
 
 - Functions return CSS _values_ --
   like a string, color, or length --
-  that can be used inside a CSS property
+  and can be used inside a CSS property
 - Mixins return CSS _declarations_
   (property-value pairs)
-  or even rule blocks
+  or even _rule blocks_
   with selectors and other at-rules included
 
 {% note %}
@@ -110,6 +142,16 @@ they would provide in CSS:
   declaration-output is disallowed or ignored
   in non-nested contexts.
 {% endnote %}
+
+These features are popular for
+reducing code repetition,
+and encouraging consistent use of best practice.
+Removing the reliance on pre-processors
+would further simplify maintenance for CSS authors --
+while providing new client-side functionality:
+
+- Passing cascaded custom-properties as arguments.
+- Adding media/support and other client-side conditions to function logic.
 
 Sass provides some built-in core functions,
 but (so far) does not provide core mixins.
@@ -137,12 +179,12 @@ DRY code (Don't Repeat Yourself),
 but ends up very similar to using
 a 'utility class' such as `.clearfix`.
 
-In this case,
+When no parameters are exposed,
 the main difference between a class
 and a mixin comes from
 how the repeated code is applied --
-through HTML (for the class),
-or directly in CSS (for mixins).
+through HTML attributes (for the class),
+or directly in CSS to other selectors (for mixins).
 The need for CSS control
 comes into focus when combined
 with `@media`/`@container` and other conditional logic.
@@ -166,10 +208,11 @@ defining all the custom properties twice:
 }
 ```
 
-Most of the proposed solutions currently
-rely finding ways to combine conditional logic
+Most of the currently proposed solutions
+to that problem
+combine conditional logic
 with selector logic,
-so both can be defined at once.
+so that both can be defined at once.
 In Sass, we would fix this instead
 by providing a `dark-mode` mixin
 that can be used multiple times
@@ -234,21 +277,7 @@ we have to do that on a different element
 }
 ```
 
-Mixins without parameters can also
-overlap with the Sass `@extend` rule,
-which is used to have more semantic selectors
-'extend' another class in CSS.
-While they differ in Sass,
-I would expect a CSS-native `@extend`
-and a no-parameter-mixin to be functionally identical.
-
-These features could provide some benefit to authors in CSS,
-reducing code repetition and reliance on pre-processors
-would simplify maintenance.
-However, they likely wouldn't provide
-new functionality over what is already possible.
-
-It's much less common to have
+It's less common to have
 functions without parameters,
 since a simple value
 can be captured in a variable
@@ -274,11 +303,12 @@ and an amount to darken that color.
 
 In some cases (like `darken()`)
 the internal function logic
-can be represented by an inline calculation.
+can be represented by an inline calculation
+using existing CSS features.
 But more complex use-cases
 may require conditional statements
 or more complex 'flow control'
-such loop structures.
+such as loops.
 
 For example,
 a combination of mixins might generate
@@ -365,7 +395,8 @@ in the CSS Working Group issue tracker.
 Since then,
 the proposal has gone through
 several revisions and updates.
-Note that:
+
+The current plan is that:
 
 - Functions would be resolved
   at the same time as variable substitution
@@ -373,10 +404,11 @@ Note that:
   can be validated at parse time
   (like `@property`-registered variables)
 - This would be a declarative version
-  of the more full-featured Houdini JS feature
+  of the more full-featured Houdini API feature
 
-The current (2023-08-08) proposal
-uses these examples,
+The current (2023-08-08)
+proposal in that thread
+provides several examples
 for clamped fluid typography:
 
 ```css
@@ -404,7 +436,8 @@ p {
   for this use-case.
 {% endnote %}
 
-And for generating a checkerboard:
+The thread also includes
+a function for generating checkerboard background-images:
 
 ```css
 @custom-function --checkerboard(--size "<length>") {
@@ -431,17 +464,26 @@ And for generating a checkerboard:
 }
 ```
 
-In addition to some bike-shedding of the syntax,
-there are several open questions in the thread:
+For these use-case,
+custom functions could be a simple wrapper
+for inserting parameters into
+existing functions like `calc()`.
+Tab Atkins has suggested a math-only version of this
+would be simplest to implement.
+While that would be a useful first-step,
+it quickly falls short of the use-cases I've seen.
+I would prefer to start with a more fully-featured approach,
+and work backwards to an attainable level 1 implementation
+if needed.
+
+In addition to some additional bike-shedding of the syntax,
+there are several more open questions in the thread:
 
 - Can authors provide a fallback output
-  when invalid arguments are provided?
+  for invalid arguments?
 - Would it be helpful to include default parameter values
-  in the function definition
-  (this is already possible in the `var()` syntax,
-  when applying the parameters)?
-- Can authors define internal custom properties,
-  in order to break apart the internal logic?
+  in the function definition?
+- Can function authors define internally-scoped custom properties?
 - Can authors use conditional at-rules
   inside the function logic?
 - Can functions expose a parameter
@@ -464,7 +506,7 @@ we need several bits of information:
   - A required `parameter-name`
   - An optional(?) `parameter-syntax`
   - An optional `parameter-initial-value`
-- Some amount of internal logic using `nested-rules`
+- Some amount of internal logic using `function-rules`
 - A returned `result` value
 
 The proposed syntax
@@ -473,7 +515,7 @@ could look something like:
 
 ```
 @function <function-name> [( <parameter-list> )]? {
-  <nested-rules>
+  <function-rules>
 
   @return <result>;
 }
@@ -502,9 +544,9 @@ rather than a `result` descriptor.
 - Result is not a property,
   but looks a lot like one
 
-Still, either syntax should be able to support
+Either syntax should be able to support
 the same basic behavior,
-so we can bikeshed the details later.
+so we can bike-shed the details later.
 
 When multiple `result`s are returned,
 we need a way to determine which one is used.
@@ -516,7 +558,7 @@ and to resolve naming conflicts (e.g. keyframes).
 
 Either approach should work here as well,
 though I would lean towards the latter
-for the sake of consistency.
+for the sake of internal consistency.
 
 ### Parameter lists
 
@@ -524,110 +566,56 @@ Each `<parameter>`
 in the `<parameter-list>`
 must have a `<name>`, along with an
 optional `<syntax>` (default to universal syntax),
-and optional `<initial-value>`
-(default to the guaranteed-invalid value).
+and optional `<default-value>`
+(the guaranteed-invalid value when undefined).
 This matches closely to the needs
 of [global property registration](https://github.com/w3c/csswg-drafts/issues/9206),
 though working in a more restricted space.
 
+Default values in this context
+should be distinct from
+'initial' values of a globally-registered
+custom property.
+Initial values come with additional restrictions,
+such as being computationally-independent
+when the syntax is defined.
+These defaults should behave more like fallback values
+in the `var()` syntax,
+used when the passed-in argument is guaranteed-invalid.
+
 In my mind, it would be great to build on
-the way authors currently define most variables --
-using the standard property/value declaration syntax.
-This would work for `name: initial-value;`
-or `name: syntax;` in a straight-forward way,
+the way authors currently define custom properties.
+This would work for either `name: default-value;`
+or `name: syntax;` in a straight-forward way --
+and potentially `name-only;` --
 but has several limitations
-when we want to capture both `initial-value` and `syntax`:
+when we want to capture both `default-value` and `syntax`:
 
 - Value parsing is very broad and forgiving,
-  making it hard to combine anything with `initial-value`
-  on the right (value) side of a declaration
-- There's no precedent (yet!) for
-  adding more than a name
-  to the left (property) side of a declaration
+  making it hard to combine anything along-side `default-value`
 - It should be possible to define any combination
-  of `initial-value` and `syntax`
+  of `default-value` and `syntax`
   without requiring either one
 
-On the property side of the equation,
-it seems theoretically possible to extend the syntax
-with a new delimiter like a space, or parenthesis:
-
-```css
-/* in either case */
-@function --contrast(
-  /* name only, default value & syntax */
-  --color;
-  --ratio;
-) { /* … */ }
-
-/* using parenthesis */
-@function --contrast(
-  /* name and syntax, default value */
-  --color("<color>");
-  --ratio("<number>");
-
-  /* name, syntax, and value */
-  --color("<color>"): #222;
-  --ratio("<number>"): 7;
-) { /* … */ }
-
-/* using space */
-@function --contrast(
-  /* name and syntax, default value */
-  --color "<color>";
-  --ratio "<number>";
-
-  /* name, syntax, and value */
-  --color "<color>": #222;
-  --ratio "<number>": 7;
-) { /* … */ }
-```
-
-On the value side,
-it's a bit harder to combine optional
-`syntax` with an optional `initial-value`.
-It could be done with the `!` delimiter,
-which is reserved:
+While I'm tempted to develop a one-line syntax for this,
+the `@property` rule may be our best reference.
+By using a block syntax
+we can avoid inventing a new esoteric syntax,
+while also leaving space for future extensions:
 
 ```css
 @function --example (
-  --my-parameter: initial value !syntax("*");
-) { /* … */ }
-```
-
-Or, if syntax were required,
-it might be possible to make them positional
-(though this comes with other risks):
-
-```css
-@function --example (
-  /* as with var(), any additional commas are part of the initial value */
-  --my-parameter: "*", initial value;
-) { /* … */ }
-```
-
-Another option might be
-allowing two forms --
-one inline for simple name-and-value descriptions,
-and the other with a block
-for providing more descriptors:
-
-```css
-/* this might need more clarity
-   to avoid parsing issues */
-@function --example (
-  --my-parameter: initial value;
-  --another-param {
-    initial: 2em,
+  --name-only;
+  --name-with: default-value;
+  @param --all-three {
+    default: 2em,
     syntax: "<length>",
   }
 ) { /* … */ }
 ```
 
 As with other matters of syntax,
-we can bikeshed the details as necessary.
-For this document
-I will use the name-plus-parenthesis approach.
+we can bike-shed the details as necessary.
 
 ## Calling functions
 
@@ -635,17 +623,21 @@ When calling functions,
 we may want to allow a similarly broad
 syntax for argument values.
 In order to achieve that,
-we would again use `;` as the argument delimiter:
+we could again use `;` as the argument delimiter:
 
 ```css
 button {
-  background: --contrast(pink; 0.7);
+  background: --contrast(pink; WCAG-AAA);
 }
 ```
 
-There is already precedent for this
-with built-in functions such as `mix()`
-that accept broad-syntax arguments.
+{% note %}
+  There is (at least in theory)
+  some precedent for this in CSS --
+  though I'm not sure any of them have been implemented.
+  Hopefully
+  I'm not invoking a spec-deadly pattern here.
+{% endnote %}
 
 For more complex functions
 it can often be useful to use
@@ -660,15 +652,34 @@ button {
 }
 ```
 
+To differentiate positional and named arguments,
+we may need additional syntax
+and limitations on positional values.
+For example, wrapping named arguments in brackets,
+and disallowing positional arguments
+with wrapping brackets:
+
+```css
+button {
+  background: --contrast({ --color: pink; --ratio: 0.7 });
+}
+```
+
 If positional and named arguments
 are allowed in the same function call,
 the common convention is to require
 all positional values come before any named values
-to avoid confusion.
+to avoid confusion:
 
-### Nested rules
+```css
+button {
+  background: --contrast(pink; { --ratio: 0.7 });
+}
+```
 
-The `nested-rules` can include custom property declarations
+### Function rules
+
+The `<function-rules>` can include custom property declarations
 (which are scoped to the function),
 as well as conditional at-rules
 (which may contain further nested
@@ -680,37 +691,48 @@ My assumption
 would be that custom properties
 defined inside the function
 are not available
-on elements where the function is used,
+on elements where the function is called,
 and (maybe less obvious)
-custom properties defined or inherited on the element
-cannot be referenced in the function.
+custom properties defined or inherited on an element
+cannot be referenced in the function
+without being passed in as an argument.
 Any passing of values between the two contexts
-would have to be explicit, via provided parameters.
+would have to be explicit, via provided parameters,
+to avoid accidental naming conflicts
+or side-effects.
 
-Only custom properties and conditional rules
+As far as I can tell,
+only custom properties and conditional rules
 are useful inside a function definition.
 Since functions have no output
 besides their returned value,
-no-custom properties, nested selectors, and non-conditional rules
+nested selectors, built-in properties,
+and name-defining rules
 are not necessary or meaningful.
-They should be ignored and discarded.
 I don't think there's any need for these things
-to invalidate the entire function.
+to invalidate the entire function,
+so they should be ignored and discarded.
+
+An example function
+using conditional rules
+to return one of multiple values:
 
 ```css
 @function --sizes(
   --s: 1em;
-  --m: calc(1em + 0.5vw);
-  --l: calc(1.2em + 1vw);
+  --m: 1em + 0.5vw;
+  --l: 1.2em + 1vw;
 ) {
+  --min: 16px;
+
   @media (inline-size < 20em) {
-    @return var(--s);
+    @return max(var(--min), var(--s));
   }
   @media (20em < inline-size < 50em) {
-    @return var(--m);
+    @return max(var(--min), var(--m));
   }
   @media (50em < inline-size) {
-    @return var(--l);
+    @return max(var(--min), var(--l));
   }
 }
 ```
@@ -722,8 +744,14 @@ to my proposed syntax:
 
 ```css
 @function --fluid-ratio(
-  --min-width("<length>"): 300px;
-  --max-width("<length>"): 2000px;
+  @param --min-width {
+    default: 300px;
+    syntax: "<length>";
+  };
+  @param --max-width {
+    default: 2000px;
+    syntax: "<length>";
+  };
 ) {
   --scale: calc(var(--max-width) - var(--min-width));
   --current: calc(100vw - var(--min-width));
@@ -749,8 +777,14 @@ into the function:
 @function --fluid-mix(
   --min-value;
   --max-value;
-  --min-width("<length>"): 375px;
-  --max-width("<length>"): 1920px;
+  @param --min-width {
+    default: env(--fluid-min, 375px);
+    syntax: "<length>";
+  }
+  @param --max-width {
+    default: env(--fluid-max, 1920px);
+    syntax: "<length>";
+  }
 ) {
   --scale: calc(var(--max-width) - var(--min-width));
   --current: calc(100vw - var(--min-width));
@@ -776,37 +810,41 @@ responsive to those global settings:
 @function --fluid-mix(
   --min-value;
   --max-value;
-  --min-width("<length>"): env(--fluid-min, 375px);
-  --max-width("<length>"): env(--fluid-max, 1920px);
+  @param --min-width {
+    default: env(--fluid-min, 375px);
+    syntax: "<length>";
+  }
+  @param --max-width {
+    default: env(--fluid-max, 1920px);
+    syntax: "<length>";
+  }
 ) { /* … */ }
 ```
 
 ## Defining a mixin: the `@mixin` rule
 
-The primary difference
-between a mixin and a function
-is the level at which they operate.
 Rather than returning a single value,
 mixins return entire declarations
 and potentially entire nested rule blocks.
-
-Much of the function syntax
+While much of the function syntax
 could be re-purposed,
-but the main change would be in how
-nested rules and output are handled.
+we would need an additional way
+to manage property scoping --
+clearly marking what rule blocks are internal,
+and which should be part of the output.
 
 ```
 @mixin <mixin-name> [( <parameter-list> )]? {
-  <nested-rules>
+  <mixin-rules>
 }
 ```
 
-When there are multiple mixins
+Again, when there are multiple mixins
 that use the same name,
 the last mixin with that name
 takes precedence.
 
-### Nested rules and output
+### Mixin rules and output
 
 The simplest approach
 to nested rules and output
@@ -870,43 +908,50 @@ However,
 this approach doesn't allow
 the mixin to contain any internal logic
 scoped to the mixin itself.
-Mixins should be able to both
-use internally scoped custom properties,
-and output custom properties
+Mixins should be able to
+use internally scoped custom-properties,
+and also optionally _output_ custom properties
 as part of the returned rule block.
-
-There are several approaches that might work here
-(all names are open to changing):
-
-1. Explicit `@output` rule blocks inside the mixin.
-   Anything outside that block is private to the mixin.
-2. An `!output` or `!private` flag
-   for declaring the availability of individual custom properties.
-3. Anything at the top level is private,
-   and anything in nested selectors will be output?
-   (see 'using mixins' below)
-
 As things stand,
 this doesn't seem relevant
 to anything other than custom properties.
-However, we may want to consider
-if there's a chance that would change down the road.
+Built-in properties, selectors, and at-rules
+are only useful for their output.
 
-### Applying mixins: the `@apply` rule
+Given that this issue is specific to custom properties,
+we could consider a flag such as `!private`.
+That flag could be interesting
+for custom properties in other contexts,
+but I won't follow that path unless there's interest.
+Alternatively,
+we could explicitly mark content for output
+with a block rule version of `@return`.
+
+### Applying mixins: the (new) `@apply` rule
 
 In order to apply a mixin,
-authors can use the `@apply` rule.
+we use an `@apply` rule:
+
+```css
+@apply <mixin-name> [(<argument-list>)]?
+```
+
+The `<argument-list>` syntax
+can hopefully match the function argument notation,
+for positional and named arguments,
+and declaration-like `;` delimiters.
+
 When the mixin is resolved,
 the output of the mixin
 is inserted where the apply rule was called:
 
 ```css
-/* input */
+/* declaration */
 .float-container {
   @apply --clearfix;
 }
 
-/* output */
+/* result */
 .float-container {
   &::after {
     display: block;
@@ -931,22 +976,18 @@ at the top level of the document
 @apply --center-content;
 ```
 
-One potential advantage of option 3 above,
-is that it requires mixins always provide
-a selector rule block as part of their output.
+As long as there is a selector wrapping the output,
+this should not be an issue.
 Even if that selector is simply
 the parent reference `&`,
 that has a well-defined behavior
 at the top level of documents --
 referring to the current `:scope`.
+However, if the result is bare declarations
+without any selector,
+they should be discarded and ignored.
 
-The downside would be
-that browsers currently
-apply nested rules _after_
-bare declarations when nesting --
-so all mixin output would
-have higher cascade source-order priority
-than non-mixin declarations.
+## Detailed discussion and open questions
 
 ### Passing nested content to mixins
 
@@ -986,7 +1027,8 @@ the same as writing:
 }
 ```
 
-## Detailed discussion and open questions
+This seems like something that could be added later,
+if necessary.
 
 ### Invalid function fallbacks
 
@@ -1001,71 +1043,35 @@ In order to achieve that,
 we would need to limit functions
 so that they are the only value in a property.
 I don't think that tradeoff makes sense
-for the use-cases I've seen
-(often around specialized or repeated math).
+for the use-cases I've seen.
 
 I'm also not sure it makes sense
 to provide function-defined fallback values
-to return when arguments provided are invalid.
-Instead, I would expect function fallbacks
-to be modeled after variable fallbacks --
+to return when arguments provided have invalid syntax.
+Ideally, function fallbacks
+would be modeled after variable fallbacks --
 established where the function is called,
 rather than where it is defined.
-
 It's hard to see where this would fit
-in the proposed syntax,
-without using a built-in keyword parameter:
+in the proposed syntax.
+
+One option would be a `var()`-like
+wrapper function:
 
 ```css
 button {
-  background: --contrast(pink; 0.7; fallback: black);
+  background: fallback(--contrast(pink; 0.7), black);
 }
 ```
 
-I don't love that solution,
-and believe this
-deserves more bikeshedding.
-
-### Argument conditions and loops
-
-With both mixins and functions
-it can be useful to have conditions
-based on the arguments passed in.
-For example, we might pass in
-one of several established keywords,
-and return a different value
-depending which keyword is used:
-
-```css
-@function --link(
-  --theme("dark | light"): dark;
-) {
-  @when (arg(--theme): light) {
-    result: env(--link-light);
-  } @else {
-    result: env(--link-dark);
-  }
-}
-```
-
-It's not clear to me
-if the proposed `@when`/`@else` features
-can be adapted to this use-case,
-or if it would need to be
-a distinct set of similar flow controls.
-
-Similarly,
-as we saw in the tint-shade example earlier,
-it can be useful to loop over
-a set number of repetitions (for loop)
-or a set list of items (each loop).
-
-While these would be helpful features for authors,
-they are not required for
-(or dependent on)
-an initial implementation of mixins or functions.
-They feel like distinct features
-that would go well together.
+We could even use the existing `var()`,
+but that would result in functions and custom properties
+sharing a single namespace,
+which might not be ideal.
+Maybe the proposed function for
+`first-supported()` would also be an option
+that has broader use?
+This likely needs more bike-shedding.
 
 ### Using parameters in conditional rules
 
@@ -1077,7 +1083,7 @@ and use parameters to define the media queries themselves:
 
 ```css
 @function --media(
-  --breakpoint("<length>");
+  --breakpoint;
   --below;
   --above;
 ) {
@@ -1111,7 +1117,7 @@ simple value substitution should be possible:
 
 ```css
 @function --media(
-  --breakpoint("<length>");
+  --breakpoint;
   --below;
   --above;
 ) {
@@ -1150,6 +1156,50 @@ it would be up to function authors
 to document and communicate
 which parameters can accept cascading variables,
 and which can not.
+
+### Argument conditions and loops
+
+With both mixins and functions
+it can be useful to have conditions
+based on the arguments passed in.
+For example, we might want to pass in
+one of several established keywords,
+and return a different value
+depending which keyword is used:
+
+```css
+@function --link(
+  --theme: {
+    default: dark;
+    syntax: "dark | light";
+  }
+) {
+  @when (arg(--theme): light) {
+    result: env(--link-light);
+  } @else {
+    result: env(--link-dark);
+  }
+}
+```
+
+It's not clear to me
+if the proposed `@when`/`@else` features
+can be adapted to this use-case,
+or if it would need to be
+a distinct set of similar flow controls.
+
+Similarly,
+as we saw in the tint-shade example earlier,
+it can be useful to loop over
+a set number of repetitions (for loop)
+or a set list of items (each loop).
+
+While these would be helpful features for authors,
+they are not required for
+(or dependent on)
+an initial implementation of mixins or functions.
+They feel like distinct features
+that would go well together.
 
 ### Can we allow the `<calc-sum>` syntax?
 
@@ -1201,3 +1251,69 @@ either for parameters specifically,
 or for property registration more generally.
 It seems ideal to me
 if those lists can be kept in alignment.
+
+### What about `@extend`?
+
+In Sass,
+mixins without parameters also
+overlap with the `@extend` feature,
+which is used to combine related classes --
+one as an 'extension' of the other.
+In most cases,
+that has the same intended result
+as a no-parameter-mixin:
+
+```css
+/* extends */
+.error {
+  border: thin solid maroon;
+
+  &:hover {
+    background-color: #fee;
+  }
+}
+
+.error--serious {
+  @extend .error;
+  border-width: thick;
+}
+
+/* mixin */
+@mixin error {
+  border: thin solid maroon;
+
+  &:hover {
+    background-color: #fee;
+  }
+}
+
+.error--serious {
+  @include error;
+  border-width: thick;
+}
+```
+
+The difference is that a class definition
+can be compiled from multiple rule blocks
+in different style sheets,
+while a mixin generally has one centralized definition.
+This is part of the reason
+extensions have become less common in Sass --
+it can be difficult to reason about their impact.
+For now,
+I think mixins would provide the similar functionality
+without all the complexity.
+
+### Can functions be chained, or call themselves?
+
+I would expect that it should be possible
+to chain function/mixin calls together.
+A theme-generating mixin
+should be able to reference
+a single-color generating mixin or function internally.
+
+It's less clear to me if recursive function calls
+are possible or necessary.
+There are likely use-cases for recursion
+as a form of looping,
+but I'm not sure how central they are.
