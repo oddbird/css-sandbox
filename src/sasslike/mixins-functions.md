@@ -16,6 +16,9 @@ changes:
     log: >
       Clarifications and updates
       based on initial review and informal TPAC discussions
+  - time: 2023-09-12T19:40:02+02:00
+    log: >
+      Document potential built-in keyframes mixin
 ---
 
 Over the years,
@@ -1317,3 +1320,83 @@ are possible or necessary.
 There are likely use-cases for recursion
 as a form of looping,
 but I'm not sure how central they are.
+
+### Keyframe-based mixins for interpolated values?
+
+There has been a lot of recent discussion around
+[interpolating values between breakpoints](https://github.com/w3c/csswg-drafts/issues/6245#issuecomment-1715416464)
+for e.g. responsive typography.
+Conceptually, animation keyframes work well
+for defining the steps involved --
+but in this case the result is not technically animated,
+and interpolated values
+should ideally not be removed
+to the animation origin.
+
+To get around that,
+the most recent proposals
+involves a new property
+(tentatively `interpolate`)
+that would accept a keyframes name
+and timeline,
+then 'expand in place'
+to represent the declarations
+in the referenced `@keyframes` rule.
+
+```css
+@keyframes typography {
+  from {
+    font-size: 1.2em;
+    line-height: 1.4;
+  }
+  to {
+    font-size: 3em;
+    line-height: 1.2;
+  }
+}
+
+h2 {
+  /* declaration, this is all pseudo-code */
+  interpolate: typography --container-size ease-in;
+
+  /* result, with interpolated values */
+  font-size: /* interpolated… */;
+  line-height: /* interpolated… */;
+}
+```
+
+Alan Stearns has pointed out
+in conversations
+that this is a very mixin-like behavior,
+and suggested treating keyframes
+as an existing form of mixin,
+rather than a new property.
+Given the same keyframes above,
+we could consider a syntax like:
+
+```css
+h2 {
+  /* declaration, this is all pseudo-code */
+  @apply typography (--container-size; ease-in);
+
+  /* result, with interpolated values */
+  font-size: /* interpolated… */;
+  line-height: /* interpolated… */;
+}
+```
+
+If that clutters the mixin namespace,
+another approach might be
+requiring dashed-ident mixin names,
+and providing some built-in mixins such as:
+
+```css
+h2 {
+  /* declaration, this is all pseudo-code */
+  @apply keyframes(typography; --container-size; ease-in);
+
+  /* result, with interpolated values */
+  font-size: /* interpolated… */;
+  line-height: /* interpolated… */;
+}
+```
