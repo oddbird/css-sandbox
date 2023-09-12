@@ -601,9 +601,9 @@ while also leaving space for future extensions:
 @function --example (
   --name-only;
   --name-with: default-value;
-  @param --all-three {
-    default: 2em,
-    syntax: "<length>",
+  @parameter --all-three {
+    default: 2em;
+    syntax: "<length>";
   }
 ) { /* … */ }
 ```
@@ -738,11 +738,11 @@ to my proposed syntax:
 
 ```css
 @function --fluid-ratio(
-  @param --min-width {
+  @parameter --min-width {
     default: 300px;
     syntax: "<length>";
   };
-  @param --max-width {
+  @parameter --max-width {
     default: 2000px;
     syntax: "<length>";
   };
@@ -771,11 +771,11 @@ into the function:
 @function --fluid-mix(
   --min-value;
   --max-value;
-  @param --min-width {
+  @parameter --min-width {
     default: env(--fluid-min, 375px);
     syntax: "<length>";
   }
-  @param --max-width {
+  @parameter --max-width {
     default: env(--fluid-max, 1920px);
     syntax: "<length>";
   }
@@ -804,11 +804,11 @@ responsive to those global settings:
 @function --fluid-mix(
   --min-value;
   --max-value;
-  @param --min-width {
+  @parameter --min-width {
     default: env(--fluid-min, 375px);
     syntax: "<length>";
   }
-  @param --max-width {
+  @parameter --max-width {
     default: env(--fluid-max, 1920px);
     syntax: "<length>";
   }
@@ -980,6 +980,31 @@ referring to the current `:scope`.
 However, if the result is bare declarations
 without any selector,
 they should be discarded and ignored.
+
+Another example,
+from a Sass mixin I've used on occasion:
+
+```css
+@mixin --gradient-text(
+  --from: mediumvioletred;
+  --to: teal;
+  --angle: to bottom right;
+) {
+  color: var(--from, var(--to));
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    --gradient: linear-gradient(var(--angle), var(--from), var(--to));
+    background: var(--gradient, var(--from));
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+h1 {
+  @apply --gradient-text(pink, powderblue);
+}
+```
 
 ## Detailed discussion and open questions
 
