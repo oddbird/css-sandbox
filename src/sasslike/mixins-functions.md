@@ -137,15 +137,6 @@ they provide:
   or even _rule blocks_
   with selectors and other at-rules included
 
-{% note %}
-  While [CSS Nesting](https://drafts.csswg.org/css-nesting-1/)
-  ensures that both declarations and rule blocks are allowed
-  in a nested context,
-  we would need to ensure that
-  declaration-output is disallowed or ignored
-  in non-nested contexts.
-{% endnote %}
-
 These features are popular for
 reducing code repetition,
 and encouraging consistent use of best practice.
