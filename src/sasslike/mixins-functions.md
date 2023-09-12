@@ -407,8 +407,8 @@ for clamped fluid typography:
 
 ```css
 @custom-function --fluid-ratio(
-  --min-width "<length>",
-  --max-width "<length>"
+  --min-width,
+  --max-width
 ) {
   result: clamp(
     0%,
@@ -434,7 +434,7 @@ The thread also includes
 a function for generating checkerboard background-images:
 
 ```css
-@custom-function --checkerboard(--size "<length>") {
+@custom-function --checkerboard(--size) {
    result: linear-gradient(
         45deg,
         silver 25%,
