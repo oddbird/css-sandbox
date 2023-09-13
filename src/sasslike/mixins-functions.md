@@ -549,7 +549,7 @@ At computed value time,
 that output can be resolved and validated
 against the property that called the function.
 
-I like the `@return` at-rule syntax
+I like an at-rule syntax (e.g. `@return`)
 rather than a `result` descriptor.
 
 - It helps distinguish
@@ -558,9 +558,15 @@ rather than a `result` descriptor.
 - Result is not a property,
   but looks a lot like one
 
-Either syntax should be able to support
-the same basic behavior,
-so we can bike-shed the details later.
+Update: François Remy
+has proposed setting a custom property
+with the same name as the function,
+and that property is treated as the resulting value.
+
+Whatever syntax we use,
+they should all be able to support
+the same basic behavior.
+We can continue to bike-shed the details.
 
 When multiple `result`s are returned,
 we need a way to determine which one is used.
@@ -599,9 +605,9 @@ used when the passed-in argument is guaranteed-invalid.
 
 In my mind, it would be great to build on
 the way authors currently define custom properties.
-This would work for either `name: default-value;`
-or `name: syntax;` in a straight-forward way --
-and potentially `name-only;` --
+This would work for `--name: default-value;`
+in a straight-forward way --
+and could potentially include `--name-only;` --
 but has several limitations
 when we want to capture both `default-value` and `syntax`:
 
@@ -619,14 +625,34 @@ while also leaving space for future extensions:
 
 ```css
 @function --example (
-  --name-only;
-  --name-with: default-value;
-  @parameter --all-three {
+  --arg-one;
+  --arg-two: with default value;
+) {
+  @parameter --arg-one {
     default: 2em;
     syntax: "<length>";
   }
-) { /* … */ }
+  /* … */
+}
 ```
+
+Emilio Cobos Álvarez
+suggested using name-only in the parameter list,
+and providing any additional details
+in the body of the function/mixin:
+
+```css
+@function --example (--arg-one, --arg-two) {
+  @parameter --arg-two {
+    default: 2em;
+    syntax: "<length>";
+  }
+  /* … */
+}
+```
+
+That removes the need for `;` delimiters
+in the prelude to the at-rule.
 
 As with other matters of syntax,
 we can bike-shed the details as necessary.
@@ -678,6 +704,11 @@ button {
   background: --contrast({ --color: pink; --ratio: 0.7 });
 }
 ```
+
+Edit: Emilio suggests
+we may also be able to parse named arguments
+based only on a dashed-ident followed by a colon.
+If that's true, it's likely the better solution.
 
 If positional and named arguments
 are allowed in the same function call,
@@ -1460,3 +1491,5 @@ along the way from:
 - Rune Lillesveen
 - Alan Stearns
 - Yehonatan Daniv
+- Emilio Cobos Álvarez
+- François Remy
