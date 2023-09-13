@@ -19,6 +19,8 @@ changes:
   - time: 2023-09-12T19:40:02+02:00
     log: >
       Document potential built-in keyframes mixin
+  - time: 2023-09-13T10:03:41+02:00
+    log: Provide acknowledgments
 ---
 
 Over the years,
@@ -1416,3 +1418,27 @@ h2 {
   line-height: /* interpolated… */;
 }
 ```
+
+## Acknowledgments
+
+This proposal is based on
+an [existing discussion](https://github.com/w3c/csswg-drafts/issues/7490)
+with input from:
+
+- Johannes Odland
+- David Baron
+- Brian Kardell
+- Tab Atkins Jr.
+- @jimmyfrasche
+- Brandon McConnell
+- Lea Verou
+
+I've also incorporated feedback
+along the way from:
+
+- Tab Atkins Jr.
+- Nicole Sullivan
+- Anders Hartvoll Ruud
+- Rune Lillesveen
+- Alan Stearns
+- Yehonatan Daniv
