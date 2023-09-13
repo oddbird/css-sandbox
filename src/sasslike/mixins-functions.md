@@ -48,6 +48,24 @@ and asks:
   come from providing these features
   in the browser?
 
+## Discussion
+
+I posted this proposal
+to a new issue in the CSS Working Group:
+
+- [Proposal: Custom CSS Functions & Mixins #9350](https://github.com/w3c/csswg-drafts/issues/9350)
+
+The proposal is based largely
+on an existing issue specific to functions:
+
+- [Declarative custom functions #7490](https://github.com/w3c/csswg-drafts/issues/7490)
+
+Issues specific to this document
+(such as typos or corrections)
+can be filed on Github:
+
+- [OddBird CSS Sandbox Issues](https://github.com/oddbird/css-sandbox/issues)
+
 ## Background
 
 These aren't new questions.
