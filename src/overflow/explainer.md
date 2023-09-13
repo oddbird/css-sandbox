@@ -616,6 +616,8 @@ it's own set of issues:
 
 ### Accessibility
 
+#### Exclude offscreen content
+
 It is common practice for carousels to only include content on the active screen
 in the accessibility tree and in tab order.
 Other screens are accessed via buttons or links.
@@ -630,6 +632,11 @@ A pure declarative solution could be to allow setting inertness via CSS. E.g.
 ```
 
 See [[css-ui] Should inertness be exposed as CSS property?](https://github.com/w3c/csswg-drafts/issues/7021).
+
+#### Interactive pseudo-elements
+
+If we have interactive pseudo elements they will need appropriate roles.
+These could be fixed for the pseudo element type (e.g. next / previous are buttons).
 
 ## Key scenarios
 
