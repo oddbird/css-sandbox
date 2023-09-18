@@ -1,13 +1,18 @@
-# Container Query Proposal & Explainer
-
-NOTE: This explainer may be out of date,
-since work is now happening
-on the official specification:
-[CSS Containment Module level 3](https://drafts.csswg.org/css-contain-3/).
+---
+title: Container Query Proposal & Explainer
+created: 2020-12-17
+changes:
+  - time: 2021-08-20
+    log: Work has moved to CSS Containment Module level 3
+explainer: query-explainer
+archive: shipped
+tags:
+  - explainer
+---
 
 ## Authors
 
-- Miriam Suzanne
+Miriam Suzanne
 
 ## Participate
 

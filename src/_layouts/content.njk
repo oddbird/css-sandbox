@@ -1,0 +1,16 @@
+---
+layout: base.njk
+---
+
+{% include "base/alerts.njk" %}
+
+{{ content | safe }}
+
+{% include "base/links.njk" %}
+
+{% if index %}
+  {% import "base/list.macros.njk" as list %}
+
+  <h2>Related Notes</h2>
+  {{ list.all(collections[index] | noSelf(page), collections) }}
+{% endif %}

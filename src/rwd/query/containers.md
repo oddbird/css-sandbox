@@ -1,11 +1,6 @@
 ---
 title: Container Selection Syntax Implications
 created: 2022-02-08
-eleventyNavigation:
-  key: query-containers
-  title: Container Selection Syntax Implications
-  parent: container-queries
-warn: false
 ---
 
 There are three big syntax issues

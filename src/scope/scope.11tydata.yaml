@@ -1,7 +1,6 @@
+archive: moved
+moved: >
+  [the latest specification](https://www.w3.org/TR/css-cascade-6/)
+parent: scope
 tags:
-  - scoped styles
-status:
-  type: warn
-  text: |
-    Work on this feature has moved to an
-    [Editor's Draft specification](https://drafts.csswg.org/css-cascade-6/)
+  - scope

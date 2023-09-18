@@ -1,0 +1,21 @@
+{% import "alert.njk" as alert %}
+
+{% if draft %}
+  {{ alert.warn(
+    'This document is not ready for review or comment',
+    'Rough Draft'
+  ) }}
+{% elif archive %}
+  {% set details %}
+    {{ titles.archive[archive] or archive }}
+    {% if moved %}See {{ moved }} for details.{% endif %}
+  {% endset %}
+
+  {{ alert.warn(
+    details,
+    'Archived'
+  ) }}
+{% endif %}
+
+{{ alert.note(note) if note else none }}
+{{ alert.warn(warn) if warn else none }}

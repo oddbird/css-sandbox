@@ -1,19 +1,27 @@
 ---
-title: Brooklyn CSS
+title: 2021 CSS Proposals w/ Fantasai
 created: 2021-10-05
-eleventyNavigation:
-  key: 2021-brooklyn
-  title: Brooklyn CSS
-  parent: elsewhere
+archive: moved
+permalink: /elsewhere/21-brooklyn/
+tags:
+  - note
 ---
 
 I spent a week in Brooklyn,
-working with fantasai and Jen Simmons
+working with Fantasai and Jen Simmons
 on a range of ideas and proposals
 for the future of CSS.
 Most of those notes are documented elsewhere,
 but I wanted to collate here
 what we covered in that time.
+
+Some of our notes & proposals
+are documented on the [CSSWG Wiki](https://wiki.csswg.org/ideas):
+
+- [Margin Collapse Controls](https://wiki.csswg.org/ideas/margin-collapsing)
+- [Timelines and Interpolation](https://wiki.csswg.org/ideas/timelines)
+- [Column and Row Gaps and Rules](https://wiki.csswg.org/ideas/gutter-styling)
+- [Logical (Flow-relative) Syntax](https://wiki.csswg.org/ideas/logical-syntax)
 
 ## Agenda
 

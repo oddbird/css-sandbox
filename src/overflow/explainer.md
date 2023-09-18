@@ -1,21 +1,10 @@
 ---
 draft: 2023-04-17
 title: Overflow Extensions Explainer
-eleventyNavigation:
-  key: overflow-explainer
-  title: Draft Explainer
-  parent: overflow
+tags:
+  - overflow
+  - explainer
 ---
-
-{% warn %}
-This is a high-level draft explainer
-exploring issues with
-(and possible extensions to) CSS overflow/layout --
-especially in relation to common UX patterns
-like tabs, carousels, and accordions.
-This is not a complete proposal,
-but a starting place for further conversation.
-{% endwarn %}
 
 ## Authors
 
@@ -313,7 +302,7 @@ dynamically generating all of the required components:
 ```css
 carousel {
   display: grid;
-  grid-template: 
+  grid-template:
     'previous scroller next' 1fr
     '. markers .' auto
     / auto 1fr auto;

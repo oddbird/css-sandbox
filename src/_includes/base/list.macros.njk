@@ -1,0 +1,24 @@
+{%- macro all(pages, collections) -%}
+  {%- if pages | length > 0 -%}
+    <ul>
+      {%- for page in pages | byDate -%}
+        <li>
+          {%- if page.data.draft -%}
+            <strong> [draft] </strong>
+          {%- endif -%}
+
+          <a href="{{ page.url }}">{{ page.data.title }}</a>
+
+          {%- set date =
+            collections[page.data.index] | latest
+            if page.data.index
+            else page.date
+          -%}
+          <time datetime="{{ date.toISOString() }}">
+            {{ date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
+          </time>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+{%- endmacro -%}

@@ -20,12 +20,8 @@ changes:
     log: Links to js polyfill & demo
   - time: 2022-04-25T15:41:44-06:00
     log: Match syntax improvements (named states!) in draft spec
-eleventyNavigation:
-  key: toggles-explainer
-  title: CSS Toggles Explainer
-  parent: toggles
-warn: |
-  This explainer is still under active development.
+tags:
+  - explainer
 ---
 
 ## Authors

@@ -2,7 +2,7 @@ button {
   background: var(--bg);
   color: var(--text);
   cursor: pointer;
-  border: thin solid var(--neutral);
+  border: 2px solid var(--neutral);
   border-radius: 0.25em;
   font: inherit;
   font-size: 0.75rem;
@@ -20,8 +20,23 @@ button {
     background: var(--focus);
     border-color: var(--focus);
   }
+}
 
-  &::after {
-    content: ' [' var(--mode) ']';
+[data-toggle] {
+  display: flex;
+
+  button {
+    flex: auto;
+    border-radius: 0;
   }
+
+  button + button {
+    margin-inline-start: -2px;
+  }
+}
+
+[aria-pressed=true] {
+  border-color: var(--action);
+  position: relative;
+  z-index: 2;
 }

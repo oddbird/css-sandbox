@@ -1,20 +1,5 @@
 title: Sass Color Spaces Proposal
 created: 2022-03-11
-eleventyNavigation:
-  key: color spaces-proposal
-  title: Color Spaces Proposal
-  parent: sass
-status:
-  type: warn
-  text: |
-    See the
-    [Sass Pull Request](https://github.com/sass/sass/pull/2832)
-    for the latest updates.
-warn: |
-  This document is no longer being maintained.
-  All future changes will be made
-  in the [Sass Pull Request](https://github.com/sass/sass/pull/2832)
-  and Sass GitHub repository.
 changes:
   - time: 2022-04-04T15:56:51-06:00
     log: Defining color terms, procedures, and functions

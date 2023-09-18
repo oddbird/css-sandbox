@@ -6,10 +6,6 @@ changes:
     log: Revised proposal
   - time: 2021-09-24T18:41:09-06:00
     log: Need a more flexible shorthand type/name syntax
-eleventyNavigation:
-  key: query-syntax
-  title: Explicit Syntax
-  parent: container-queries
 ---
 
 The overall approach documented in my initial

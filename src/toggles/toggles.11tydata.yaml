@@ -1,7 +1,6 @@
+archive: abandoned
+moved: >
+  [the Unofficial Draft specification](https://tabatkins.github.io/css-toggle/)
+parent: toggles
 tags:
   - toggles
-status:
-  type: note
-  text: |
-    See the
-    [Unofficial Draft specification](https://tabatkins.github.io/css-toggle/)

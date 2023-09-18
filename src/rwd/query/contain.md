@@ -4,11 +4,8 @@ created: 2020-11-14
 changes:
   - time: 2021-07-05
     log: Known single-axis containment bugs
-eleventyNavigation:
-  key: containment
-  title: Containment
-  parent: container-queries
 ---
+
 {% import "embed.njk" as embed %}
 
 Layout and Size containment are supported

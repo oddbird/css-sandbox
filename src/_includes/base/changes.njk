@@ -1,0 +1,15 @@
+{% if changes and not (is_log) %}
+  <aside id="changelog-feed" class="changelog">
+    <h2>Change history for this page</h2>
+    {% for change in changes %}
+      <article>
+        <h3>
+          <time datetime="{{ change.time | date('iso') }}">
+            {{ change.time | date('DATETIME_FULL') }}
+          </time> »
+        </h3>
+        {{ change.log | md | safe }}
+      </article>
+    {% endfor %}
+  </aside>
+{% endif %}
