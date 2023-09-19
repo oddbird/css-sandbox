@@ -1,5 +1,5 @@
 const getDate = (page) => page.data.changes
-  ? page.data.changes[0].time
+  ? page.data.changes.sort((a, b) => b.time - a.time).at(0).time
   : page.data.draft || page.data.created || page.date;
 
 const upDated = (page) => {
