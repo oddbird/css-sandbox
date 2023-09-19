@@ -289,7 +289,7 @@ the same affordance at all screen sizes?
 
 ### Spicy questions
 
-Lets assume all the toggle/a11y logic & behavior
+Let's assume all the toggle/a11y logic & behavior
 can be handled in CSS Toggles.
 
 ## Meeting notes
