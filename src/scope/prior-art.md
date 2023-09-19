@@ -1,10 +1,6 @@
 ---
 title: Prior Art
 created: 2021-10-05
-eleventyNavigation:
-  key: scope-history
-  title: Prior Art
-  parent: scope
 ---
 
 ## Existing Specifications
