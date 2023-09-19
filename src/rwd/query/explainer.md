@@ -1,10 +1,9 @@
 ---
-title: Container Query Proposal & Explainer
+title: CSS Container Query Proposal & Explainer
 created: 2020-12-17
 changes:
   - time: 2021-08-20
     log: Work has moved to CSS Containment Module level 3
-explainer: query-explainer
 archive: shipped
 tags:
   - explainer

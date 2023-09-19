@@ -1,5 +1,5 @@
 ---
-title: Scope & Encapsulation
+title: CSS Scope & Encapsulation
 created: 2020-11-10
 changes:
   - time: 2021-09-11
@@ -9,6 +9,8 @@ links:
   spec: css-cascade-6
   project: 21
   caniuse: css-cascade-scope
+  tag: 593
+  wpt: css-cascade?q=scope
 ---
 
 Authors often complain that CSS is "globally scoped" --

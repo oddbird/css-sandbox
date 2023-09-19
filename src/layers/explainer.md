@@ -1,6 +1,5 @@
 ---
-title: Cascade Layers Explainer
-explainer: layers
+title: CSS Cascade Layers Explainer
 created: 2021-01-08
 changes:
   - time: 2021-09-09

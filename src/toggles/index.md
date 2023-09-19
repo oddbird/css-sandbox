@@ -1,5 +1,5 @@
 ---
-title: Declarative Toggles
+title: CSS Declarative Toggles
 created: 2021-05-28
 index: toggles
 ---

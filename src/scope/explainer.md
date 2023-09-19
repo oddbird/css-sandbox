@@ -1,5 +1,5 @@
 ---
-title: Scope Proposal & Explainer
+title: CSS Scope Proposal & Explainer
 tags:
   - explainer
 created: 2020-12-15

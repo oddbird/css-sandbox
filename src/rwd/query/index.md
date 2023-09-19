@@ -1,5 +1,5 @@
 ---
-title: Container Queries
+title: CSS Container Queries
 created: 2020-11-14
 index: container-queries
 links:
@@ -8,7 +8,7 @@ links:
   mdn: CSS_Container_Queries
   caniuse: css-container-queries
   tag: 592
-  wpt: css-contain/container-queries/
+  wpt: css-contain/container-queries
 ---
 
 While media queries provide a method

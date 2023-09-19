@@ -7,7 +7,9 @@
             <strong> [draft] </strong>
           {%- endif -%}
 
-          <a href="{{ page.url }}">{{ page.data.title }}</a>
+          <a href="{{ page.url }}">
+            {{- page.data.title -}}
+          </a>
 
           {%- set date =
             collections[page.data.index] | latest
@@ -15,6 +17,7 @@
             else page.date
           -%}
           <time datetime="{{ date.toISOString() }}">
+            – updated
             {{ date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
           </time>
         </li>

@@ -1,10 +1,13 @@
 ---
-title: Container Style Queries
+title: CSS Style Queries
 created: 2022-10-25
 index: style-queries
 links:
   spec: css-contain-3
   project: 18
+  caniuse: css-container-queries-style
+  tag: 787
+  wpt: css-contain/container-queries?q=style
 ---
 
 Style queries are a subset of 'container queries',

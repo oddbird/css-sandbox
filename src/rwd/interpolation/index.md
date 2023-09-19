@@ -1,5 +1,5 @@
 ---
-title: Interpolated Values
+title: CSS Interpolated Values
 index: interpolation
 created: 2020-11-13
 changes:

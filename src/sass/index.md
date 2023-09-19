@@ -2,7 +2,6 @@
 title: Sass Core Features
 created: 2021-12-06
 index: sass
-archive: inactive
 ---
 
 In addition to our work on CSS specifications,

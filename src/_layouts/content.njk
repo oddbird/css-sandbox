@@ -8,9 +8,10 @@ layout: base.njk
 
 {% include "base/links.njk" %}
 
-{% if index %}
+{% set related = collections[index] | noSelf(page) if index else [] %}
+{% if related | length > 0 %}
   {% import "base/list.macros.njk" as list %}
 
   <h2>Related Notes</h2>
-  {{ list.all(collections[index] | noSelf(page), collections) }}
+  {{ list.all(related, collections) }}
 {% endif %}

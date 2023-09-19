@@ -23,6 +23,6 @@ because we prefer working in public.
 
 {{ list.all(collections.explainer, collections) }}
 
-## Other Notes
+## More Topics
 
 {{ list.all(collections.index, collections) }}

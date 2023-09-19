@@ -1,3 +1,3 @@
+language: Sass
 parent: sass
-tags:
-  - sass
+tags: [sass]

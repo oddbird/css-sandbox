@@ -1,7 +1,6 @@
 ---
 created: 2023-08-21
 title: CSS Mixins and Functions Explainer
-explainer: mixins-functions
 tags:
   - explainer
   - mixins-functions

@@ -2,9 +2,6 @@
 title: 2021 CSS Proposals w/ Fantasai
 created: 2021-10-05
 archive: moved
-permalink: /elsewhere/21-brooklyn/
-tags:
-  - note
 ---
 
 I spent a week in Brooklyn,

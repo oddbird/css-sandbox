@@ -1,5 +1,5 @@
 ---
-title: Potential Grid Improvements
+title: CSS Grid Improvements
 created: 2020-11-10
 index: grids
 changes:

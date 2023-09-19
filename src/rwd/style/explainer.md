@@ -1,5 +1,5 @@
 ---
-title: Container Style Query Explainer
+title: CSS Style Query Explainer
 created: 2022-11-21
 tags:
   - explainer
