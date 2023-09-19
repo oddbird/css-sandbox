@@ -7,7 +7,7 @@
   ) }}
 {% elif archive %}
   {% set details %}
-    {{ titles.archive[archive] or archive }}
+    {{ status.archive[archive] or archive }}
     {% if moved %}See {{ moved }} for details.{% endif %}
   {% endset %}
 

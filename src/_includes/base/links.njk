@@ -3,23 +3,23 @@
   <ul>
     {% for type, link in links %}
       <li>
-        <a href="{{ titles.links[type].url | replace('%s', link) }}">
-          {{ titles.links[type].name }}
+        <a href="{{ refs[type].url | replace('%s', link) }}">
+          {{ refs[type].name }}
         </a>
       </li>
 
       {% if type == 'spec' %}
         <li>
-          <a href="{{ titles.links.draft.url | replace('%s', link) }}">
-            {{ titles.links.draft.name }}
+          <a href="{{ refs.draft.url | replace('%s', link) }}">
+            {{ refs.draft.name }}
           </a>
         </li>
       {% endif %}
 
       {% if type in ['draft', 'spec'] %}
         <li>
-          <a href="{{ titles.links.label.url | replace('%s', link) }}">
-            {{ titles.links.label.name }}
+          <a href="{{ refs.label.url | replace('%s', link) }}">
+            {{ refs.label.name }}
           </a>
         </li>
       {% endif %}
