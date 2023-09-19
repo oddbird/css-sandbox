@@ -23,8 +23,12 @@ date: Last Modified
     <h1>{{ title | mdInline | safe }}</h1>
 
     {% if tags %}
-      <time datetime="{{ page.date.toISOString() }}">
-        Updated {{ page.date.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
+      {% set updated = collections[index] | latest
+        if index
+        else collections.all | getPage(page) | getDate
+      %}
+      <time datetime="{{ updated.toISOString() }}">
+        Updated {{ updated.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
       </time>
     {% endif %}
 

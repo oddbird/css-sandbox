@@ -12,7 +12,7 @@ const byDate = (collection) => collection
   .sort((a, b) => b.date - a.date);
 
 const latest = (collection) => {
-  return byDate(collection)[0].date;
+  return byDate(collection).at(0).date;
 };
 
 const noSelf = (collection, self) =>
@@ -43,6 +43,9 @@ const getStatus = (collection, status) => byStatus(collection)[status];
 const getIndex = (collection, tag) =>
   collection.find((page) => page.data.index === tag);
 
+  const getPage = (collection, page) =>
+  collection.find((item) => item.url === page.url);
+
 module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('getDate', getDate);
   eleventyConfig.addFilter('upDated', upDated);
@@ -52,6 +55,7 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter('byStatus', byStatus);
   eleventyConfig.addFilter('getStatus', getStatus);
   eleventyConfig.addFilter('getIndex', getIndex);
+  eleventyConfig.addFilter('getPage', getPage);
 
   eleventyConfig.addCollection("index", function(collectionApi) {
     const collect = collectionApi

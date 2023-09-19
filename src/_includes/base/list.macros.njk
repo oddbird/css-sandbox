@@ -11,8 +11,7 @@
             {{- page.data.title -}}
           </a>
 
-          {%- set date =
-            collections[page.data.index] | latest
+          {%- set date = collections[page.data.index] | latest
             if page.data.index
             else page.date
           -%}
