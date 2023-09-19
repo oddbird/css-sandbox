@@ -567,6 +567,23 @@ would also need to track and expose
 the current active state -
 providing a way to style the active marker.
 
+#### Next / previous buttons
+
+Many 'carousel' components offer next and previous buttons.
+These could be declared explicitly in HTML,
+or constructed as interactive pseudo-elements (e.g. `::next`/`::previous`).
+The behavior of these could be defined in many ways:
+
+- Defined by Javascript handlers.
+  The amount to scroll can be calculated,
+  rely on [css-scroll-snap-1 6.2](https://www.w3.org/TR/css-scroll-snap-1/#choosing) to choose the next snap point from a directional scroll (e.g. `scrollBy({left: 1})`),
+  or use the proposed `scrollTo({left: 'snap-next'})` [explainer](https://github.com/argyleink/ScrollSnapExplainers/tree/main/js-scrollToOptions_Snap-Additions).
+- Defined via page anchors (e.g. `<a href="#page2">`).
+  This requires the author to create next / previous links for every page,
+  which are only visible on that page,
+  and to explicitly paginate their content independent of screen size.
+- Implicit, by using new pseudo-elements or attributes (e.g. `<button type="next">`).
+
 ### Per-item markers & tabs
 
 In more tab-like cases,
