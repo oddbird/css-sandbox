@@ -43,7 +43,7 @@ const getStatus = (collection, status) => byStatus(collection)[status];
 const getIndex = (collection, tag) =>
   collection.find((page) => page.data.index === tag);
 
-  const getPage = (collection, page) =>
+const getPage = (collection, page) =>
   collection.find((item) => item.url === page.url);
 
 module.exports = function (eleventyConfig) {
