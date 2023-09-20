@@ -1,2 +1,18 @@
-type: callout
-text: Notes towards the future of CSS, from Miriam Suzanne & OddBird
+section:
+  draft: Upcoming Topics
+  active: Active Topics
+  archive: Archived Topics
+archive:
+  abandoned: >
+    This feature has been abandoned
+    (at least for now).
+    Our notes are likely out-of-date.
+  shipped: >
+    This feature has shipped in browsers.
+    Our notes are likely out-of-date.
+  moved: >
+    This content
+    is being maintained elsewhere.
+    Our notes are likely out-of-date.
+  inactive: >
+    Not much active in here at the moment…

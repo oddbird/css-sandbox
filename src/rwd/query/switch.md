@@ -4,21 +4,8 @@ created: 2020-11-09
 changes:
   - time: 2021-03-15
     log: Use cases & related conditional functions
-eleventyNavigation:
-  key: switch-function
-  title: Switch Function
-  parent: container-queries
-warn: |
-  This feature was
-  proposed by Brian Kardell,
-  and considered as an
-  [alternative](/rwd/compare/switch-query/)
-  to the `@container` rule,
-  which is now
-  [shipping in multiple browsers](/2022/08/18/cq-syntax/).
-  There are no plans
-  to continue work on a `switch()` function
-  at this point.
+permalink: /rwd/switch/index.html
+archive: abandoned
 ---
 
 The `switch()` function

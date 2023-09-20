@@ -1,10 +1,7 @@
 ---
 created: 2023-04-17
-title: Overflow Extensions
-eleventyNavigation:
-  key: overflow
-  title: Overflow Extensions
-  parent: home
+title: CSS Overflow Extensions
+index: overflow
 ---
 
 Managing content 'overflow' effectively on the web
@@ -23,7 +20,3 @@ to handle one of these patterns,
 I'm interested in what tools are needed
 to make the existing patterns easier to build
 effectively and accessibly.
-
-## Our notes
-
-{{ collections.all | eleventyNavigation('overflow') | eleventyNavigationToHtml | typogr | safe }}

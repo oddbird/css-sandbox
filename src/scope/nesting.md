@@ -1,10 +1,6 @@
 ---
 title: Nesting, Scoping, and Proximity (a FAQ)
 created: 2023-03-21
-eleventyNavigation:
-  key: scope-nesting
-  title: Nesting, Scoping, and Proximity (a FAQ)
-  parent: scope
 ---
 
 ## Do we really need both scoping and nesting?

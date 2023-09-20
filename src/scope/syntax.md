@@ -6,10 +6,6 @@ changes:
     log: Clarifications
   - time: 2021-10-05T12:37:15-06:00
     log: Add possible selector notation & proximity combinator
-eleventyNavigation:
-  key: scope-syntax
-  title: Syntax Options
-  parent: scope
 ---
 
 There have been several different proposals

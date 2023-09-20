@@ -1,10 +1,6 @@
 ---
 created: 2023-06-22
 title: Sass Features in CSS
-eleventyNavigation:
-  key: sasslike
-  title: Sass Features in CSS
-  parent: home
 ---
 
 Over the last decade,
@@ -25,7 +21,3 @@ has done some
 [basic tracking of Sass usage](https://github.com/w3c/csswg-drafts/issues/5798)
 across sites that provide
 public Sass sourcemaps.
-
-## Our notes
-
-{{ collections.all | eleventyNavigation('sasslike') | eleventyNavigationToHtml | typogr | safe }}

@@ -4,9 +4,9 @@
   "description": "A public scratch-pad for OddBird to work on CSS & Sass",
   "main": "index.html",
   "scripts": {
-    "watch:sass": "sass  --no-source-map --watch src/styles:public/css",
+    "watch:sass": "sass --no-source-map --watch src/styles:public/css",
     "watch:eleventy": "eleventy --serve",
-    "build:sass": "sass  --no-source-map src/styles:public/css",
+    "build:sass": "sass --no-source-map src/styles:public/css",
     "build:eleventy": "eleventy",
     "postbuild": "postcss public/css/*.css -u autoprefixer cssnano -r",
     "start": "npm-run-all build:sass --parallel watch:*",

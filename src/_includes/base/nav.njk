@@ -1,0 +1,16 @@
+<nav>
+  <a href="/" rel="home" {% if page.url == '/' %}aria-current="page"{% endif %}>Home</a>
+
+  {% if parent and not (parent == index) %}
+  {% set parentIndex = collections[parent] | getIndex(parent) %}
+    /
+    <a href="{{ parentIndex.url }}">
+      {{ parentIndex.data.title }}
+    </a>
+  {% endif %}
+</nav>
+
+<div data-toggle="mode" class="controls">
+  <button data-mode="light" aria-pressed="true">Light</button>
+  <button data-mode="dark" aria-pressed="false">Dark</button>
+</div>

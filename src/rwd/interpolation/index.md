@@ -1,9 +1,6 @@
 ---
-title: Interpolated Values
-eleventyNavigation:
-  key: interpolation
-  title: Interpolated Values
-  parent: rwd
+title: CSS Interpolated Values
+index: interpolation
 created: 2020-11-13
 changes:
   - time: 2021-09-22T00:35:28-04:00
@@ -28,7 +25,7 @@ to responsive type.
 
 ## Proposal
 
-Fantasai and I worked on a proposal to address & unify 
+Fantasai and I worked on a proposal to address & unify
 a number of related use-cases around interpolation & timelines:
 
 Timelines can be defined in relation to:

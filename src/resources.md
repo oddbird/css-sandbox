@@ -1,10 +1,8 @@
 ---
-title: CSS Links & Resources
+title: W3C & Browser Resources
 created: 2022-03-04
-eleventyNavigation:
-  key: resources
-  title: CSS Links & Resources
-  parent: home
+tags:
+  - resources
 ---
 
 Some links
@@ -38,7 +36,7 @@ Webkit:
 - [Webkit feature status](https://webkit.org/status/)
 - [WebKit release notes](https://webkit.org/blog/)
 - [Safari release notes](https://developer.apple.com/documentation/safari-release-notes)
-- (Safari doesn't announce future release plans)
+- [Safari standards positions](https://webkit.org/standards-positions/)
 
 Chromium/Blink:
 - [Blink CSS issues](https://bugs.chromium.org/p/chromium/issues/list?q=component:Blink%3ECSS)

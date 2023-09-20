@@ -1,14 +1,4 @@
+archive: shipped
+parent: layers
 tags:
-  - cascade layers
-warn: |
-  Much of this content is now out-of-date,
-  as layers are defined by the
-  [Cascade & Inheritance Level 5 specification](https://www.w3.org/TR/css-cascade-5/).
-  Check out the linked
-  [talks, podcasts, and articles](/layers/#talks--podcasts)
-  for more recent information.
-status:
-  type: warn
-  text: |
-    This feature is now a stable
-    [Candidate Recommendation](https://www.w3.org/TR/css-cascade-5/)
+  - layers

@@ -17,108 +17,98 @@ date: Last Modified
   {%- endif %}
 </head>
 <body>
-  <aside data-status="{{ status.type }}">
-    {{ status.text | md | safe }}
-  </aside>
-
-  <div class="controls">
-    <button data-toggle="mode">colors</button>
-  </div>
+  {% include "base/nav.njk" %}
 
   <header>
-    {% include "nav.njk" %}
-    {% if not (page.url == '/') %}
-      {% set latest = changes[0].time or draft or page.date %}
-      <time datetime="{{ latest.toISOString() }}">
-        Updated {{ latest.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
+    <h1>{{ title | mdInline | safe }}</h1>
+
+    {% if tags %}
+      {% set updated = collections[index] | latest
+        if index
+        else collections.all | getPage(page) | getDate
+      %}
+      <time datetime="{{ updated.toISOString() }}">
+        Updated {{ updated.toLocaleString('en-US', {'dateStyle': 'medium'}) }}
       </time>
     {% endif %}
 
-    {% if not raw_md %}
-      <h1>{{ title | mdInline | safe }}</h1>
-      {% if eleventyNavigation and eleventyNavigation.parent and not manual_toc %}
-        <details id="toc-details">
-          <summary class="toc-summary">Table of Contents</summary>
-          {{ content | toc | safe }}
-        </details>
-      {% endif %}
+    {% if content | toc %}
+      <details id="toc-details">
+        <summary class="toc-summary">Table of Contents</summary>
+        {{ content | toc | safe }}
+      </details>
     {% endif %}
   </header>
 
   <main>
-    {% import "alert.njk" as alert %}
-    {{ alert.note(note) if note else none }}
-    {{ alert.warn(warn) if warn else none }}
-
     {{ content | typogr | safe }}
   </main>
 
-  {% if changes and not (raw_md or is_log) %}
-    <aside id="changelog-feed" class="changelog">
-      <h2>Log of Major Page Changes</h2>
-      <a href="/feed.xml">Subscribe to site changes feed »</a>
-      {% for change in changes %}
-        <article>
-          <h3>
-            <time datetime="{{ change.time | date('iso') }}">
-              {{ change.time | date('DATETIME_FULL') }}
-            </time> »
-          </h3>
-          {{ change.log | md | safe }}
-        </article>
-      {% endfor %}
-    </aside>
-  {% endif %}
+  {% include "base/changes.njk" %}
 
   <footer>
-    {% include "footer.njk" %}
+    {% include "base/footer.njk" %}
   </footer>
 
   <script>
-    var modeRoot = document.querySelector('[data-mode]');
-    var modeBtn = document.querySelector('[data-toggle="mode"]');
+    const modeRoot = document.querySelector('[data-mode]');
+    const modeToggle = document.querySelector('[data-toggle=mode]');
 
-    if (modeBtn && modeRoot) {
-      var darkPref = window.matchMedia( "(prefers-color-scheme: dark)" ).matches;
-      var localMode = window.localStorage.getItem('mode');
-
-      var lightMap = {
-        'auto': 'dark',
-        'dark': 'light',
-        'light': 'auto',
-      };
-
-      var darkMap = {
-        'auto': 'light',
-        'light': 'dark',
-        'dark': 'auto',
-      };
-
-      var stateMap = darkPref ? darkMap : lightMap;
-
-      var isValidMode = function(mode) {
-        return mode && stateMap[mode];
-      }
-
-      var getMode = function() {
+    if (modeToggle && modeRoot) {
+      const autoMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark' : 'light';
+      const userMode = window.localStorage.getItem('mode') || autoMode;
+      const htmlMode = () => {
         return modeRoot.getAttribute('data-mode');
       }
 
-      var setMode = function(to) {
-        var setTo = to || stateMap[getMode()];
-        if (setTo === 'auto') {
-          window.localStorage.removeItem('mode');
-        } else {
-          window.localStorage.setItem('mode', setTo);
-        }
-        modeRoot.setAttribute('data-mode', setTo);
-      };
-
-      if (isValidMode(localMode) && getMode() !== localMode) {
-        setMode(localMode);
+      const isValidMode = (mode) => {
+        return mode && ['light', 'dark', 'auto'].includes(mode);
       }
 
-      modeBtn.addEventListener('click', function() { setMode(); });
+      const updateStore = (to) => {
+        if (to === 'auto') {
+          window.localStorage.removeItem('mode');
+        } else {
+          window.localStorage.setItem('mode', to);
+        }
+      }
+
+      const updateToggles = (to) => {
+        [...modeToggle.children].forEach((btn) => {
+          if (btn.getAttribute('data-mode') === to) {
+            btn.setAttribute('aria-pressed', 'true');
+          } else {
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+      }
+
+      const setMode = (to, store=true) => {
+        const setTo = to === 'auto' ? autoMode : to;
+
+        if (isValidMode(setTo)) {
+          modeRoot.setAttribute('data-mode', setTo);
+          updateToggles(setTo);
+          if (store) {
+            updateStore(setTo);
+          }
+        } else {
+          console.error(`Unknown color scheme: ${setTo}`);
+        }
+      };
+
+      // initial setting
+      setMode(userMode, false);
+
+      // events
+      [...modeToggle.children].forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          event.preventDefault();
+          const setTo = btn.getAttribute("data-mode");
+          setMode(setTo);
+        });
+      });
     }
   </script>
 </body>

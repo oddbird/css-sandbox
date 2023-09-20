@@ -1,12 +1,7 @@
 ---
 title: Use-Cases for Style Queries
 created: 2022-08-09T17:17:31-06:00
-warn: false
 permalink: /rwd/query/style-cases/
-eleventyNavigation:
-  key: query-style-cases
-  title: Use-Cases for Style Queries
-  parent: style-queries
 ---
 
 When people talk about container queries,

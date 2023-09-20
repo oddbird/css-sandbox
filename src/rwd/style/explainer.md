@@ -1,38 +1,13 @@
-# Container Style Query Explainer
-
-<!-- generate TOC using VSCode Markdown All-In-One extension -->
-- [Authors](#authors)
-- [Participate](#participate)
-- [Introduction](#introduction)
-- [Goals](#goals)
-- [Non-goals](#non-goals)
-- [Proposed solutions](#proposed-solutions)
-  - [Querying computed styles: `@container style()`](#querying-computed-styles-container-style)
-  - [Defining style containers: `container-type` and `container-name`](#defining-style-containers-container-type-and-container-name)
-    - [Default containers for inherited properties](#default-containers-for-inherited-properties)
-    - [Named containers for non-inherited properties](#named-containers-for-non-inherited-properties)
-- [Key scenarios](#key-scenarios)
-  - [Setting parameters in web components](#setting-parameters-in-web-components)
-  - [Contextual configuration without custom elements](#contextual-configuration-without-custom-elements)
-  - [Parameters for generated content](#parameters-for-generated-content)
-  - [Simple value cycles](#simple-value-cycles)
-  - [Complex value adjustments](#complex-value-adjustments)
-  - [Querying non-inherited properties](#querying-non-inherited-properties)
-  - [Using `var()` in container queries](#using-var-in-container-queries)
-  - [Replacing the 'variable space toggle' hack](#replacing-the-variable-space-toggle-hack)
-- [Detailed design discussion & alternatives](#detailed-design-discussion--alternatives)
-  - [Alternatives to an at-rule syntax](#alternatives-to-an-at-rule-syntax)
-    - [Inline conditional functions](#inline-conditional-functions)
-    - [Global constants](#global-constants)
-    - [Conditional pseudo-class](#conditional-pseudo-class)
-    - [Building on container queries](#building-on-container-queries)
-  - [Default container types](#default-container-types)
-- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
-- [References & acknowledgements](#references--acknowledgements)
+---
+title: CSS Style Query Explainer
+created: 2022-11-21
+tags:
+  - explainer
+---
 
 ## Authors
 
-- Miriam Suzanne
+Miriam Suzanne
 
 ## Participate
 

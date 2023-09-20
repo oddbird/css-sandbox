@@ -1,10 +1,9 @@
 ---
 created: 2023-08-21
-title: CSS Mixins and Functions
-eleventyNavigation:
-  key: mixins-functions
-  title: CSS Mixins and Functions
-  parent: sasslike
+title: CSS Mixins and Functions Explainer
+tags:
+  - explainer
+  - mixins-functions
 changes:
   - time: 2023-08-22T10:20:26-06:00
     log: Document issues with function fallbacks

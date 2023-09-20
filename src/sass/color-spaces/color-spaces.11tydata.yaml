@@ -1,0 +1,6 @@
+archive: moved
+moved: >
+  [the official Sass proposal](https://github.com/sass/sass/blob/main/proposal/color-4-new-spaces.md)
+parent: sass-color-spaces
+tags:
+  - sass-color-spaces

@@ -1,0 +1,28 @@
+{% if links %}
+  <h2>Important Links</h2>
+  <ul>
+    {% for type, link in links %}
+      <li>
+        <a href="{{ refs[type].url | replace('%s', link) }}">
+          {{ refs[type].name }}
+        </a>
+      </li>
+
+      {% if type == 'spec' %}
+        <li>
+          <a href="{{ refs.draft.url | replace('%s', link) }}">
+            {{ refs.draft.name }}
+          </a>
+        </li>
+      {% endif %}
+
+      {% if type in ['draft', 'spec'] %}
+        <li>
+          <a href="{{ refs.label.url | replace('%s', link) }}">
+            {{ refs.label.name }}
+          </a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}

@@ -7,12 +7,15 @@ const ghSlug = require('github-slugger').slug;
 
 const time = require('./filters/time');
 const type = require('./filters/type');
+const get = require('./filters/get');
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPlugin(hljs);
   eleventyConfig.addPlugin(nav);
   eleventyConfig.addPlugin(toc);
   eleventyConfig.addPlugin(pluginRss);
+
+  eleventyConfig.addPlugin(get);
 
   eleventyConfig.addWatchTarget('./src/styles/');
   eleventyConfig.addPassthroughCopy('./src/css');

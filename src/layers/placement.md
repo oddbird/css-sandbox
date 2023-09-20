@@ -1,13 +1,6 @@
 ---
 title: Ordering of Unlayered Styles
 created: 2021-10-20
-eleventyNavigation:
-  key: placement
-  title: Ordering of Unlayered Styles
-  parent: layers
-note: |
-  The full discussion is happening in
-  [CSSWG-drafts issue #6323](https://github.com/w3c/csswg-drafts/issues/6323)
 ---
 
 By default,

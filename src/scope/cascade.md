@@ -6,10 +6,6 @@ changes:
     log: Clarify conclusions
   - time: 2021-10-05T11:57:41-06:00
     log: Merge in cascade options
-eleventyNavigation:
-  key: scope-cascade
-  title: In the Cascade
-  parent: scope
 ---
 
 There are two primary ways to think about "scope" in CSS,

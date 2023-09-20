@@ -1,6 +1,7 @@
 ---
-title: Potential Grid Improvements
+title: CSS Grid Improvements
 created: 2020-11-10
+index: grids
 changes:
   - time: 2021-05-19
     log: Link to overflow fragmentation proposal
@@ -8,10 +9,6 @@ changes:
     log: Link to gap-styling proposal & grid-area discussion
   - time: 2021-10-20T13:07:53-06:00
     log: Link Rachel Andrew on multicol & page fragments
-eleventyNavigation:
-  key: grids
-  title: Potential Grid Improvements
-  parent: rwd
 ---
 
 As part of my work on Container Queries,

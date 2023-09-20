@@ -1,37 +1,28 @@
 ---
 title: OddBird CSS Sandbox
 created: 2020-11-09
-changes:
-  - time: 2021-10-05T12:52:11-06:00
-    log: |
-      Link CSSWG Wiki proposals for
-      margin collapsing,
-      timelines & interpolation,
-      column & row gap rules,
-      and flow-relative (logical) syntax
-eleventyNavigation:
-  key: home
 ---
 
-This is a scratch site for
+This is a sandbox for
 [Miriam Suzanne](https://oddbird.net/authors/miriam/)
 and [OddBird](https://oddbird.net/)
-to take notes & document ideas
-related to the
+to document our notes
+related to
 [CSS Working Group](https://github.com/w3c/csswg-drafts/),
-the [Sass language](https://sass-lang.com/),
+[Sass language](https://sass-lang.com/),
 and related web platform features.
-
-Most conversations happen in [CSSWG issue threads][drafts] --
-but we wanted a place to gather our thoughts
-around those conversations.
-Everything here is un-official **work-in-progress** --
-an ever-changing reflection of
-what we're working on and thinking about.
+Everything here is un-official and incomplete,
+as we do our thinking in public.
 
 [gh]: https://github.com/oddbird/css-sandbox
 [drafts]: https://github.com/w3c/csswg-drafts/issues
 
-## Our Notes (So Far)
+{% import "base/list.macros.njk" as list %}
 
-{{ collections.all | eleventyNavigation('home') | eleventyNavigationToHtml | typogr | safe }}
+## Explainers
+
+{{ list.all(collections.explainer, collections) }}
+
+## More Topics
+
+{{ list.all(collections.index, collections) }}
