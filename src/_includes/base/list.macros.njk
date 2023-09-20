@@ -13,7 +13,7 @@
 
           {%- set date = collections[page.data.index] | latest
             if page.data.index
-            else page.date
+            else page | getDate
           -%}
           <time datetime="{{ date.toISOString() }}">
             – updated
