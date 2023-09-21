@@ -456,6 +456,19 @@ if the styles applied
 could change the number of pages
 or placement of content in those pages.
 
+Authors will often want to style the active page and marker.
+Authors could use `:snapped` from [css-scroll-snap-2](https://drafts.csswg.org/css-scroll-snap-2/#snapped) in combination with snapped pages. E.g.
+
+```css
+::page {
+  scroll-snap-align: start;
+}
+::page:snapped-inline::marker {
+  /* Highlight active marker. */
+  outline: 2px solid blue;
+}
+```
+
 {% note %}
 Could these pseudo-classes be used for paged
 (e.g. print) media as well?
