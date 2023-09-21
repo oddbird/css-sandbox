@@ -620,6 +620,30 @@ it's own set of issues:
 - [[css-grid] grid area as element][flow-element]
 - [[css-grid] Decorative grid-cell pseudo-elements][style-area]
 
+### Accessibility
+
+#### Exclude offscreen content
+
+It is common practice for carousels to only include content on the active screen
+in the accessibility tree and in tab order.
+Other screens are accessed via buttons or links.
+In the [WAI tutorial](https://www.w3.org/WAI/tutorials/carousels/full-code/),
+this is accomplished by setting the `aria-hidden` attribute from Javascript.
+A pure declarative solution could be to allow setting inertness via CSS. E.g.
+
+```css
+::page:not(:active) {
+  interactivity: inert;
+}
+```
+
+See [[css-ui] Should inertness be exposed as CSS property?](https://github.com/w3c/csswg-drafts/issues/7021).
+
+#### Interactive pseudo-elements
+
+If we have interactive pseudo elements they will need appropriate roles.
+These could be fixed for the pseudo element type (e.g. next / previous are buttons).
+
 ## Key scenarios
 
 [TBD]
