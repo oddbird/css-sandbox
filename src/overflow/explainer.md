@@ -1,10 +1,18 @@
 ---
-draft: 2023-04-17
-title: CSS Overflow Extensions Explainer
+created: 2023-12-14
+title: CSS Overflow - Broad Research
 tags:
   - overflow
   - explainer
 ---
+
+{% note %}
+  This is a high level review
+  of issues in overflow,
+  and potential features to explore.
+  We'll break out individual explainers
+  for specific feature proposals.
+{% endnote %}
 
 ## Authors
 
@@ -348,6 +356,11 @@ carousel {
   }
 }
 ```
+
+Rob has put together
+[a prototype of this feature](https://flackr.github.io/web-demos/carousel/),
+and will write a more detailed explainer
+for the features required.
 
 ### Paged overflow, in the browser
 
