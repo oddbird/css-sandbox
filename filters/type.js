@@ -28,18 +28,18 @@ const render = (content, type = true) =>
 const inline = (content, type = true) =>
   type ? set(mdown.renderInline(content)) : mdown.renderInline(content);
 
-const note = (content, label) => {
-  return `<aside data-alert="note">
-            <strong>${label || 'Note'}:</strong>
+const note = (content, label, close) => {
+  return `<details data-alert="note" ${close ? '' : 'open'}>
+            <summary>${label || 'Note'}:</summary>
             <div>${render(content.trim())}</div>
-          </aside>`;
+          </details>`;
 }
 
-const warn = (content, label) => {
-  return `<aside data-alert="warn">
-            <strong>${label || 'Warning'}:</strong>
+const warn = (content, label, close) => {
+  return `<details data-alert="warn" ${close ? '' : 'open'}>
+            <summary>${label || 'Warning'}:</summary>
             <div>${render(content.trim())}</div>
-          </aside>`;
+          </details>`;
 }
 
 module.exports = {

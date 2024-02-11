@@ -1,14 +1,14 @@
 
-{% macro note(description, label='Note') %}
-  <aside data-alert="note">
-    <strong>{{ label }}:</strong>
+{% macro note(description, label='Note', close=false) %}
+  <details data-alert="note" {{ '' if close else 'open' }}>
+    <summary>{{ label }}:</summary>
     <div>{{ description | md | safe }}</div>
-  </aside>
+  </details>
 {% endmacro %}
 
-{% macro warn(description, label='Warning') %}
-  <aside data-alert="warn">
-    <strong>{{ label }}:</strong>
+{% macro warn(description, label='Warning', close=false) %}
+  <details data-alert="warn" {{ '' if close else 'open' }}>
+    <summary>{{ label }}:</summary>
     <div>{{ description | md | safe }}</div>
-  </aside>
+  </details>
 {% endmacro %}

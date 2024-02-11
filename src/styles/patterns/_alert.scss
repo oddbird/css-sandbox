@@ -10,10 +10,11 @@
   margin: 1em 0;
 }
 
-[data-alert] > strong {
+[data-alert] summary {
   background-color: var(--alert);
   color: var(--alert-contrast, inherit);
   font-size: max(16px, 0.5em);
+  font-weight: bold;
   grid-area: title;
   padding: 0.25em 0.5em;
 }
