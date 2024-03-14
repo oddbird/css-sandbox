@@ -5,9 +5,6 @@ tags:
   - resources
 ---
 
-Some links
-that are useful to keep around...
-
 ## Github Repos
 
 - [CSS Working Group](https://github.com/w3c/csswg-drafts/)
