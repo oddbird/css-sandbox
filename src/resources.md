@@ -19,8 +19,8 @@ that are useful to keep around...
 ## Web Platform Tests
 
 - [wpt info](https://wpt.fyi/)
+  (includes yearly interop)
 - [live tests](https://wpt.live/)
-- [interop 2022](https://wpt.fyi/interop-2022)
 
 ## Browser Issues / Status
 
@@ -33,7 +33,6 @@ Gecko:
 
 Webkit:
 - [Webkit css issues](https://bugs.webkit.org/buglist.cgi?bug_status=__open__&component=CSS&list_id=7970035&product=WebKit)
-- [Webkit feature status](https://webkit.org/status/)
 - [WebKit release notes](https://webkit.org/blog/)
 - [Safari release notes](https://developer.apple.com/documentation/safari-release-notes)
 - [Safari standards positions](https://webkit.org/standards-positions/)
@@ -44,5 +43,4 @@ Chromium/Blink:
 - [Chrome platform status](https://chromestatus.com/features)
 - [Chrome release schedule](https://chromiumdash.appspot.com/schedule)
 - [Chrome release notes](https://developer.chrome.com/)
-- [Edge platform status](https://developer.microsoft.com/en-us/microsoft-edge/status/)
 - [Edge release notes](https://docs.microsoft.com/en-us/deployedge/microsoft-edge-relnote-stable-channel)
