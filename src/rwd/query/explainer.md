@@ -1,6 +1,7 @@
 ---
 title: CSS Container Query Proposal & Explainer
 created: 2020-12-17
+progress: ✅
 changes:
   - time: 2021-08-20
     log: Work has moved to CSS Containment Module level 3

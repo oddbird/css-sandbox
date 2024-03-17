@@ -1,9 +1,16 @@
 ---
 created: 2023-08-21
 title: CSS Mixins & Functions Explainer
+progress: 👍🏼
 tags:
   - explainer
   - mixins-functions
+note: >
+  👍🏼
+  The CSS Working Group has
+  [resolved to adopt this proposal](https://github.com/w3c/csswg-drafts/issues/9350#issuecomment-1939628591),
+  and begin drafting a new specification
+  for CSS Mixins & Functions.
 changes:
   - time: 2023-08-22T10:20:26-06:00
     log: Document issues with function fallbacks

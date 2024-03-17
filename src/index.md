@@ -19,10 +19,10 @@ as we do our thinking in public.
 
 {% import "base/list.macros.njk" as list %}
 
-## Explainers
+## Proposals & Explainers
 
 {{ list.all(collections.explainer, collections) }}
 
-## More Topics
+## Research Topics
 
 {{ list.all(collections.index, collections) }}

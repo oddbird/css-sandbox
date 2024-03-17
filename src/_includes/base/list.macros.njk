@@ -5,6 +5,8 @@
         <li>
           {%- if page.data.draft -%}
             <strong> [draft] </strong>
+          {%- elif page.data.progress -%}
+            <span> {{ page.data.progress }} </span>
           {%- endif -%}
 
           <a href="{{ page.url }}">
