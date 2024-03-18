@@ -17,7 +17,7 @@ and not a replacement for CSSWG issue threads**.
 ## Development Scripts
 
 This static site is built using
-[Eleventy](11ty.dev/),
+[Eleventy](https://11ty.dev/),
 based on a [skeleton template](https://11ty.rocks/)
 developed by [@5t3ph](https://twitter.com/5t3ph).
 
