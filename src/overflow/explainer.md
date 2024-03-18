@@ -1,7 +1,12 @@
 ---
 created: 2023-12-14
 title: CSS Overflow - Broad Research
-progress: 👍🏼
+progress: 👍
+archive: moved
+moved: >
+  [Rob's Carousel Explainer](https://github.com/flackr/carousel/),
+  [Related CSSWG discussion](https://github.com/w3c/csswg-drafts/issues/9745),
+  and upcoming CSS-Overflow-5 specification.
 tags:
   - overflow
   - explainer
