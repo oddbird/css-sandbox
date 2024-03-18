@@ -28,8 +28,8 @@ Gecko:
 - [Firefox release calendar](https://wiki.mozilla.org/Release_Management/Calendar)
 - [Mozilla standards positions](https://mozilla.github.io/standards-positions/)
 
-Webkit:
-- [Webkit css issues](https://bugs.webkit.org/buglist.cgi?bug_status=__open__&component=CSS&list_id=7970035&product=WebKit)
+WebKit:
+- [WebKit CSS issues](https://bugs.webkit.org/buglist.cgi?bug_status=__open__&component=CSS&list_id=7970035&product=WebKit)
 - [WebKit release notes](https://webkit.org/blog/)
 - [Safari release notes](https://developer.apple.com/documentation/safari-release-notes)
 - [Safari standards positions](https://webkit.org/standards-positions/)
