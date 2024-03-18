@@ -17,6 +17,8 @@ as we do our thinking in public.
 [gh]: https://github.com/oddbird/css-sandbox
 [drafts]: https://github.com/w3c/csswg-drafts/issues
 
+[Links & Resources »](/resources/)
+
 {% import "base/list.macros.njk" as list %}
 
 ## Explainers
