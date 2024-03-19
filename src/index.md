@@ -21,10 +21,18 @@ as we do our thinking in public.
 
 {% import "base/list.macros.njk" as list %}
 
-## Explainers
+## Proposals & Explainers
 
 {{ list.all(collections.explainer, collections) }}
 
-## More Topics
+{% note 'progress emoji' %}
+- ✅ implemented, shipped, and complete
+- 🚀 implementation underway, beginning to ship
+- 👍 approved to proceed on a standards track
+- 📝 research stage, or unofficial draft proposal
+- ❌ rejected or abandoned (at least for now)
+{% endnote %}
+
+## Research Topics
 
 {{ list.all(collections.index, collections) }}

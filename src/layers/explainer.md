@@ -1,5 +1,8 @@
 ---
 title: CSS Cascade Layers Explainer
+progress: ✅
+tags:
+  - explainer
 created: 2021-01-08
 changes:
   - time: 2021-09-09

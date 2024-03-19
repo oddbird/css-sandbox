@@ -1,5 +1,6 @@
 ---
 title: CSS Toggles Explainer & Proposal
+progress: ❌
 created: 2022-02-28
 changes:
   - time: 2022-03-01T18:41:51-07:00

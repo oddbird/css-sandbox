@@ -29,8 +29,3 @@
   --alert: var(--mark);
   --alert-contrast: var(--text);
 }
-
-[data-status='warn'] {
-  --focus: white;
-  background-color: var(--mark);
-}
