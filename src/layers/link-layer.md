@@ -96,6 +96,11 @@ For that reason,
 I've set aside support conditions
 as a non-goal for this document.
 
+Authors can polyfill conditional loading as desired,
+with a small amount of javascript
+to detect feature support,
+and alter the existing `media` attribute as needed.
+
 ## Proposed solution: the `layer` attribute
 
 The `layer` attribute
