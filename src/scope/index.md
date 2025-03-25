@@ -2,6 +2,10 @@
 title: CSS Scope & Encapsulation
 created: 2020-11-10
 changes:
+  - time: 2025-03-25T12:59:52-06:00
+    log: >
+      Scope is part of
+      Interop 2025
   - time: 2021-09-11
     log: Scope spec draft moved to Cascade-6
 index: scope
@@ -12,6 +16,10 @@ links:
   tag: 593
   wpt: css-cascade?q=scope
 ---
+
+{% note 'progress' %}
+Scope part of [Interop 2025](https://wpt.fyi/interop-2025).
+{% endnote %}
 
 Authors often complain that CSS is "globally scoped" --
 so that every selector is compared against every DOM element.

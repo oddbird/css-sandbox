@@ -1,7 +1,6 @@
 ---
 created: 2023-12-14
 title: CSS Overflow - Broad Research
-progress: 👍
 archive: moved
 moved: >
   [Rob's Carousel Explainer](https://github.com/flackr/carousel/),
@@ -9,7 +8,6 @@ moved: >
   and upcoming CSS-Overflow-5 specification.
 tags:
   - overflow
-  - explainer
 ---
 
 {% note %}
