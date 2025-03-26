@@ -1,6 +1,6 @@
 ---
-title: Scattered notes & side quests
-draft: 2025-03-25
+title: Logical shorthand notes & side quests
+created: 2025-03-26
 ---
 
 ## Why `inline-size` but `padding-inline`?
@@ -15,8 +15,13 @@ I wasn't in the CSS Working Group
 when this decision was made,
 but here's what I've found so far.
 
+- December 2010
+  Writing Modes spec defines terms
+  `length` (logical `height`)
+  and `measure` (logical `width`)
+  https://www.w3.org/TR/2010/WD-css3-writing-modes-20101202/#dimensions
 - March 2014
-  Writing-Modes spec defines terms
+  Writing-Modes spec uses
   `extent` (block) & `measure` (inline):
   https://www.w3.org/TR/2014/CR-css-writing-modes-3-20140320/#abstract-dimensions
 - March 2014
@@ -44,3 +49,23 @@ but here's what I've found so far.
 [Github issues only go back to late 2015](https://github.com/w3c/csswg-drafts/issues?q=is%3Aissue%20&page=377),
 after the names seem to be settled,
 so I can't find any discussion there.
+
+Many of the people participating in those conversations
+are still involved with the CSSWG today,
+so I can ask around for more information --
+but it seems to me that the likely answer is:
+
+- The logical `margin`, `padding`, and `border` properties
+  were added as longhand versions of existing properties,
+  with the well established `<base-property>-<sub-property>` syntax.
+- At the time, `width` and `height` were not longhand properties
+  with a shared shorthand base-property,
+  and so the logical alternatives were not designed
+  as longhand sub-properties.
+- `inline-size` and `block-size` already existed as conceptual terms,
+  and they read better than the flipped `size-inline` and `size-block`.
+  Without a shorthand property to base the names off,
+  there's little reason to change them.
+- Now that we are adding a `size` shorthand,
+  the pattern seems inconsistent --
+  but it wasn't even a consideration previously.
