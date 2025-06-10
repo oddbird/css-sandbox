@@ -12,6 +12,9 @@ necessarily needs both options,
 or that a logical-shorthand syntax
 would need to impact all of these.
 
+[You can support this effort](https://opencollective.com/oddbird-open-source/contribute/css-logical-shorthands-86141)
+or [read more about it](/logical/).
+
 ## Stand-alone properties
 
 These accept either physical or logical dimensions,
