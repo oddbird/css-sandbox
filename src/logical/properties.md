@@ -3,6 +3,15 @@ title: Relevant CSS properties, keywords, and functions
 draft: 2025-06-10
 ---
 
+At this point,
+I'm documenting everything that has
+logical and/or physical syntax.
+This is a very rough first pass,
+and does not imply that every syntax
+necessarily needs both options,
+or that a logical-shorthand syntax
+would need to impact all of these.
+
 ## Stand-alone properties
 
 These accept either physical or logical dimensions,
