@@ -1,2 +1,6 @@
+archive: moved
+moved: >
+  [the latest specification](https://www.w3.org/TR/css-mixins-1/)
+  (currently only defines functions)
 parent: sasslike
 tags: [sasslike]
