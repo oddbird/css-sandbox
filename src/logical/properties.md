@@ -21,17 +21,17 @@ These accept either physical or logical dimensions,
 but don't have associated sub-properties
 for the individual dimensions involved.
 
-- `aspect-ratio` **physical** (width / height)
-- `background-size` **physical** (width & height)
-- `border-spacing` logical (columns & rows)
-- `border-image-outset` **physical** (trbl)
-- `border-image-repeat` **physical** (tb & lr)
-- `border-image-slice` **physical** (trbl)
-- `border-image-width` **physical** (trbl)
-- `box-shadow` **physical** (offset-x & -y)
+- `aspect-ratio` physical (width / height)
+- `background-size` physical (width & height)
+- `border-image-outset` physical (trbl)
+- `border-image-repeat` physical (tb & lr)
+- `border-image-slice` physical (trbl)
+- `border-image-width` physical (trbl)
+- `box-shadow` physical (offset-x & -y)
 
 No change needed…
 
+- `border-spacing` logical (columns & rows)
 - `column-width` & proposed `column-height` are flow-relative
 
 ## Shorthand properties
