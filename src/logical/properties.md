@@ -5,8 +5,11 @@ draft: 2025-06-10
 
 At this point,
 I'm documenting everything that has
-logical and/or physical syntax.
-This is a very rough first pass,
+logical and/or physical syntax --
+working through properties in
+roughly alphabetical order,
+with occasional detours.
+This is a first pass,
 and does not imply that every syntax
 necessarily needs both options,
 or that a logical-shorthand syntax
@@ -21,13 +24,28 @@ These accept either physical or logical dimensions,
 but don't have associated sub-properties
 for the individual dimensions involved.
 
-- `aspect-ratio` physical (width / height)
-- `background-size` physical (width & height)
-- `border-image-outset` physical (trbl)
-- `border-image-repeat` physical (tb & lr)
-- `border-image-slice` physical (trbl)
-- `border-image-width` physical (trbl)
-- `box-shadow` physical (offset-x & -y)
+- `aspect-ratio` physical (x/y)
+- `background`…
+  - `background-size` physical (x/y)
+  - `background-repeat` physical (x/y) _and keywords_
+- `border-image`…
+  - `border-image-outset` physical (trbl)
+  - `border-image-repeat` physical (x/y)
+  - `border-image-slice` physical (trbl)
+  - `border-image-width` physical (trbl)
+- `box-shadow` physical (x/y)
+- `mask`…
+  - `mask-position` physical (x/y) _with offset keywords_
+  - `mask-repeat` physical (x/y) _and keywords_
+  - `mask-position` physical (x/y)
+- `mask-border`…
+  - `mask-border-outset` physical (trbl)
+  - `mask-border-repeat` physical (x/y)
+  - `mask-border-slice` physical (trbl)
+  - `mask-border-width` physical (trbl)
+- `object-position` physical (x/y) _with offset keywords_
+- `offset-position` physical (x/y) _with offset keywords_
+- `perspective-origin` physical (x/y) _with offset keywords_
 
 No change needed…
 
@@ -42,7 +60,7 @@ Some of them have logical as well as physical
 long-hand properties available,
 while some are missing either the physical or logical alternative.
 
-- `background-position` (`background-position-x` & `*-y`)
+- `background-position` (`*-x` & `*-y`) _with offset keywords_
   - **missing**: `background-position-inline` & `*-block`
 - `size` (`width` & `height`)
   - available: `inline-size` & `block-size`
@@ -60,10 +78,22 @@ while some are missing either the physical or logical alternative.
   - available: `inset-<axis>-<side>`
 - `contain-intrinsic-size` (`contain-intrinsic-width` & `*-height`)
   - available: `contain-intrinsic-<axis>-size`
+- `margin` (`margin-<trbl>`)
+  - available: `margin-<axis>-<side>`
+- `padding` (`padding-<trbl>`)
+  - available: `padding-<axis>-<side>`
+- `mask-border` (see sub-properties above)
+  - **missing**: logical `-outset`, `-repeat`, `-slice`, & `-width`
+- `overflow` (`overflow-x` & `overflow-y`)
+  - available: `overflow-<axis>`
+- `overflow-behavior` (`*-x` & `*-y`)
+  - available: `overflow-behavior-<axis>`
 
 No change needed…
 
 - `border` defines all sides equally
+- `outline`/`outline-width` defines all sides equally
+- `overflow-clip-margin` defines all sides equally
 - `columns` already flow-relative
 - `gap` already flow-relative
 
@@ -71,12 +101,26 @@ No change needed…
 
 - `background-repeat` has `repeat-x` & `repeat-y` keywords
   - **missing** `repeat-inline` & `repeat-block`
+- `background-position` has physical offset keywords
+  - **missing** logical-side offsets
+- `mask-repeat` has `repeat-x` & `repeat-y` keywords
+  - **missing** `repeat-inline` & `repeat-block`
+- `mask-position` has physical offset keywords
+  - **missing** logical-side offsets
+- `object-position` has physical offset keywords
+  - **missing** logical-side offsets
+- `offset-position` has physical offset keywords
+  - **missing** logical-side offsets
+- `perspective-origin` has physical offset keywords
+  - **missing** logical-side offsets
 
 No change needed…
 
 - `caption-side` (`top` & `bottom`) are flow-relative
 - `clear` has both logical & physical keywords
 - `float` has both logical & physical keywords
+- `flex-*` & `grid-*` already flow-relative
+- `margin-trim` already flow-relative
 
 ## Functions
 
