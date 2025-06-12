@@ -4,6 +4,8 @@ created: 2025-06-12T12:54:44-06:00
 changes:
   - time: 2025-06-12T14:25:31-06:00
     log: Provide more context in a summary
+  - time: 2025-06-12T15:03:37-06:00
+    log: The position type does support logical offset keywords
 ---
 
 This list is based on the
@@ -158,18 +160,18 @@ where logical functionality might be missing.
 
 - `background-repeat` has `repeat-x` & `repeat-y` keywords
   - **missing** `repeat-inline` & `repeat-block`
-- `background-position` has physical offset keywords
-  - **missing** logical-side offsets
 - `mask-repeat` has `repeat-x` & `repeat-y` keywords
   - **missing** `repeat-inline` & `repeat-block`
-- `mask-position` has physical offset keywords
-  - **missing** logical-side offsets
-- `object-position` has physical offset keywords
-  - **missing** logical-side offsets
-- `offset-position` has physical offset keywords
-  - **missing** logical-side offsets
-- `perspective-origin` has physical offset keywords
-  - **missing** logical-side offsets
+
+Properties including
+`background-position`, `mask-position`, `object-position`,
+`offset-position`, `fill-position`, and `stroke-position`
+all use the
+[`<position>` syntax](https://drafts.csswg.org/css-values-5/#typedef-position)
+with optional offset keywords.
+That allows for positioning relative to
+either a physical or logical edge
+without any toggle on the property parsing itself.
 
 No change needed…
 
