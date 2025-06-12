@@ -1,19 +1,56 @@
 ---
 title: Relevant CSS properties, keywords, and functions
 created: 2025-06-12T12:54:44-06:00
+changes:
+  - time: 2025-06-12T14:25:31-06:00
+    log: Provide more context in a summary
 ---
 
 This list is based on the
 [MDN properties reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference),
 and the
 [index of CSS properties](https://www.w3.org/Style/CSS/all-properties.en.html).
-I'm documenting everything that has
-logical and/or physical syntax,
-especially where there are multiple values
-and the axis or side is implied by order.
-Not every syntax listed here
-will need both logical and physical options,
-or a toggle between syntaxes.
+
+I have attempted to capture
+all the places where axis or side
+is implied by the order of values --
+which includes
+(but is not limited to)
+shorthand properties.
+For example,
+`background-position` is a shorthand
+for `background-position-x` and `background-position-y` --
+but `object-position` uses the same syntax
+without having individual longhand sub-properties.
+
+This is not meant to be a prescriptive list
+of which properties _should_ provide logical alternatives,
+but a descriptive list
+of what properties _could_ be toggled
+from one syntax to another.
+
+Apart from properties,
+all `<basic-shape>` functions,
+transform functions,
+and gradient functions currently use physical syntax --
+and there have been various requests for logical alternatives.
+It's not clear to me on first-glance
+if a logical/physical toggle could (or should)
+change how those functions are parsed.
+
+As a side-note,
+I also captured where we have
+physical keywords without logical alternatives,
+although that's clearly tangential to the syntax-toggle issue,
+since they are explicit to an axis or side.
+Still, they seem relevant to a larger question
+of providing logical alternatives wherever it is useful.
+
+I think the next step is to sort these
+into groups by shared syntax,
+and describe how a toggle
+(either local or global)
+would apply to each.
 
 [You can support this effort](https://opencollective.com/oddbird-open-source/contribute/css-logical-shorthands-86141)
 or [read more about it](/logical/).
