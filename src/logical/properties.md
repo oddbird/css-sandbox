@@ -3,21 +3,17 @@ title: Relevant CSS properties, keywords, and functions
 created: 2025-06-12T12:54:44-06:00
 ---
 
-At this point,
+This list is based on the
+[MDN properties reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference),
+and the
+[index of CSS properties](https://www.w3.org/Style/CSS/all-properties.en.html).
 I'm documenting everything that has
-logical and/or physical syntax --
-working through properties in
-roughly alphabetical order,
-with occasional detours.
-This is a first pass,
-and does not imply that every syntax
-necessarily needs both options,
-or that a logical-shorthand syntax
-would need to impact all of these.
-
-I've completed a pass,
-but there may still be properties
-in newer specifications that I missed.
+logical and/or physical syntax,
+especially where there are multiple values
+and the axis or side is implied by order.
+Not every syntax listed here
+will need both logical and physical options,
+or a toggle between syntaxes.
 
 [You can support this effort](https://opencollective.com/oddbird-open-source/contribute/css-logical-shorthands-86141)
 or [read more about it](/logical/).
@@ -30,7 +26,9 @@ for the dimensions involved.
 Ideally, a global toggle would apply here.
 
 - `aspect-ratio` physical (x/y)
-- `background`…
+- `box-shadow` physical (x/y)
+- `text-shadow` physical (x/y)
+- `background`… (`*-position` is listed with shorthands)
   - `background-size` physical (x/y)
   - `background-repeat` physical (x/y) _and keywords_
 - `border-image`…
@@ -38,8 +36,6 @@ Ideally, a global toggle would apply here.
   - `border-image-repeat` physical (x/y)
   - `border-image-slice` physical (trbl)
   - `border-image-width` physical (trbl)
-- `box-shadow` physical (x/y)
-- `text-shadow` physical (x/y)
 - `mask`…
   - `mask-position` physical (x/y) _with offset keywords_
   - `mask-repeat` physical (x/y) _and keywords_
@@ -52,11 +48,11 @@ Ideally, a global toggle would apply here.
 - `object-position` physical (x/y) _with offset keywords_
 - `offset-position` physical (x/y) _with offset keywords_
 - `perspective-origin` physical (x/y) _with offset keywords_
-- `transform`…
+- `transform`… (see related functions as well)
   - `transform-origin` physical (x/y) _with offset keywords_
-  - `rotate` physical (x/y)
-  - `scale` physical (x/y)
-  - `translate` physical (x/y)
+  - `rotate` physical (x/y/z)
+  - `scale` physical (x/y/z)
+  - `translate` physical (x/y/z)
 
 No change needed…
 
@@ -77,16 +73,17 @@ while some are missing either the physical or logical alternative.
     ([ED level 4](https://drafts.csswg.org/css-backgrounds-4/), unpublished)
 - `size` (`width` & `height`)
   - available: `inline-size` & `block-size`
-- `border-width` (`border-<trbl>-width`)
-  - available: `border-<axis>-<side>-width`
-- `border-style` (`border-<trbl>-style`)
-  - available: `border-<axis>-<side>-style`
-- `border-color` (`border-<trbl>-color`)
-  - available: `border-<axis>-<side>-color`
-- `border-radius` (`border-<trbl>-radius`)
-  - available: `border-<block>-<inline>-color`
-- `border-image` (see sub-properties above)
-  - **missing**: logical `-outset`, `-repeat`, `-slice`, & `-width`
+- `border`…
+  - `border-width` (`border-<trbl>-width`)
+    - available: `border-<axis>-<side>-width`
+  - `border-style` (`border-<trbl>-style`)
+    - available: `border-<axis>-<side>-style`
+  - `border-color` (`border-<trbl>-color`)
+    - available: `border-<axis>-<side>-color`
+  - `border-radius` (`border-<trbl>-radius`)
+    - available: `border-<block>-<inline>-color`
+  - `border-image` (see sub-properties above)
+    - **missing**: logical `-outset`, `-repeat`, `-slice`, & `-width`
 - `inset` (`top`, `right`, `bottom`, & `left`)
   - available: `inset-<axis>-<side>`
 - `contain-intrinsic-size` (`contain-intrinsic-width` & `*-height`)
@@ -144,6 +141,7 @@ No change needed…
   to `left` and `right`
 - `clear` has both logical & physical keywords
 - `float` has both logical & physical keywords
+  (including page-floats)
 - `flex-*` & `grid-*` already flow-relative
 - `margin-trim` already flow-relative
 - `scroll-snap-align` already flow-relative
@@ -160,6 +158,8 @@ No change needed…
 
 - All `<basic-shape>` functions use **physical** dimensions
   - Impacts `clip-path`, `shape-outside`, `offset-path`
+  - Deprecated `clip` (for `rect()` only)
+  - Never implemented `shape-inside`
 - `rotate()`, `translate()`, and `scale()`
   - Impacts `transform`
 - various `gradient()` functions
@@ -172,3 +172,9 @@ such as `cx` and `cy` only provide physical syntax.
 I imagine there might be use-cases
 for SVG elements that adapt to writing mode,
 but that seems like a separate concern.
+
+There are other SVG properties
+that rely on background-like productions.
+The `fill` & `stroke` properties
+have `*-image`, `*-position`, `*-size`, and `*-repeat`
+sub-properties.
