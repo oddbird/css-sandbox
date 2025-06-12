@@ -1,6 +1,6 @@
 ---
 title: Relevant CSS properties, keywords, and functions
-draft: 2025-06-10
+created: 2025-06-12T12:54:44-06:00
 ---
 
 At this point,
@@ -15,14 +15,19 @@ necessarily needs both options,
 or that a logical-shorthand syntax
 would need to impact all of these.
 
+I've completed a pass,
+but there may still be properties
+in newer specifications that I missed.
+
 [You can support this effort](https://opencollective.com/oddbird-open-source/contribute/css-logical-shorthands-86141)
 or [read more about it](/logical/).
 
-## Stand-alone properties
+## Multi-value properties
 
-These accept either physical or logical dimensions,
+These accept multiple dimensions in a single syntax,
 but don't have associated sub-properties
-for the individual dimensions involved.
+for the dimensions involved.
+Ideally, a global toggle would apply here.
 
 - `aspect-ratio` physical (x/y)
 - `background`…
@@ -34,6 +39,7 @@ for the individual dimensions involved.
   - `border-image-slice` physical (trbl)
   - `border-image-width` physical (trbl)
 - `box-shadow` physical (x/y)
+- `text-shadow` physical (x/y)
 - `mask`…
   - `mask-position` physical (x/y) _with offset keywords_
   - `mask-repeat` physical (x/y) _and keywords_
@@ -46,11 +52,17 @@ for the individual dimensions involved.
 - `object-position` physical (x/y) _with offset keywords_
 - `offset-position` physical (x/y) _with offset keywords_
 - `perspective-origin` physical (x/y) _with offset keywords_
+- `transform`…
+  - `transform-origin` physical (x/y) _with offset keywords_
+  - `rotate` physical (x/y)
+  - `scale` physical (x/y)
+  - `translate` physical (x/y)
 
 No change needed…
 
 - `border-spacing` logical (columns & rows)
 - `column-width` & proposed `column-height` are flow-relative
+- `view-timeline-inset` is controlled by `view-timeline-axis`
 
 ## Shorthand properties
 
@@ -61,7 +73,8 @@ long-hand properties available,
 while some are missing either the physical or logical alternative.
 
 - `background-position` (`*-x` & `*-y`) _with offset keywords_
-  - **missing**: `background-position-inline` & `*-block`
+  - **missing**: `*-inline` & `*-block`
+    ([ED level 4](https://drafts.csswg.org/css-backgrounds-4/), unpublished)
 - `size` (`width` & `height`)
   - available: `inline-size` & `block-size`
 - `border-width` (`border-<trbl>-width`)
@@ -80,8 +93,12 @@ while some are missing either the physical or logical alternative.
   - available: `contain-intrinsic-<axis>-size`
 - `margin` (`margin-<trbl>`)
   - available: `margin-<axis>-<side>`
+- `scroll-margin` (`scroll-margin-<trbl>`)
+  - available: `scroll-margin-<axis>-<side>`
 - `padding` (`padding-<trbl>`)
   - available: `padding-<axis>-<side>`
+- `scroll-padding` (`scroll-padding-<trbl>`)
+  - available: `scroll-padding-<axis>-<side>`
 - `mask-border` (see sub-properties above)
   - **missing**: logical `-outset`, `-repeat`, `-slice`, & `-width`
 - `overflow` (`overflow-x` & `overflow-y`)
@@ -96,8 +113,14 @@ No change needed…
 - `overflow-clip-margin` defines all sides equally
 - `columns` already flow-relative
 - `gap` already flow-relative
+- `animation-range` controlled by `*-timeline-axis`
 
 ## Keywords
+
+Since keywords clearly establish physical/logical directions,
+they would not be impacted by a global 'switch' --
+but it's still useful to know
+where logical functionality might be missing.
 
 - `background-repeat` has `repeat-x` & `repeat-y` keywords
   - **missing** `repeat-inline` & `repeat-block`
@@ -116,14 +139,36 @@ No change needed…
 
 No change needed…
 
-- `caption-side` (`top` & `bottom`) are flow-relative
+- `caption-side` (`top` & `bottom`) are flow-relative,
+  along with `inline-start` and `inline-end` alternatives
+  to `left` and `right`
 - `clear` has both logical & physical keywords
 - `float` has both logical & physical keywords
 - `flex-*` & `grid-*` already flow-relative
 - `margin-trim` already flow-relative
+- `scroll-snap-align` already flow-relative
+- `scroll-snap-type` has both logical & physical keywords
+- `scroll-timeline-axis` has both logical & physical keywords
+- `place-*` and sub-properties, already flow-relative
+- `position-area` already flow-relative
+- `resize` has both logical & physical keywords
+- `text-align` has both logical & physical keywords
+- `text-align-last` has both logical & physical keywords
+- `azimuth` logical dimensions have no meaning here
 
 ## Functions
 
 - All `<basic-shape>` functions use **physical** dimensions
-  - Impacts `clip-path`
+  - Impacts `clip-path`, `shape-outside`, `offset-path`
+- `rotate()`, `translate()`, and `scale()`
+  - Impacts `transform`
+- various `gradient()` functions
+  - Impacts all image properties
 
+## SVG
+
+Most SVG-related properties
+such as `cx` and `cy` only provide physical syntax.
+I imagine there might be use-cases
+for SVG elements that adapt to writing mode,
+but that seems like a separate concern.
