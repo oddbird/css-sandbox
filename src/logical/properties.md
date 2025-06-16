@@ -1,11 +1,13 @@
 ---
-title: Relevant CSS properties, keywords, and functions
+title: Physical/logical properties, keywords, and functions
 created: 2025-06-12T12:54:44-06:00
 changes:
   - time: 2025-06-12T14:25:31-06:00
     log: Provide more context in a summary
   - time: 2025-06-12T15:03:37-06:00
     log: The position type does support logical offset keywords
+  - time: 2025-06-16T11:30:54-06:00
+    log: Clarify SVG properties, and change title
 ---
 
 This list is based on the
@@ -208,12 +210,18 @@ No change needed…
 
 Most SVG-related properties
 such as `cx` and `cy` only provide physical syntax.
-I imagine there might be use-cases
-for SVG elements that adapt to writing mode,
-but that seems like a separate concern.
+However, the `text-anchor` property
+only has `start` and `end` values,
+with no physical variant.
+We could consider adding physical keywords
+for `text-anchor`,
+but I don't see any need for a syntax toggle.
 
-There are other SVG properties
-that rely on background-like productions.
 The `fill` & `stroke` properties
 have `*-image`, `*-position`, `*-size`, and `*-repeat`
-sub-properties.
+sub-properties specified --
+but not currently implemented.
+Any changes to similar background/border productions,
+should apply here.
+I think this is the only place a syntax toggle
+would impact SVGs.

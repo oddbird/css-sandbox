@@ -21,8 +21,7 @@
 }
 
 html {
-  color-scheme: dark light;
-  --mode: 'auto';
+  color-scheme: var(--mode, var(--os-mode, light));
 
   // palette
   --contrast-light: snow;
@@ -40,6 +39,7 @@ html {
 
   @media (prefers-color-scheme: dark) {
     @include dark-mode;
+    --os-mode: dark;
   }
 
   background: var(--bg);
@@ -48,10 +48,10 @@ html {
 
 [data-mode='light'] {
   @include light-mode;
-  --mode: 'light';
+  --mode: light;
 }
 
 [data-mode='dark'] {
   @include dark-mode;
-  --mode: 'dark';
+  --mode: dark;
 }
