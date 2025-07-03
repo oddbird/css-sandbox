@@ -1,6 +1,7 @@
 ---
 title: Defining the `&` selector in a `@scope` rule
 created: 2025-07-02
+archive: false
 ---
 
 TL;DR
@@ -197,7 +198,8 @@ The question is what it means to use
 
 ### The original spec
 
-It could refer to the `<scope-start>` _selector_
+A scoped `&`
+could refer to the `<scope-start>` _selector_
 (`#parent` in the previous example).
 But then adding the `&`
 at the start of a selector

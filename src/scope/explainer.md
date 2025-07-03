@@ -4,6 +4,9 @@ progress: 🚀
 tags:
   - explainer
 created: 2020-12-15
+archive: moved
+moved: >
+  [the latest specification](https://www.w3.org/TR/css-cascade-6/)
 changes:
   - time: 2021-08-24
     log: Link to syntax comparison

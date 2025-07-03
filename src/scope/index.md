@@ -18,7 +18,8 @@ links:
 ---
 
 {% note 'progress' %}
-Scope part of [Interop 2025](https://wpt.fyi/interop-2025).
+Scope is shipping
+as part of [Interop 2025](https://wpt.fyi/interop-2025).
 {% endnote %}
 
 Authors often complain that CSS is "globally scoped" --
