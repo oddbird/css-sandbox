@@ -130,14 +130,14 @@ The new `@scope` rule
 allows authors to define scoped styles in CSS.
 This has a lot of [overlap with nesting](/scope/nesting/),
 because (until now)
-the default 'descendent combinator'
+the default 'descendant combinator'
 has been our best approximation
 of the scope use-case.
 
 These two selectors are similar,
 and should match the same elements --
 a `.child` class
-descendent of the `#parent` ID.
+descendant of the `#parent` ID.
 
 ```css
 #parent {
@@ -198,7 +198,7 @@ _selector_ (`#parent` in the previous example).
 But then adding the `&`
 at the start of a selector
 changes both the specificity
-and also what it can match match:
+and also what it can match:
 
 ```css
 @scope (.parent) {
@@ -229,7 +229,7 @@ that might be hard to learn:
 - Bare declarations match only the scope-root at zero specificity
 - `:where(:scope)` is the same as the implicit behavior
 - `:scope` matches only the scope root, with 1-class specificity
-- `&` matches based on a selector, with that selector specificity
+- `&` matches based on a selector, with that selector's specificity
 
 But if we think of `&` instead as
 'referencing the implicit context' of a selector,
