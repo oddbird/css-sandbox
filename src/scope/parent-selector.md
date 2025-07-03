@@ -1,6 +1,6 @@
 ---
 title: Defining the `&` selector in a `@scope` rule
-draft: 2025-07-02
+created: 2025-07-02
 ---
 
 TL;DR
@@ -12,7 +12,9 @@ that is prepended on
 declarations and scoped selectors
 by default.
 This post explains
-the thought process behind the decision.
+the thought process behind our decision --
+which is a change
+from the current specification.
 
 ## How the `&` selector works, when nesting
 
@@ -70,7 +72,7 @@ These two rules are the same:
 Note that `&`…
 
 - Represents the parent selector, matching the same elements
-- Is implied first unless explicitly placed in a nested selector
+- Is implied at the start unless explicitly placed in a nested selector
 - Implicit and explicit starting `&` match the same elements
 - Implicit and explicit starting `&` have the same specificity
 
@@ -115,7 +117,7 @@ it has the specificity of a class selector.
 Note that `:scope`…
 
 - Represents the single scope-root element
-- Is implied first unless explicitly placed in a scoped selector
+- Is implied at the start unless explicitly placed in a scoped selector
 - Implicit and explicit starting `:scope` match the same element
 - Implicit and explicit starting `:scope` have _different_ specificity
 
@@ -159,7 +161,7 @@ The nested selector here
 has a specificity
 of the parent ID and child class together,
 while the scoped selector
-only has only the child class specificity:
+only has the child class specificity:
 
 ```css
 #parent {
@@ -193,8 +195,10 @@ meaning and specificity:
 The question is what it means to use
 `&` in an `@scope` context.
 
-It could refer to the `<scope-start>`
-_selector_ (`#parent` in the previous example).
+### The original spec
+
+It could refer to the `<scope-start>` _selector_
+(`#parent` in the previous example).
 But then adding the `&`
 at the start of a selector
 changes both the specificity
@@ -230,6 +234,8 @@ that might be hard to learn:
 - `:where(:scope)` is the same as the implicit behavior
 - `:scope` matches only the scope root, with 1-class specificity
 - `&` matches based on a selector, with that selector's specificity
+
+### The proposed change
 
 But if we think of `&` instead as
 'referencing the implicit context' of a selector,
