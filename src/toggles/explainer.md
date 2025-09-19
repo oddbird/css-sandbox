@@ -1,6 +1,6 @@
 ---
 title: CSS Toggles Explainer & Proposal
-progress: ❌
+progress: abandoned
 created: 2022-02-28
 changes:
   - time: 2022-03-01T18:41:51-07:00
@@ -21,8 +21,6 @@ changes:
     log: Links to js polyfill & demo
   - time: 2022-04-25T15:41:44-06:00
     log: Match syntax improvements (named states!) in draft spec
-tags:
-  - explainer
 ---
 
 ## Authors

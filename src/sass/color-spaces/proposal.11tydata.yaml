@@ -1,6 +1,6 @@
 title: Sass Color Spaces Proposal
 created: 2022-03-11
-progress: ✅
+progress: implemented
 tags: [explainer]
 changes:
   - time: 2022-04-04T15:56:51-06:00

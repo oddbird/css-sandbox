@@ -1,6 +1,6 @@
 ---
 title: CSS Scope Proposal & Explainer
-progress: 🚀
+progress: specified
 tags:
   - explainer
 created: 2020-12-15

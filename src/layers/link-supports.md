@@ -1,6 +1,6 @@
 ---
 title: Import Conditions in the HTML Link Tag
-progress: 📝
+progress: draft
 tags:
   - explainer
 draft: 2024-06-17

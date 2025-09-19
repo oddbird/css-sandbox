@@ -1,7 +1,7 @@
 ---
 created: 2023-08-21
 title: CSS Mixins & Functions Explainer
-progress: 🚀
+progress: specified
 tags:
   - explainer
   - mixins-functions

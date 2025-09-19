@@ -6,7 +6,8 @@
           {%- if page.data.draft -%}
             <strong> [draft] </strong>
           {%- elif page.data.progress -%}
-            <span> {{ page.data.progress }} </span>
+            {% set progress = page.data.status.progress[page.data.progress] %}
+            <span> {{ progress.icon or page.data.progress }} </span>
           {%- endif -%}
 
           <a href="{{ page.url }}">

@@ -1,28 +1,39 @@
 ---
 created: 2023-12-14
 title: CSS Overflow - Broad Research
-archive: moved
-moved: >
-  [Rob's Carousel Explainer](https://github.com/flackr/carousel/),
-  [Related CSSWG discussion](https://github.com/w3c/csswg-drafts/issues/9745),
-  and upcoming CSS-Overflow-5 specification.
+changes:
+  - time: 2025-09-19T14:46:32-06:00
+    log: >
+      Remove and re-link Rob's carousel proposal
+      as tangential to the goals of this document.
 tags:
   - overflow
 ---
 
-{% note %}
-  This is a high level review
-  of issues in overflow,
-  and potential features to explore.
-  We'll break out individual explainers
-  for specific feature proposals.
-{% endnote %}
+{% warn "This is not a carousel explainer" %}
+Chrome asked me to pursue
+a proposal for css carousels.
+I wasn't interested,
+but agreed to help research a broader
+set of issues around overflow.
+I think there are interesting questions to explore
+around paged vs continuous overflow in the browser.
 
-## Authors
+Once that research was complete,
+Chrome began to contribute
+carousel-specific proposals here --
+and link this document as The Carousel Explainer --
+but they eventually moved their
+[carousel proposal](https://github.com/flackr/carousel/) elsewhere.
+I've removed that content here,
+since it's not a proposal I'm involved with,
+and not the goal of this document --
+but you can find it in the version history if you want.
 
-- Miriam Suzanne
-- Robert Flack
-- Nicole Sullivan
+For that proposal, see:
+- [Rob's Carousel Explainer](https://github.com/flackr/carousel/)
+- [Related CSSWG discussion](https://github.com/w3c/csswg-drafts/issues/9745)
+{% endwarn %}
 
 ## Participate
 
@@ -31,8 +42,8 @@ file issues against,
 or contribute to this explainer
 on GitHub:
 
-- [Explainer Document](https://github.com/oddbird/css-sandbox/blob/main/src/overflow/explainer.md)
-- [Issue Tracker](https://github.com/oddbird/css-sandbox/issues)
+- [This document](https://github.com/oddbird/css-sandbox/blob/main/src/overflow/explainer.md)
+- [Issue tracker](https://github.com/oddbird/css-sandbox/issues)
 
 We also rely heavily
 on some existing proposals
@@ -285,87 +296,6 @@ Below, we'll explore some of the features
 that are still missing or difficult
 for authors to get right.
 
-### Carousel example
-
-![Carousel boxes](../carousel-boxes.svg)
-
-As a strawman example,
-a developer should be able to use the following HTML
-to create the visualized carousel:
-
-```html
-<carousel>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-  <li></li>
-</carousel>
-```
-
-The visualized carousel
-can be constructed
-with the following style
-dynamically generating all of the required components:
-
-```css
-carousel {
-  display: grid;
-  grid-template:
-    'previous scroller next' 1fr
-    '. markers .' auto
-    / auto 1fr auto;
-
-  > li {
-    /* Flow into scroller grid-flow defined below */
-    grid-flow: --scroller;
-  }
-
-  &::grid-flow(--scroller) {
-    grid-area: scroller;
-    /* Paginate overflow? */
-    overflow: paginate;
-    scroll-snap-type: x mandatory;
-
-    &::page {
-      /* style all pages */
-      scroll-snap-align: center;
-
-      &:not(:active) {
-        interactivity: inert;
-        opacity: .5;
-      }
-
-      /* Create markers for each page */
-      ::marker {
-        /* Flow them into the markers grid-flow */
-        grid-flow: --markers;
-      }
-    }
-  }
-
-  &::grid-flow(--markers) {
-    grid-area: markers;
-  }
-
-  &::next {
-    grid-area: next;
-  }
-
-  &::previous {
-    grid-area: previous;
-  }
-}
-```
-
-Rob has put together
-[a prototype of this feature](https://flackr.github.io/web-demos/carousel/),
-and will write a more detailed explainer
-for the features required.
-
 ### Paged overflow, in the browser
 
 Simple carousels (or 'media-scrollers')
@@ -472,19 +402,6 @@ or `::page:focus-within`,
 if the styles applied
 could change the number of pages
 or placement of content in those pages.
-
-Authors will often want to style the active page and marker.
-Authors could use `:snapped` from [css-scroll-snap-2](https://drafts.csswg.org/css-scroll-snap-2/#snapped) in combination with snapped pages. E.g.
-
-```css
-::page {
-  scroll-snap-align: start;
-}
-::page:snapped-inline::marker {
-  /* Highlight active marker. */
-  outline: 2px solid blue;
-}
-```
 
 {% note %}
 Could these pseudo-classes be used for paged
@@ -597,23 +514,6 @@ would also need to track and expose
 the current active state -
 providing a way to style the active marker.
 
-#### Next / previous buttons
-
-Many 'carousel' components offer next and previous buttons.
-These could be declared explicitly in HTML,
-or constructed as interactive pseudo-elements (e.g. `::next`/`::previous`).
-The behavior of these could be defined in many ways:
-
-- Defined by Javascript handlers.
-  The amount to scroll can be calculated,
-  rely on [css-scroll-snap-1 6.2](https://www.w3.org/TR/css-scroll-snap-1/#choosing) to choose the next snap point from a directional scroll (e.g. `scrollBy({left: 1})`),
-  or use the proposed `scrollTo({left: 'snap-next'})` [explainer](https://github.com/argyleink/ScrollSnapExplainers/tree/main/js-scrollToOptions_Snap-Additions).
-- Defined via page anchors (e.g. `<a href="#page2">`).
-  This requires the author to create next / previous links for every page,
-  which are only visible on that page,
-  and to explicitly paginate their content independent of screen size.
-- Implicit, by using new pseudo-elements or attributes (e.g. `<button type="next">`).
-
 ### Per-item markers & tabs
 
 In more tab-like cases,
@@ -650,30 +550,6 @@ it's own set of issues:
 - [[css-grid] grid area as element][flow-element]
 - [[css-grid] Decorative grid-cell pseudo-elements][style-area]
 
-### Accessibility
-
-#### Exclude offscreen content
-
-It is common practice for carousels to only include content on the active screen
-in the accessibility tree and in tab order.
-Other screens are accessed via buttons or links.
-In the [WAI tutorial](https://www.w3.org/WAI/tutorials/carousels/full-code/),
-this is accomplished by setting the `aria-hidden` attribute from Javascript.
-A pure declarative solution could be to allow setting inertness via CSS. E.g.
-
-```css
-::page:not(:active) {
-  interactivity: inert;
-}
-```
-
-See [[css-ui] Should inertness be exposed as CSS property?](https://github.com/w3c/csswg-drafts/issues/7021).
-
-#### Interactive pseudo-elements
-
-If we have interactive pseudo elements they will need appropriate roles.
-These could be fixed for the pseudo element type (e.g. next / previous are buttons).
-
 ## Key scenarios
 
 [TBD]
@@ -698,6 +574,8 @@ Much of this work is based on
 the research and proposals
 compiled by others:
 
+- Robert Flack
+- Nicole Sullivan
 - Rachel Andrew
 - Una Kravets
 - Adam Argyle
@@ -708,10 +586,3 @@ compiled by others:
   Scott O'Hara,
   and others
   in the OpenUI Community Group.
-
-{% note %}
-- document snapping approach
-- scroll markers are tabs (aria)
-- focus groups
-- gestures vs mouse (mouse fling?)
-{% endnote %}

@@ -26,11 +26,9 @@ as we do our thinking in public.
 {{ list.all(collections.explainer, collections) }}
 
 {% note 'progress emoji' %}
-- 📝 research stage, or unofficial draft proposal
-- 👍 approved to proceed on a standards track
-- 🚀 implementation underway, beginning to ship
-- ✅ implemented, shipped, and complete
-- ❌ rejected or abandoned (at least for now)
+{% for name, stage in status.progress -%}
+- {{ stage.icon }} ({{ name }}): {{ stage.description }}
+{% endfor %}
 {% endnote %}
 
 ## Research Topics

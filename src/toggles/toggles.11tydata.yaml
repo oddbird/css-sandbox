@@ -1,6 +1,28 @@
 archive: abandoned
-moved: >
-  [the Unofficial Draft specification](https://tabatkins.github.io/css-toggle/)
 parent: toggles
 tags:
   - toggles
+warn: |
+  I don't think this was a good proposal,
+  or an idea that belongs in CSS:
+
+  - The style part of the problem --
+    responding to state --
+    is better handled with features like
+    [container style queries](https://www.w3.org/TR/css-conditional-5/#style-container).
+  - The issue of creating toggles
+    has been a real pain point,
+    but is best addressed in other parts of the platform
+    with features like
+    [invoker commands](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API).
+
+  When Chrome asked me to explore
+  a syntax for CSS toggles,
+  I was one of many to raise concerns about accessibility --
+  but didn't see harm in exploring the topic
+  while they worked out the details.
+  In retrospect,
+  I'm afraid this acted as a distraction
+  from better proposals --
+  while requiring more effort from accessibility experts
+  to document all the issues with our approach.
