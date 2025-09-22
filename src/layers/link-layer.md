@@ -1,6 +1,6 @@
 ---
 title: Cascade Layering of HTML Linked Style Sheets
-progress: 📝
+progress: draft
 tags:
   - explainer
 created: 2024-06-18

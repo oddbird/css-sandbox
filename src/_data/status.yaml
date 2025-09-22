@@ -1,12 +1,23 @@
-section:
-  draft: Upcoming Topics
-  active: Active Topics
-  archive: Archived Topics
+progress:
+  draft:
+    icon: 📝
+    description: research stage, or unofficial draft proposal
+  adopted:
+    icon: 👍
+    description: proceeding on a standards track
+  specified:
+    icon: 🚀
+    description: implementation underway, beginning to ship
+  implemented:
+    icon: ✅
+    description: implemented, shipped, and complete
+  abandoned:
+    icon: ❌
+    description: rejected or abandoned
 archive:
   abandoned: >
     ❌
-    This feature has been abandoned
-    (at least for now).
+    This feature has been abandoned.
     Our notes are likely out-of-date.
   shipped: >
     ✅

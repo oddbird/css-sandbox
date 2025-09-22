@@ -1,7 +1,6 @@
 ---
 title: Defining the `&` selector in a `@scope` rule
 created: 2025-07-02
-archive: false
 ---
 
 TL;DR
