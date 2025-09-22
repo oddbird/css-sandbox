@@ -37,7 +37,7 @@ for additional contributors and prior art
 - [Github issues for draft spec][issues]
 - [CSSWG tracking issue](https://github.com/w3c/csswg-drafts/issues/6991)
 - [OddBird JS polyfill/prototype][polyfill]
-  (and [demo][])
+  (and [demo][]) **DEPRECATED**
 
 [spec]: https://tabatkins.github.io/css-toggle/
 [issues]: https://github.com/tabatkins/css-toggle
@@ -348,15 +348,6 @@ html {
 }
 ```
 
-{% note %}
-The [Toggles Polyfill][polyfill] currently supports:
-- the previously specified `initial/max` syntax
-- the new keyword `max at initial` syntax
-- the bracket/keyword `[one two three] at three` named-state syntax
-
-[polyfill]: https://github.com/oddbird/css-toggles
-{% endnote %}
-
 #### Default toggle events & 'overflow'
 
 While it's possible to define
@@ -611,15 +602,6 @@ with the 3rd active state of the `tabs` toggle.
 See the [toc-style tab markup](#tabs-using-table-of-contents-code-order)
 use-case, for example.
 {% endwarn %}
-
-{% note %}
-The [Toggles Polyfill][polyfill] currently implements
-`toggle-visibility` by simply applying `display:none`
-without any of the expected benefits
-that a browser implementation might provide.
-
-[polyfill]: https://github.com/oddbird/css-toggles
-{% endnote %}
 
 ### Selecting based on toggle state (`:toggle()`)
 

@@ -2,35 +2,31 @@
 created: 2023-12-14
 title: CSS Overflow - Broad Research
 changes:
-  - time: 2025-09-19T14:46:32-06:00
+  - time: 2025-09-22T11:06:56-06:00
     log: >
-      Remove and re-link Rob's carousel proposal
-      as tangential to the goals of this document.
+      Remove and re-link Chrome's carousel proposal
+      as tangential to the goals of this document
 tags:
   - overflow
 ---
 
 {% warn "This is not a carousel explainer" %}
 Chrome asked me to pursue
-a proposal for css carousels.
-I wasn't interested,
-but agreed to help research a broader
+a proposal for CSS carousels,
+but I only agreed to research a broader
 set of issues around overflow.
-I think there are interesting questions to explore
-around paged vs continuous overflow in the browser.
+I created this explainer to explore
+paged overflow generally in screen media.
 
 Once that research was complete,
 Chrome began to contribute
 carousel-specific proposals here --
-and link this document as The Carousel Explainer --
-but they eventually moved their
-[carousel proposal](https://github.com/flackr/carousel/) elsewhere.
-I've removed that content here,
+and link this document as The Carousel Explainer.
+I've removed that content,
 since it's not a proposal I'm involved with,
-and not the goal of this document --
-but you can find it in the version history if you want.
+and not the goal of this document.
 
-For that proposal, see:
+For their proposal, see:
 - [Rob's Carousel Explainer](https://github.com/flackr/carousel/)
 - [Related CSSWG discussion](https://github.com/w3c/csswg-drafts/issues/9745)
 {% endwarn %}
